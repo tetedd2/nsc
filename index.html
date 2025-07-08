@@ -2,8 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>🔒 MoneySkillz – เข้าสู่ระบบ</title>tetedd2/nsc-app
-
+  <title>🔒 MoneySkillz – เข้าสู่ระบบ</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -93,7 +92,6 @@
     <form id="loginForm">
       <input type="email" id="email" placeholder="อีเมล" required>
       <input type="password" id="password" placeholder="รหัสผ่าน" required>
-      <!-- เพิ่มลิงก์สำหรับหน้า ลืมรหัสผ่าน -->
       <a href="forgetpassword.html" class="forgot-link">ลืมรหัสผ่าน?</a>
       <button type="submit" id="loginBtn">เข้าสู่ระบบ</button>
     </form>
@@ -108,9 +106,8 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
   <script>
+    // === Firebase Config ===
     const firebaseConfig = {
       apiKey: "AIzaSyBW_6zxU1RUfjsAkv2cXEek21jCk_Muy_0",
       authDomain: "financial-management-app-f6444.firebaseapp.com",
@@ -120,6 +117,7 @@
       appId: "1:1076541981473:web:b87f5de9e6c78608673460"
     };
 
+    // === Initialize Firebase ===
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
@@ -163,6 +161,5 @@
       });
     };
   </script>
-
 </body>
 </html>
