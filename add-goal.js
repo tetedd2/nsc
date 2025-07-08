@@ -8,10 +8,11 @@ function saveGoal(event) {
     alert("กรุณากรอกข้อมูลให้ครบถ้วน");
     return;
   }
+
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
   const endDate = new Date(goalDate);
-  endDate.setHours(0,0,0,0);
+  endDate.setHours(0, 0, 0, 0);
   let savingPlan = [];
   let numInstallments = 1;
   let perInstallment = goalAmount;
@@ -67,8 +68,7 @@ function saveGoal(event) {
     }
   }
 
-  // -- เปลี่ยนเป็น Firestore + Auth --
-  firebase.auth().onAuthStateChanged(function(user) {
+  firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
       const goal = {
         name: goalName,
@@ -82,7 +82,7 @@ function saveGoal(event) {
       db.collection("users").doc(user.uid).collection("goals").add(goal)
         .then(() => {
           alert("บันทึกเป้าหมายสำเร็จ!");
-          updateGoalList();
+          window.history.back(); // ✅ ใช้ปุ่มย้อนกลับได้จริง
         })
         .catch(err => alert("เกิดข้อผิดพลาด: " + err.message));
     } else {
@@ -91,9 +91,8 @@ function saveGoal(event) {
   });
 }
 
-// โหลด + แสดงผลรายการ goal ทั้งหมดจาก Firestore
 function updateGoalList() {
-  firebase.auth().onAuthStateChanged(function(user) {
+  firebase.auth().onAuthStateChanged(function (user) {
     if (!user) return;
     db.collection("users").doc(user.uid).collection("goals").orderBy("createdAt", "desc").get()
       .then(snapshot => {
@@ -106,7 +105,6 @@ function updateGoalList() {
         snapshot.forEach(doc => {
           const goal = doc.data();
           goal.id = doc.id;
-          // รวมยอดออมจริงใหม่จากทุกงวด
           goal.savings = goal.plan.reduce((sum, p) => sum + (p.saved || 0), 0);
           const percent = ((goal.savings / goal.target) * 100).toFixed(0);
           const goalBlock = document.createElement('div');
@@ -145,15 +143,14 @@ function updateGoalList() {
 }
 
 function planTypeText(type) {
-  if(type === "daily") return "รายวัน";
-  if(type === "weekly") return "รายสัปดาห์";
-  if(type === "monthly") return "รายเดือน";
+  if (type === "daily") return "รายวัน";
+  if (type === "weekly") return "รายสัปดาห์";
+  if (type === "monthly") return "รายเดือน";
   return "";
 }
 
-// เพิ่มเงินออมแต่ละงวด
 function addSavingToPlan(goalId, planIdx) {
-  firebase.auth().onAuthStateChanged(function(user) {
+  firebase.auth().onAuthStateChanged(function (user) {
     if (!user) return;
     db.collection("users").doc(user.uid).collection("goals").doc(goalId).get()
       .then(doc => {
@@ -178,14 +175,13 @@ function addSavingToPlan(goalId, planIdx) {
   });
 }
 
-// ลบเป้าหมาย
 function deleteGoal(goalId) {
   if (!confirm("ต้องการลบเป้าหมายนี้จริงหรือไม่?")) return;
-  firebase.auth().onAuthStateChanged(function(user) {
+  firebase.auth().onAuthStateChanged(function (user) {
     if (!user) return;
     db.collection("users").doc(user.uid).collection("goals").doc(goalId).delete().then(updateGoalList);
   });
 }
 
-// โหลด goal list ทันทีเมื่อเปิดหน้า
+// โหลดเป้าหมายเมื่อเปิดหน้า
 updateGoalList();
