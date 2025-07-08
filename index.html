@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>🔒 MoneySkillz – เข้าสู่ระบบ</title>tetedd2/nsc-app
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #eaf4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-box {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
+    }
+
+    .login-box h1 {
+      margin-bottom: 0.2rem;
+      font-size: 1.8rem;
+    }
+
+    .login-box p {
+      margin-bottom: 1.5rem;
+      color: #444;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: right;
+      margin: 6px 0 14px;
+      font-size: 0.9rem;
+      color: #009688;
+      text-decoration: none;
+    }
+
+    button {
+      width: 100%;
+      background-color: #009688;
+      color: white;
+      padding: 12px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .divider {
+      margin: 20px 0;
+      border-top: 1px solid #ccc;
+    }
+
+    .signup-link,
+    .google-login {
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+
+    .signup-link a, .google-login a {
+      color: #009688;
+      text-decoration: none;
+    }
+
+    #message {
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <h1>MoneySkillz</h1>
+    <p>“ยินดีต้อนรับกลับ!”</p>
+
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="อีเมล" required>
+      <input type="password" id="password" placeholder="รหัสผ่าน" required>
+      <!-- เพิ่มลิงก์สำหรับหน้า ลืมรหัสผ่าน -->
+      <a href="forgetpassword.html" class="forgot-link">ลืมรหัสผ่าน?</a>
+      <button type="submit" id="loginBtn">เข้าสู่ระบบ</button>
+    </form>
+
+    <div id="message"></div>
+
+    <div class="divider"></div>
+    <div class="signup-link">ยังไม่มีบัญชี? <a href="signup.html">สมัครสมาชิก</a></div>
+    <div class="google-login"><a href="#" id="googleSignIn">เข้าสู่ระบบด้วย Google</a></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBW_6zxU1RUfjsAkv2cXEek21jCk_Muy_0",
+      authDomain: "financial-management-app-f6444.firebaseapp.com",
+      projectId: "financial-management-app-f6444",
+      storageBucket: "financial-management-app-f6444.appspot.com",
+      messagingSenderId: "1076541981473",
+      appId: "1:1076541981473:web:b87f5de9e6c78608673460"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    window.onload = function () {
+      const loginBtn = document.getElementById('loginBtn');
+      const messageDiv = document.getElementById('message');
+
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        messageDiv.textContent = "⏳ กำลังเข้าสู่ระบบ...";
+        messageDiv.style.color = "blue";
+        loginBtn.disabled = true;
+        loginBtn.textContent = "กำลังโหลด...";
+
+        try {
+          await auth.signInWithEmailAndPassword(email, password);
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          messageDiv.textContent = "เกิดข้อผิดพลาด: " + error.message;
+          messageDiv.style.color = "red";
+          loginBtn.disabled = false;
+          loginBtn.textContent = "เข้าสู่ระบบ";
+        }
+      });
+
+      document.getElementById('googleSignIn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const provider = new firebase.auth.GoogleAuthProvider();
+        messageDiv.textContent = "⏳ กำลังเข้าสู่ระบบด้วย Google...";
+        messageDiv.style.color = "blue";
+        try {
+          await auth.signInWithPopup(provider);
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          messageDiv.textContent = "Google Login Error: " + error.message;
+          messageDiv.style.color = "red";
+        }
+      });
+    };
+  </script>
+
+</body>
+</html>

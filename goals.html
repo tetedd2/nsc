@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>🎯 เป้าหมายการออม - MoneySkillz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="add-goal.css">
+  <!-- Firebase SDK + config (อัปเดตโปรเจกต์ใหม่) -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+  <style>
+    .goal-block { background:white; margin:15px 0; border-radius:16px; padding:15px 12px 8px; box-shadow:0 2px 8px #0001; position:relative;}
+    .goal-title { font-size:1.1rem; font-weight:600; color:#00695c;}
+    .goal-money { font-size:1.09rem; margin:6px 0;}
+    .progress-bar-bg { background:#e0e0e0; border-radius:8px; margin:6px 0 3px; width:100%; height:12px;}
+    .progress-bar { background:#009688; height:100%; border-radius:8px;}
+    .delete-btn { position:absolute; right:9px; top:7px; color:#aaa; background:transparent; border:none; font-size:1.2rem; cursor:pointer;}
+    .goal-content { max-width:480px; margin:0 auto;}
+    .saving-plan-list { background:#f5f5f5; border-radius:10px; padding:10px;}
+    .saving-row { display:flex; align-items:center; margin:7px 0; gap:9px; font-size:0.98rem;}
+    .bar-bg { background:#e0e0e0; width:70px; height:10px; border-radius:7px; }
+    .bar { background:#2196f3; height:100%; border-radius:7px;}
+    .bar-label { font-size:0.93rem;}
+    .bar-btn { margin-left:7px; font-size:0.93rem;}
+    .saving-plan-title { margin:7px 0 2px; font-size:1rem;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎯 เป้าหมายการออม</h1>
+  </div>
+  <div class="container">
+    <div class="goal-box">
+      <div class="goal-content" id="goalContent">
+        <div class="goal-title">- ยังไม่มีเป้าหมายที่ตั้งไว้ -</div>
+      </div>
+      <div style="margin-top:25px;text-align:center;">
+        <a href="add-goal.html"><button>+ เพิ่มเป้าหมายใหม่</button></a>
+      </div>
+    </div>
+  </div>
+  <script>
+    function planTypeText(type) {
+      if(type === "daily") return "รายวัน";
+      if(type === "weekly") return "รายสัปดาห์";
+      if(type === "monthly") return "รายเดือน";
+      return "";
+    }
+    // -- CRUD goal แยก user --
+    function updateGoalList() {
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) return;
+        db.collection("users").doc(user.uid).collection("goals").orderBy("createdAt", "desc").get()
+          .then(snapshot => {
+            const goalListContainer = document.getElementById('goalContent');
+            goalListContainer.innerHTML = "";
+            if (snapshot.empty) {
+              goalListContainer.innerHTML = `<div class="goal-title">- ยังไม่มีเป้าหมายที่ตั้งไว้ -</div>`;
+              return;
+            }
+            snapshot.forEach(doc => {
+              const goal = doc.data();
+              goal.id = doc.id;
+              goal.savings = goal.plan.reduce((sum, p) => sum + (p.saved || 0), 0);
+              const percent = ((goal.savings / goal.target) * 100).toFixed(0);
+              const goalBlock = document.createElement('div');
+              goalBlock.classList.add('goal-block');
+              goalBlock.innerHTML = `
+                <button class="delete-btn" title="ลบเป้าหมายนี้" onclick="deleteGoal('${goal.id}')">✖</button>
+                <div class="goal-title"><span class="goal-name">📌 ${goal.name}</span></div>
+                <div class="goal-money">
+                  💰 ฿<span class="current-savings">${goal.savings.toFixed(2)}</span>
+                  / ฿<span class="total-amount">${goal.target.toFixed(2)}</span>
+                  <span class="progress-text">(${percent}%)</span>
+                </div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar" style="width: ${percent}%"></div>
+                </div>
+                <div class="saving-plan-title">📅 แผนการออม (${planTypeText(goal.planType)})</div>
+                <div class="saving-plan-list">
+                  ${goal.plan ? goal.plan.map((p, planIdx) => `
+                    <div class="saving-row">
+                      <div style="font-size:0.97rem; color:#00796b;">
+                        งวดที่ ${p.round}<br>(${p.date})<br><b>${p.amount}</b> บาท
+                      </div>
+                      <div class="bar-bg">
+                        <div class="bar" style="width:${(p.saved/p.amount*100)||0}%"></div>
+                      </div>
+                      <span class="bar-label">ออมแล้ว: <b>${(p.saved||0).toFixed(2)}</b> / ${p.amount} บาท</span>
+                      <button class="bar-btn" onclick="addSavingToPlan('${goal.id}',${planIdx})">+ ออม</button>
+                    </div>
+                  `).join('') : '<i>ไม่มีแผน</i>'}
+                </div>
+              `;
+              goalListContainer.appendChild(goalBlock);
+            });
+          });
+      });
+    }
+
+    // เพิ่มเงินออมแต่ละงวด
+    function addSavingToPlan(goalId, planIdx) {
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) return;
+        db.collection("users").doc(user.uid).collection("goals").doc(goalId).get()
+          .then(doc => {
+            if (!doc.exists) return;
+            const goal = doc.data();
+            let plan = goal.plan;
+            let left = parseFloat(plan[planIdx].amount) - parseFloat(plan[planIdx].saved || 0);
+            let save = parseFloat(prompt("กรุณาใส่จำนวนเงินที่จะออม (สำหรับงวดนี้):", left > 0 ? left : '0'));
+            if (!Number.isFinite(save) || save <= 0) {
+              alert("จำนวนเงินไม่ถูกต้อง");
+              return;
+            }
+            if (!plan[planIdx].saved) plan[planIdx].saved = 0;
+            plan[planIdx].saved += save;
+            if (plan[planIdx].saved > plan[planIdx].amount) plan[planIdx].saved = parseFloat(plan[planIdx].amount);
+            goal.savings = plan.reduce((sum, p) => sum + (p.saved || 0), 0);
+            db.collection("users").doc(user.uid).collection("goals").doc(goalId).update({
+              plan: plan,
+              savings: goal.savings
+            }).then(updateGoalList);
+          });
+      });
+    }
+
+    // ลบเป้าหมาย
+    function deleteGoal(goalId) {
+      if (!confirm("ต้องการลบเป้าหมายนี้จริงหรือไม่?")) return;
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) return;
+        db.collection("users").doc(user.uid).collection("goals").doc(goalId).delete().then(updateGoalList);
+      });
+    }
+
+    // โหลด goal list เมื่อเข้าเพจ
+    updateGoalList();
+  </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📝 แบบทดสอบการเงิน – MoneySkillz</title>
+  <style>
+    /* ... (CSS เหมือนเดิม ไม่ต้องเปลี่ยน) ... */
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f9f9; margin: 0; }
+    .container { max-width: 700px; margin: 32px auto; background: #fff; border-radius: 18px; box-shadow: 0 8px 24px #00968822; padding: 32px 20px; }
+    h1, h2 { text-align: center; color: #00796b; }
+    .set-list { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-bottom: 20px; }
+    .set-btn { padding: 18px 30px; border-radius: 10px; background: #009688; color: #fff; border: none; font-size: 1.1rem; cursor: pointer; transition: background 0.18s; }
+    .set-btn:hover { background: #00796b; }
+    .quiz-box { margin: 0 auto; max-width: 520px; }
+    .question { font-size: 1.13rem; margin-bottom: 18px; color: #333; }
+    .choices { list-style: none; padding: 0; }
+    .choices li { background: #e0f2f1; margin-bottom: 10px; padding: 12px 16px; border-radius: 8px; cursor: pointer; transition: background 0.15s; border: 2px solid transparent; }
+    .choices li:hover { background: #b2dfdb; }
+    .choices li.selected { border-color: #009688; }
+    .choices li.disabled { pointer-events: none; opacity: 0.72; }
+    .explain { margin: 14px 0 0 0; color: #1565c0; font-size: 1rem; min-height: 28px; }
+    .next-btn, .finish-btn { margin: 22px auto 0; display: block; background: #009688; color: #fff; padding: 10px 28px; border-radius: 20px; border: none; font-size: 1.07rem; cursor: pointer; transition: background 0.15s; }
+    .next-btn:hover, .finish-btn:hover { background: #00796b; }
+    .score-box { text-align: center; margin-top: 30px; }
+    .score-box span { color: #388e3c; font-size: 1.8rem; font-weight: bold; }
+    .back-btn { margin: 28px auto 0; background: #bdbdbd; color: #333; border: none; border-radius: 18px; padding: 10px 24px; font-size: 1rem; display: block; cursor: pointer; transition: background 0.14s; }
+    .back-btn:hover { background: #757575; color: #fff; }
+    .history-section { margin-top: 36px; }
+    .history-title { font-size:1.12rem; color:#00796b; margin-bottom:10px; }
+    .history-list { list-style:none; padding:0; }
+    .history-list li { background:#e0f7fa; border-radius:9px; margin:6px 0; padding:10px 13px; font-size:1rem; }
+  </style>
+  <!-- Firebase SDK + config -->
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-auth.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBW_6zxU1RUfjsAkv2cXEek21jCk_Muy_0",
+      authDomain: "financial-management-app-f6444.firebaseapp.com",
+      projectId: "financial-management-app-f6444",
+      storageBucket: "financial-management-app-f6444.appspot.com",
+      messagingSenderId: "1076541981473",
+      appId: "1:1076541981473:web:b87f5de9e6c78608673460",
+      measurementId: "G-74HS8JK0SC"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 แบบทดสอบการเงิน</h1>
+    <div id="start-section">
+      <h2>เลือกชุดแบบทดสอบ</h2>
+      <div class="set-list">
+        <button class="set-btn" onclick="startSet(1)">ชุดที่ 1: พื้นฐานการเงิน</button>
+        <button class="set-btn" onclick="startSet(2)">ชุดที่ 2: วางแผนและใช้จ่าย</button>
+        <button class="set-btn" onclick="startSet(3)">ชุดที่ 3: การออมและการลงทุน</button>
+      </div>
+    </div>
+    <div id="quiz-section" style="display:none;">
+      <div class="quiz-box">
+        <div class="question" id="question"></div>
+        <ul class="choices" id="choices"></ul>
+        <div class="explain" id="explain"></div>
+        <button class="next-btn" id="nextBtn" style="display:none;">ถัดไป</button>
+        <button class="finish-btn" id="finishBtn" style="display:none;">ส่งคำตอบและดูคะแนน</button>
+      </div>
+    </div>
+    <div id="score-section" style="display:none;">
+      <div class="score-box">
+        <h2>ผลคะแนน</h2>
+        <p>คุณทำได้ <span id="score"></span> จาก <span id="total"></span> คะแนน</p>
+        <div id="scoreMsg"></div>
+        <button class="back-btn" onclick="window.location.reload()">กลับไปเลือกชุดใหม่</button>
+      </div>
+      <div class="history-section" id="history-section" style="display:none;">
+        <div class="history-title">ผลคะแนนย้อนหลังของคุณ</div>
+        <ul class="history-list" id="historyList"></ul>
+      </div>
+    </div>
+  </div>
+  <script>
+    // ข้อสอบแต่ละชุด (เหมือนเดิม)
+    const sets = {
+      1: [
+        {
+          q: "ข้อใดคือสิ่งที่ควรทำเมื่อได้รับเงินมา?",
+          c: ["ใช้ให้หมดทันที", "แบ่งเก็บออมบางส่วน", "ซื้อของเล่น", "เลี้ยงเพื่อน"],
+          a: 1,
+          explain: "การแบ่งเงินไปออมก่อนใช้ เป็นนิสัยทางการเงินที่ดี ช่วยให้มีเงินสำรองในอนาคต"
+        },
+        {
+          q: "ถ้าต้องการซื้อของราคา 600 บาท แต่มีเงิน 400 บาท ควรทำอย่างไร?",
+          c: ["ขอยืมเพื่อน", "อดใจรอและเก็บเงินเพิ่ม", "รูดบัตรเครดิต", "ขโมยของ"],
+          a: 1,
+          explain: "ควรฝึกอดทนรอ เก็บเงินให้ถึงเป้าหมายก่อนตัดสินใจซื้อ เพื่อลดการเป็นหนี้"
+        },
+        {
+          q: "ข้อใดคือตัวอย่างของรายจ่ายจำเป็น?",
+          c: ["ค่าของเล่น", "ค่าอาหารกลางวัน", "ค่าขนมหวาน", "ค่าแต่งตัวแฟชั่น"],
+          a: 1,
+          explain: "ค่าอาหารกลางวันเป็นค่าใช้จ่ายที่จำเป็นต่อชีวิตประจำวัน"
+        }
+      ],
+      2: [
+        {
+          q: "การจดบันทึกรายรับรายจ่ายมีประโยชน์อย่างไร?",
+          c: ["เพื่ออวดเพื่อน", "ช่วยให้รู้ว่าเงินไปไหน", "สิ้นเปลืองเวลา", "ไม่มีประโยชน์"],
+          a: 1,
+          explain: "การบันทึกรายรับรายจ่ายช่วยให้รู้ว่าควรปรับปรุงพฤติกรรมการเงินตรงจุดไหน"
+        },
+        {
+          q: "ถ้ามีเงิน 1,000 บาท อยากซื้อรองเท้าใหม่ 1,200 บาท ควรทำอย่างไร?",
+          c: ["ใช้เงินเก็บฉุกเฉินทันที", "รอให้มีเงินพอ", "ยืมเงินเพื่อน", "ซื้อก่อน ค่อยหาเงินทีหลัง"],
+          a: 1,
+          explain: "รอให้มีเงินพอก่อนซื้อ ช่วยฝึกวินัยและป้องกันหนี้"
+        }
+      ],
+      3: [
+        {
+          q: "ข้อใดคือนิสัยที่ช่วยสร้างเงินออม?",
+          c: ["ออมก่อนใช้", "ออมเมื่อเหลือ", "ใช้จนหมดแล้วค่อยออม", "ไม่ต้องออม"],
+          a: 0,
+          explain: "การออมก่อนใช้เป็นนิสัยที่ทำให้เก็บเงินได้จริง มีเงินเหลือในระยะยาว"
+        },
+        {
+          q: "การลงทุนในอะไรเสี่ยงน้อยที่สุด?",
+          c: ["หุ้น", "ฝากธนาคารออมทรัพย์", "ทองคำ", "สลากกินแบ่ง"],
+          a: 1,
+          explain: "เงินฝากออมทรัพย์เสี่ยงต่ำและสามารถถอนเมื่อจำเป็น"
+        }
+      ]
+    };
+    let set = [], setTotal = 0, idx = 0, score = 0, setId = 1;
+
+    function startSet(id) {
+      setId = id;
+      set = sets[setId];
+      setTotal = set.length;
+      idx = 0;
+      score = 0;
+      document.getElementById('start-section').style.display = "none";
+      document.getElementById('score-section').style.display = "none";
+      document.getElementById('quiz-section').style.display = "block";
+      showQ();
+    }
+
+    function showQ() {
+      const q = set[idx];
+      document.getElementById('question').textContent = `ข้อที่ ${idx + 1}: ${q.q}`;
+      const choicesEl = document.getElementById('choices');
+      choicesEl.innerHTML = '';
+      document.getElementById('explain').textContent = '';
+      document.getElementById('nextBtn').style.display = 'none';
+      document.getElementById('finishBtn').style.display = 'none';
+      q.c.forEach((choice, i) => {
+        const li = document.createElement('li');
+        li.textContent = choice;
+        li.onclick = () => select(i, li);
+        choicesEl.appendChild(li);
+      });
+    }
+
+    function select(i, li) {
+      const q = set[idx];
+      // Lock choices
+      document.querySelectorAll('#choices li').forEach(el => {
+        el.classList.add('disabled');
+        el.onclick = null;
+      });
+      li.classList.add('selected');
+      let explainEl = document.getElementById('explain');
+      if(i === q.a) {
+        score++;
+        explainEl.innerHTML = `✅ <b>ถูกต้อง!</b> ${q.explain}`;
+        explainEl.style.color = "#388e3c";
+      } else {
+        explainEl.innerHTML = `❌ <b>ผิด</b> คำตอบที่ถูกต้องคือ "${q.c[q.a]}"<br>${q.explain}`;
+        explainEl.style.color = "#c62828";
+      }
+      // Show next/finish button
+      if (idx < setTotal - 1) {
+        document.getElementById('nextBtn').style.display = 'block';
+        document.getElementById('nextBtn').onclick = nextQ;
+      } else {
+        document.getElementById('finishBtn').style.display = 'block';
+        document.getElementById('finishBtn').onclick = showScore;
+      }
+    }
+
+    function nextQ() {
+      idx++;
+      showQ();
+    }
+
+    function showScore() {
+      document.getElementById('quiz-section').style.display = 'none';
+      document.getElementById('score-section').style.display = 'block';
+      document.getElementById('score').textContent = score;
+      document.getElementById('total').textContent = setTotal;
+      let msg = '';
+      const percent = (score / setTotal) * 100;
+      if(percent >= 90) msg = "ยอดเยี่ยม! คุณมีความรู้ทางการเงินดีมาก 👍";
+      else if(percent >= 70) msg = "ดีมาก! มีความเข้าใจทางการเงินในระดับดี";
+      else if(percent >= 50) msg = "พอใช้ได้ ลองฝึกฝนเพิ่มเติม";
+      else msg = "ควรทบทวนความรู้เรื่องการเงินเพิ่มเติมนะครับ";
+      document.getElementById('scoreMsg').textContent = msg;
+
+      // 🔥 เก็บผลคะแนน quiz ลง Firestore
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          db.collection("users").doc(user.uid).collection("quiz-results").add({
+            set: setId,
+            score: score,
+            total: setTotal,
+            percent: percent,
+            date: new Date().toISOString()
+          });
+          // โหลดผลย้อนหลัง
+          loadQuizHistory(user.uid);
+        }
+      });
+    }
+
+    // ดึงผลย้อนหลัง (score history)
+    function loadQuizHistory(uid) {
+      db.collection("users").doc(uid).collection("quiz-results")
+        .orderBy("date", "desc")
+        .limit(5)
+        .get()
+        .then(snapshot => {
+          const section = document.getElementById('history-section');
+          const list = document.getElementById('historyList');
+          list.innerHTML = "";
+          let hasHistory = false;
+          snapshot.forEach(doc => {
+            const d = doc.data();
+            hasHistory = true;
+            list.innerHTML += `<li>
+              <b>ชุดที่ ${d.set}</b> | คะแนน: <b>${d.score}</b> / ${d.total} (${d.percent.toFixed(0)}%)
+              <br>วันที่ ${new Date(d.date).toLocaleString("th-TH", { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })}
+            </li>`;
+          });
+          section.style.display = hasHistory ? "block" : "none";
+        });
+    }
+  </script>
+</body>
+</html>

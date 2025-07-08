@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>สมัครสมาชิก – MoneySkillz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f3f6f8; }
+    .signup-box { background: #fff; max-width: 400px; margin: 60px auto; border-radius: 18px; box-shadow: 0 8px 28px #00808018; padding: 38px 32px; }
+    h1 { text-align: center; color: #009688; margin-bottom: 14px; }
+    input, button { width: 100%; padding: 12px; margin: 10px 0; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; }
+    button { background-color: #009688; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #00796b; }
+    #message { margin-top: 10px; text-align: center; }
+    a { color: #00796b; text-decoration: none; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <div class="signup-box">
+    <h1>สมัครสมาชิก</h1>
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="ชื่อผู้ใช้" required />
+      <input type="email" id="email" placeholder="อีเมล" required />
+      <input type="password" id="password" placeholder="รหัสผ่าน" required />
+      <button type="submit">สมัครสมาชิก</button>
+    </form>
+    <div id="message"></div>
+    <p style="text-align:center; margin-top: 12px;">มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = 'กำลังสมัครสมาชิก...';
+      messageDiv.style.color = 'blue';
+
+      if(password.length < 6){
+        messageDiv.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+        messageDiv.style.color = 'red';
+        return;
+      }
+
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        await user.updateProfile({ displayName: username });
+        await db.collection("users").doc(user.uid).set({
+          username,
+          email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        messageDiv.textContent = 'สมัครสมาชิกสำเร็จ! กำลังไปยังหน้าเข้าสู่ระบบ...';
+        messageDiv.style.color = 'green';
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 1500);
+      } catch (error) {
+        messageDiv.textContent = 'เกิดข้อผิดพลาด: ' + error.message;
+        messageDiv.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>

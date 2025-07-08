@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>🎯 เพิ่มเป้าหมายการออม - MoneySkillz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="add-goal.css">
+  <!-- Firebase SDK + config (อัปเดตเป็นโปรเจกต์ใหม่) -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",  // แก้ไขตรงนี้!
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+  <div class="header">
+    <h1>MoneySkillz</h1>
+    <p style="margin:8px 0 0 0;font-size:1.08rem;font-weight:300;letter-spacing:0.01em;">
+      สวัสดีผู้ใช้งาน ยินดีต้อนรับสู่แอปวางแผนการเงิน!
+    </p>
+  </div>
+  <div class="container">
+    <div class="form-box">
+      <h2>🎯 เพิ่มเป้าหมายการออม</h2>
+      <form onsubmit="saveGoal(event)">
+        <label for="goalName">ชื่อเป้าหมาย</label>
+        <input type="text" id="goalName" placeholder="เช่น รถ, บ้าน, โน้ตบุ๊ค" required>
+        <label for="goalAmount">จำนวนเงินทั้งหมด (บาท)</label>
+        <input type="number" id="goalAmount" placeholder="เช่น 100000" min="1" required>
+        <label for="goalDate">วันที่กำหนด</label>
+        <input type="date" id="goalDate" required>
+        <label for="planType">แผนการออม</label>
+        <select id="planType" required>
+          <option value="monthly">ออมรายเดือน (หารตามจำนวนเดือน)</option>
+          <option value="weekly">ออมรายสัปดาห์ (หารตามจำนวนสัปดาห์)</option>
+          <option value="daily">ออมรายวัน (20 งวด x 5%)</option>
+        </select>
+        <button type="submit">💾 บันทึกเป้าหมาย</button>
+      </form>
+    </div>
+    <div class="goal-box">
+      <div class="goal-content" id="goalContent">
+        <div class="goal-title">- ยังไม่มีเป้าหมายที่ตั้งไว้ -</div>
+      </div>
+    </div>
+  </div>
+  <script src="add-goal.js"></script>
+</body>
+</html>

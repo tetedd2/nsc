@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>รายละเอียดบทเรียน – บทที่ 6 การบริหารความเสี่ยงทางการเงิน</title>
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4;}
+    .header { background-color:#009688; color:white; padding:20px; text-align:center; }
+    .container { padding:20px; max-width:800px; margin:0 auto; }
+    .lesson-title { color:#004d40; font-size:1.7rem; margin-bottom:18px; }
+    .lesson-content { font-size:1.07rem; color:#444; line-height:1.8; margin-bottom:24px; }
+    .pagination { text-align:center; margin:28px 0 10px 0;}
+    .page-btn { display:inline-block; background:#009688; color:#fff; padding:8px 20px; border-radius:7px; text-decoration:none; margin:0 12px; transition:background 0.2s;}
+    .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
+    .back-btn { margin-top:30px; display:inline-block; background:#009688; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
+    .back-btn:hover { background:#00796b; }
+    .quiz-label { font-weight:bold; margin-top:1.5em; display:block;}
+    .quiz-input { width:100%; padding:9px; border-radius:6px; border:1px solid #bbb; margin-bottom:7px;}
+    .save-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .save-btn:hover { background:#00796b; }
+    .quiz-status { margin-left:16px; color:#388e3c; font-weight:bold; }
+    table { border-collapse:collapse; width:100%; margin:18px 0;}
+    th,td { border:1px solid #bbb; padding:10px; }
+    th { background:#eee; }
+    ul,ol { margin-bottom:1em; }
+    .emph { color:#d84315; font-weight:bold;}
+    .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
+    .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+  </style>
+</head>
+<body>
+  <div class="header"><h1>รายละเอียดบทเรียน: การบริหารความเสี่ยงทางการเงิน</h1></div>
+  <div class="container">
+    <div id="lessonDetails"></div>
+    <div class="pagination" id="pagination"></div>
+    <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
+  </div>
+  <script>
+    const lessonId = 6;
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageNow = Number(urlParams.get("page")||1);
+
+    const pages = [
+      {
+        title: "บทที่ 6: ความหมายของความเสี่ยงทางการเงิน (หน้า 1/7)",
+        content: `
+          <h2>1. ความเสี่ยงทางการเงินคืออะไร?</h2>
+          <ul>
+            <li>ความเสี่ยงทางการเงิน คือ โอกาสที่เหตุการณ์ไม่คาดคิดจะทำให้เกิด “ความเสียหาย” ต่อการเงิน เช่น รายได้ลด รายจ่ายเพิ่ม หรือเงินไม่พอใช้</li>
+            <li>ความเสี่ยงเกิดขึ้นได้กับทุกคน เช่น เจ็บป่วย อุบัติเหตุ ว่างงาน หรือภาวะเศรษฐกิจเปลี่ยนแปลง</li>
+            <li>การรู้เท่าทันและ “เตรียมรับมือความเสี่ยง” จะช่วยให้ชีวิตมั่นคงขึ้น</li>
+          </ul>
+          <div class="block">
+            <b>ตัวอย่าง:</b> ป่วยกะทันหัน ต้องใช้เงินรักษาพยาบาล หากไม่มีเงินสำรอง อาจต้องกู้หนี้เพิ่ม
+          </div>
+          <ul>
+            <li><span class="emph">ทุกคนต้องเจอกับความเสี่ยง</span> แต่ถ้ารู้จักวางแผน ก็ช่วยลดผลกระทบได้</li>
+          </ul>
+        `
+      },
+      {
+        title: "บทที่ 6: ประเภทของความเสี่ยง (หน้า 2/7)",
+        content: `
+          <h2>2. ประเภทของความเสี่ยงทางการเงิน</h2>
+          <table>
+            <tr>
+              <th>ประเภทความเสี่ยง</th><th>ตัวอย่าง</th><th>แนวทางรับมือ</th>
+            </tr>
+            <tr>
+              <td>รายได้ลดลง</td>
+              <td>ผู้ปกครองตกงาน โควิด-19</td>
+              <td>มีเงินสำรองฉุกเฉิน, หาอาชีพเสริม</td>
+            </tr>
+            <tr>
+              <td>รายจ่ายฉุกเฉิน</td>
+              <td>เจ็บป่วย, ของพัง, อุบัติเหตุ</td>
+              <td>ซื้อประกัน, เตรียมเงินกองทุนสำรอง</td>
+            </tr>
+            <tr>
+              <td>หนี้สินเกินตัว</td>
+              <td>ผ่อนของเยอะ, กู้เงินนอกระบบ</td>
+              <td>วางแผนใช้จ่าย, มีวินัยผ่อนชำระ</td>
+            </tr>
+            <tr>
+              <td>การลงทุนขาดทุน</td>
+              <td>ราคาหุ้นตก, ธุรกิจไม่รุ่ง</td>
+              <td>ศึกษาข้อมูล, กระจายการลงทุน</td>
+            </tr>
+            <tr>
+              <td>ภัยธรรมชาติ/เหตุการณ์พิเศษ</td>
+              <td>น้ำท่วม, ไฟไหม้, โรคระบาด</td>
+              <td>ประกันบ้าน, วางแผนความเสี่ยง</td>
+            </tr>
+          </table>
+          <div class="block">
+            <b>สรุป:</b> ความเสี่ยงไม่ใช่เรื่องไกลตัว แต่ถ้าเตรียมรับมือ จะช่วยป้องกันไม่ให้กระทบเงินในชีวิตมากเกินไป
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 6: การวางแผนป้องกันความเสี่ยง (หน้า 3/7)",
+        content: `
+          <h2>3. วางแผนรับมือความเสี่ยงอย่างไร?</h2>
+          <ol>
+            <li><b>สร้างเงินสำรองฉุกเฉิน</b>  
+              ควรเก็บเงินไว้ใช้จ่ายได้อย่างน้อย 3–6 เดือน เช่น ค่ากินอยู่ ค่าน้ำค่าไฟ ค่าเดินทาง
+              <div class="block">
+                <b>ตัวอย่าง:</b> ถ้าค่าใช้จ่ายเดือนละ 5,000 บาท ควรมีเงินสำรอง 15,000–30,000 บาท
+              </div>
+            </li>
+            <li><b>ทำประกัน</b>  
+              เช่น ประกันอุบัติเหตุ ประกันสุขภาพ ประกันชีวิต ช่วยลดภาระเมื่อเกิดเหตุการณ์ร้ายแรง
+            </li>
+            <li><b>วางแผนจัดการหนี้</b>  
+              ไม่สร้างหนี้ฟุ่มเฟือย วางแผนจ่ายคืนตรงเวลา</li>
+            <li><b>กระจายรายได้และการลงทุน</b>  
+              ไม่ฝากเงินไว้ที่เดียว ลงทุนหลายทาง ลดความเสี่ยงขาดทุนหนัก</li>
+          </ol>
+          <div class="block">
+            <b>เทคนิค:</b> ออมเงินลงกระปุก “ฉุกเฉิน” แยกจากเงินออมเป้าหมายอื่น ๆ
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 6: เงินสำรองฉุกเฉินและประกัน (หน้า 4/7)",
+        content: `
+          <h2>4. เงินสำรองฉุกเฉินและการทำประกัน</h2>
+          <ul>
+            <li><span class="emph">เงินสำรองฉุกเฉิน</span> เก็บไว้ในบัญชีที่ถอนง่ายแต่ได้ดอกเบี้ย เช่น ออมทรัพย์หรือกองทุนตลาดเงิน</li>
+            <li>ควรแยกบัญชีเงินใช้ประจำกับบัญชีเงินสำรอง</li>
+            <li><span class="emph">การทำประกัน</span>  
+              <ul>
+                <li>ประกันอุบัติเหตุ: ค่ารักษา ค่าชดเชยรายได้</li>
+                <li>ประกันสุขภาพ: ลดค่าใช้จ่ายเมื่อเจ็บป่วย</li>
+                <li>ประกันชีวิต: คุ้มครองคนข้างหลัง</li>
+              </ul>
+            </li>
+            <li>ศึกษารายละเอียดเบี้ย คุ้มครอง และข้อยกเว้นของประกันก่อนตัดสินใจ</li>
+          </ul>
+          <div class="block">
+            <b>ตัวอย่างสถานการณ์:</b> “ออมเงินสำรองไว้ 20,000 บาท เจ็บป่วยกะทันหันไม่กระทบเงินเก็บหลัก”
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 6: หลักคิดและเทคนิคจัดการความเสี่ยง (หน้า 5/7)",
+        content: `
+          <h2>5. เทคนิคพิเศษและแนวคิดล้ำๆ</h2>
+          <ul>
+            <li><b>“อย่าใส่ไข่ทุกฟองไว้ในตะกร้าเดียว”</b>  
+              หมายถึงไม่ลงทุนหรือฝากเงินไว้กับที่เดียว เพื่อป้องกันความเสียหายหนักจากเรื่องใดเรื่องหนึ่ง</li>
+            <li><b>ฝึกคิด “แผน 2” ตลอดเวลา</b>  
+              ถามตัวเองเสมอ “ถ้าเงินขาดมือ จะเอาเงินที่ไหนมาใช้?” หรือ “ถ้าไม่มีรายได้กะทันหัน จะอยู่รอดกี่เดือน?”</li>
+            <li><b>เรียนรู้จากประสบการณ์ของผู้อื่น</b>  
+              อ่านข่าว ศึกษาเคสตัวอย่างคนที่ไม่เตรียมความเสี่ยง แล้วลองปรับใช้กับตัวเอง</li>
+            <li><b>หมั่นอัปเดตข้อมูล</b>  
+              เช่น กฎหมายประกันภัย โปรโมชันบัญชีเงินฝากใหม่ๆ หรือสิทธิรัฐช่วยเหลือยามฉุกเฉิน</li>
+          </ul>
+          <div class="block">
+            <b>ตัวอย่างแนวคิด:</b> “แนน” มีเงินสำรองฉุกเฉิน 30,000 บาท แถมซื้อประกันสุขภาพวงเงิน 100,000 บาท แม้ต้องจ่ายเบี้ยทุกปีแต่สบายใจว่าถ้ามีปัญหา จะไม่กระทบครอบครัว
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 6: ข้อควรระวังและหลุมพราง (หน้า 6/7)",
+        content: `
+          <h2>6. ข้อควรระวัง-กับดักทางการเงินที่ควรหลีกเลี่ยง</h2>
+          <ul>
+            <li>ประมาท ไม่วางแผนรับมือเหตุการณ์ร้ายแรง</li>
+            <li>เชื่อโปรโมชั่น/ข้อเสนอที่ดูดีเกินจริง เช่น การลงทุนที่บอกว่ากำไรสูงแต่ไม่บอกความเสี่ยง</li>
+            <li>ซื้อประกันโดยไม่อ่านเงื่อนไข อาจไม่ได้รับเงินเมื่อเกิดเหตุจริง</li>
+            <li>นำเงินสำรองไปลงทุนในสินทรัพย์เสี่ยง</li>
+            <li>ขาดความรู้เรื่องดอกเบี้ยหนี้สิน ทำให้จ่ายเงินมากขึ้นโดยไม่รู้ตัว</li>
+          </ul>
+          <div class="block">
+            <b>ตัวอย่าง:</b> หลายคนคิดว่าตัวเองแข็งแรง ไม่ซื้อประกัน เจ็บป่วยหนักต้องกู้หนี้ยืมสินจนเป็นปัญหาครอบครัว
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 6: แบบฝึกหัดท้ายบท & ข้อคิด (หน้า 7/7)",
+        content: `
+          <div class="takeaway">
+            <ul>
+              <li>ใครวางแผนรับมือความเสี่ยงก่อน ย่อมสบายใจและมั่นคงกว่าเสมอ</li>
+              <li>ไม่มีเงินสำรองเท่ากับ “อยู่บนเส้นด้าย” ทางการเงิน</li>
+              <li>อย่ากลัวประกันหรือกลัวการวางแผน มันคือเกราะป้องกันอนาคต</li>
+            </ul>
+          </div>
+          <form id="quizForm">
+            <label class="quiz-label">1. คุณคิดว่าความเสี่ยงทางการเงินที่สำคัญในชีวิตคุณคืออะไร?</label>
+            <textarea class="quiz-input" id="q1" rows="2"></textarea>
+            <label class="quiz-label">2. หากต้องเจอเหตุฉุกเฉินทางการเงิน คุณจะวางแผนรับมืออย่างไร?</label>
+            <textarea class="quiz-input" id="q2" rows="2"></textarea>
+            <label class="quiz-label">3. ลองเล่าเหตุการณ์ที่มีคนรอบตัวต้องแก้ปัญหาความเสี่ยงทางการเงิน</label>
+            <textarea class="quiz-input" id="q3" rows="2"></textarea>
+            <button type="button" class="save-btn" id="saveBtn">บันทึกคำตอบ</button>
+            <span id="quizStatus" class="quiz-status" style="display:none;">บันทึกแล้ว!</span>
+          </form>
+          <div style="margin-top:16px;">
+            <button id="doneBtn" class="save-btn" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status"></span>
+          </div>
+        `
+      }
+    ];
+
+    let page = Math.min(Math.max(pageNow,1), pages.length);
+    let html = `<div class="lesson-title">${pages[page-1].title}</div>
+                <div class="lesson-content">${pages[page-1].content}</div>`;
+    document.getElementById("lessonDetails").innerHTML = html;
+
+    let pag = "";
+    if (page > 1) pag += `<a class="page-btn" href="lesson-detail6.html?page=${page-1}">หน้าก่อนหน้า</a>`;
+    if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail6.html?page=${page+1}">หน้าถัดไป</a>`;
+    document.getElementById("pagination").innerHTML = pag;
+
+    // quiz + ตรวจสอบเรียนจบ
+    if (page === pages.length) {
+      setTimeout(() => {
+        ["q1","q2","q3"].forEach(qid=>{
+          let v = localStorage.getItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`)||"";
+          let el = document.getElementById(qid);
+          if(el) el.value = v;
+        });
+        const saveBtn = document.getElementById("saveBtn");
+        const quizStatus = document.getElementById("quizStatus");
+        if(saveBtn){
+          saveBtn.onclick = ()=>{
+            ["q1","q2","q3"].forEach(qid=>{
+              let el = document.getElementById(qid);
+              if(el) localStorage.setItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`, el.value.trim());
+            });
+            quizStatus.style.display = "inline";
+            setTimeout(()=>{ quizStatus.style.display = "none"; }, 1500);
+            checkDoneStatus();
+          }
+        }
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        function checkDoneStatus(){
+          let ready = ["q1","q2","q3"].every(qid=>{
+            let el = document.getElementById(qid);
+            return el && el.value.trim();
+          });
+          if(localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`)==="yes"){
+            doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
+            doneBtn.disabled = true;
+            doneBtn.style.background="#ccc";
+          }else{
+            doneStatus.innerHTML = "";
+            doneBtn.disabled = !ready;
+            doneBtn.style.background = ready ? "#388e3c" : "#bbb";
+          }
+        }
+        ["q1","q2","q3"].forEach(qid=>{
+          let el = document.getElementById(qid);
+          if(el) el.oninput = checkDoneStatus;
+        });
+        checkDoneStatus();
+
+        doneBtn.onclick = ()=>{
+          localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+          checkDoneStatus();
+        }
+      }, 200);
+    }
+  </script>
+</body>
+</html>

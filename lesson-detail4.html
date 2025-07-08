@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>รายละเอียดบทเรียน – บทที่ 4 การวางแผนการเงินส่วนบุคคล</title>
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4;}
+    .header { background-color:#009688; color:white; padding:20px; text-align:center; }
+    .container { padding:20px; max-width:800px; margin:0 auto; }
+    .lesson-title { color:#004d40; font-size:1.7rem; margin-bottom:18px; }
+    .lesson-content { font-size:1.07rem; color:#444; line-height:1.8; margin-bottom:24px; }
+    .pagination { text-align:center; margin:28px 0 10px 0;}
+    .page-btn { display:inline-block; background:#009688; color:#fff; padding:8px 20px; border-radius:7px; text-decoration:none; margin:0 12px; transition:background 0.2s;}
+    .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
+    .back-btn { margin-top:30px; display:inline-block; background:#009688; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
+    .back-btn:hover { background:#00796b; }
+    .quiz-label { font-weight:bold; margin-top:1.5em; display:block;}
+    .quiz-input { width:100%; padding:9px; border-radius:6px; border:1px solid #bbb; margin-bottom:7px;}
+    .save-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .save-btn:hover { background:#00796b; }
+    .quiz-status { margin-left:16px; color:#388e3c; font-weight:bold; }
+    table { border-collapse:collapse; width:100%; margin:18px 0;}
+    th,td { border:1px solid #bbb; padding:10px; }
+    th { background:#eee; }
+    ul,ol { margin-bottom:1em; }
+    .emph { color:#d84315; font-weight:bold;}
+    .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
+    .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+  </style>
+</head>
+<body>
+  <div class="header"><h1>รายละเอียดบทเรียน: การวางแผนการเงินส่วนบุคคล</h1></div>
+  <div class="container">
+    <div id="lessonDetails"></div>
+    <div class="pagination" id="pagination"></div>
+    <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
+  </div>
+  <script>
+    const lessonId = 4;
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageNow = Number(urlParams.get("page")||1);
+
+    const pages = [
+      {
+        title: "บทที่ 4: การวางแผนการเงินส่วนบุคคล (หน้า 1/6)",
+        content: `
+          <h2>1. ความหมายและความสำคัญของการวางแผน</h2>
+          <ul>
+            <li>การวางแผนการเงิน คือ กระบวนการกำหนดเป้าหมายทางการเงินของตนเอง และจัดการรายรับ รายจ่าย และเงินออมอย่างมีระบบ</li>
+            <li>ช่วยป้องกันปัญหาเงินขาดมือ ติดหนี้ หรือมีรายจ่ายมากเกินรายรับ</li>
+            <li>เมื่อมีแผน จะกล้าตัดสินใจและจัดลำดับความสำคัญของชีวิตได้ดีขึ้น</li>
+          </ul>
+          <div class="block">
+            <b>ตัวอย่าง:</b> พีทตั้งเป้าว่าปีนี้จะเก็บเงิน 6,000 บาทเพื่อซื้อคอมพิวเตอร์ โดยวางแผนแบ่งเก็บเดือนละ 500 บาทจนครบเป้า
+          </div>
+          <ul>
+            <li>การวางแผนที่ดีช่วยให้มีเงินใช้ยามฉุกเฉินหรือโอกาสดีๆ ที่เข้ามา</li>
+          </ul>
+        `
+      },
+      {
+        title: "บทที่ 4: เครื่องมือ เทคนิค & ตัวอย่าง (หน้า 2/6)",
+        content: `
+          <h2>2. เครื่องมือ เทคนิคการวางแผน และการวิเคราะห์รายรับ-รายจ่าย</h2>
+          <ul>
+            <li>บันทึกรายรับ-รายจ่าย: ใช้สมุดจดหรือแอปพลิเคชันช่วยบันทึกเพื่อเห็นภาพชัดเจน</li>
+            <li>จัดทำงบประมาณ: กำหนดวงเงินแต่ละเดือนว่าควรใช้ในแต่ละประเภทเท่าไร</li>
+            <li>เปรียบเทียบรายจ่าย: วิเคราะห์ดูว่าค่าใช้จ่ายส่วนใหญ่หมดไปกับอะไร แล้วปรับลดส่วนที่ไม่จำเป็น</li>
+          </ul>
+          <table>
+            <tr>
+              <th>รายการ</th>
+              <th>ค่าเฉลี่ย/เดือน</th>
+              <th>จำเป็น/ฟุ่มเฟือย</th>
+              <th>หมายเหตุ</th>
+            </tr>
+            <tr>
+              <td>ค่าอาหาร</td>
+              <td>1,200 บาท</td>
+              <td>จำเป็น</td>
+              <td>สามมื้อ/วัน</td>
+            </tr>
+            <tr>
+              <td>ขนม & เครื่องดื่ม</td>
+              <td>400 บาท</td>
+              <td>ฟุ่มเฟือย</td>
+              <td>ลดได้</td>
+            </tr>
+            <tr>
+              <td>ค่าเดินทาง</td>
+              <td>600 บาท</td>
+              <td>จำเป็น</td>
+              <td>ไป-กลับโรงเรียน</td>
+            </tr>
+            <tr>
+              <td>ของเล่น/เกม</td>
+              <td>300 บาท</td>
+              <td>ฟุ่มเฟือย</td>
+              <td>ควรตั้งงบ</td>
+            </tr>
+          </table>
+          <div class="block">
+            <b>เทคนิค:</b> ลองใช้สูตร “50-30-20”<br>
+            <ul>
+              <li>50% สำหรับความจำเป็น</li>
+              <li>30% สำหรับเป้าหมายในชีวิต (เช่น ออมเงินหรือพัฒนาตัวเอง)</li>
+              <li>20% สำหรับความสุข/ของฟุ่มเฟือย</li>
+            </ul>
+          </div>
+          <div class="block">
+            <b>ข้อควรระวัง:</b> หากรายจ่ายฟุ่มเฟือยเกินงบ ต้องปรับลดทันที อย่ารอให้เงินหมดก่อน
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: การวางแผนเป้าหมายระยะสั้น-ยาว (หน้า 3/6)",
+        content: `
+          <h2>3. วางแผนเป้าหมายระยะสั้น ระยะกลาง ระยะยาว</h2>
+          <ul>
+            <li><span class="emph">เป้าหมายระยะสั้น:</span> 1-6 เดือน เช่น เก็บเงินซื้อหนังสือ</li>
+            <li><span class="emph">เป้าหมายระยะกลาง:</span> 6 เดือน-2 ปี เช่น ออมเงินไปทัศนศึกษา</li>
+            <li><span class="emph">เป้าหมายระยะยาว:</span> มากกว่า 2 ปี เช่น ออมเพื่อเรียนต่อ หรือเก็บเงินซื้อคอมพิวเตอร์</li>
+          </ul>
+          <table>
+            <tr><th>ตัวอย่างเป้าหมาย</th><th>งบที่ต้องใช้</th><th>วิธีวางแผน</th></tr>
+            <tr>
+              <td>ซื้อจักรยาน</td>
+              <td>3,000 บาท</td>
+              <td>เก็บเดือนละ 500 บาท 6 เดือน</td>
+            </tr>
+            <tr>
+              <td>ไปเรียนซัมเมอร์</td>
+              <td>10,000 บาท</td>
+              <td>เก็บเดือนละ 1,000 บาท 10 เดือน</td>
+            </tr>
+            <tr>
+              <td>ซื้อบ้านหลังเล็กในอนาคต</td>
+              <td>ต้องวางแผนระยะยาว + หารายได้เสริม</td>
+              <td>ตั้งเป้า เรียนรู้การลงทุน</td>
+            </tr>
+          </table>
+          <div class="block">
+            <b>ตัวอย่าง:</b> พลอยอยากซื้อเครื่องเขียนใหม่ วางแผนออมสัปดาห์ละ 50 บาท 4 สัปดาห์ก็ได้ครบ
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: อุปสรรค-เทคนิคแก้ไข & กรณีศึกษา (หน้า 4/6)",
+        content: `
+          <h2>4. อุปสรรคที่พบบ่อยและเทคนิคแก้ไข</h2>
+          <ul>
+            <li>ขี้เกียจบันทึกรายจ่าย: ใช้แอปหรือชวนเพื่อนทำด้วยกัน</li>
+            <li>เป้าหมายใหญ่จนท้อ: แบ่งเป้าหมายเป็นช่วงสั้น ๆ ตั้งรางวัลให้ตัวเองเมื่อสำเร็จแต่ละเป้า</li>
+            <li>ใจอ่อนกับของลดราคา: ตั้งงบฟุ่มเฟือยประจำเดือน ถ้าใช้หมดแล้วห้ามซื้อเพิ่ม</li>
+            <li>ลืมวางแผน/ไม่มีวินัย: ตั้งเตือนในปฏิทิน หรือติดกระดาษเป้าหมายไว้ในที่เห็นทุกวัน</li>
+          </ul>
+          <div class="block">
+            <b>กรณีศึกษา:</b>
+            <ul>
+              <li>นัทตั้งเป้าเก็บ 3,000 บาท แต่พอผ่านไป 2 เดือนเงินหายไปกับของกินเล่น เลยเริ่มจดทุกบาทที่ใช้ ทำให้เห็นจุดรั่วไหลและออมได้สำเร็จ</li>
+              <li>ก้อยมีรายรับ 800 บาท/เดือน ตั้งงบใช้ 600 ออม 200 จดแยกรายการ ใช้จริงไม่เคยเกินงบเลย</li>
+            </ul>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: ข้อคิดสำคัญ & สถานการณ์ฝึกคิด (หน้า 5/6)",
+        content: `
+          <div class="takeaway">
+            <ul>
+              <li>การวางแผนการเงินคือ “ภูมิคุ้มกัน” ทางการเงิน ทำให้มั่นคงและกล้าฝันใหญ่ขึ้น</li>
+              <li>ยิ่งวางแผนเร็ว ยิ่งบรรลุเป้าหมายเร็วและง่าย</li>
+              <li>ควรทบทวนแผนอย่างน้อยเดือนละครั้ง และปรับตามสถานการณ์ชีวิต</li>
+            </ul>
+            <div class="block">
+              <b>ตัวอย่าง:</b>
+              <ul>
+                <li>ธันวาอยากซื้อสมาร์ทโฟน วางแผนเก็บวันละ 20 บาท 6 เดือน จนครบ 3,600 บาท</li>
+                <li>สายป่านมีปัญหาเงินไม่พอใช้ พอทำบัญชีรายรับรายจ่ายก็รู้จุดอ่อน เลยลดของเล่น-ขนม ได้เงินเก็บเยอะขึ้น</li>
+                <li>น้ำหวานแบ่งเงินใช้แต่ละวัน ช่วยให้ไม่ซื้อของเกินงบที่ตั้งไว้</li>
+              </ul>
+            </div>
+            <div class="block">
+              <b>สถานการณ์ฝึกคิด:</b>
+              <ol>
+                <li>หากตั้งเป้าเก็บเงินซื้อของใหญ่ แต่มีรายได้จำกัด คุณจะวางแผน/หารายได้เสริมอย่างไร?</li>
+                <li>ถ้าเงินออมไม่ถึงเป้าหมายตามกำหนด จะปรับแผนอย่างไร?</li>
+              </ol>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: การวางแผนการเงิน (แบบฝึกหัดท้ายบท)",
+        content: `
+          <form id="quizForm">
+            <label class="quiz-label">1. เป้าหมายการเงินที่สำคัญที่สุดของคุณคืออะไร?</label>
+            <textarea class="quiz-input" id="q1" rows="2"></textarea>
+            <label class="quiz-label">2. เคยเจออุปสรรคในการวางแผนเงินอย่างไร?</label>
+            <textarea class="quiz-input" id="q2" rows="2"></textarea>
+            <label class="quiz-label">3. คุณจะแก้ไขอย่างไรเมื่อแผนการเงินล้มเหลว?</label>
+            <textarea class="quiz-input" id="q3" rows="2"></textarea>
+            <button type="button" class="save-btn" id="saveBtn">บันทึกคำตอบ</button>
+            <span id="quizStatus" class="quiz-status" style="display:none;">บันทึกแล้ว!</span>
+          </form>
+          <div style="margin-top:16px;">
+            <button id="doneBtn" class="save-btn" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status"></span>
+          </div>
+        `
+      }
+    ];
+
+    let page = Math.min(Math.max(pageNow,1), pages.length);
+    let html = `<div class="lesson-title">${pages[page-1].title}</div>
+                <div class="lesson-content">${pages[page-1].content}</div>`;
+    document.getElementById("lessonDetails").innerHTML = html;
+
+    let pag = "";
+    if (page > 1) pag += `<a class="page-btn" href="lesson-detail4.html?page=${page-1}">หน้าก่อนหน้า</a>`;
+    if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail4.html?page=${page+1}">หน้าถัดไป</a>`;
+    document.getElementById("pagination").innerHTML = pag;
+
+    // quiz + ตรวจสอบเรียนจบ
+    if (page === pages.length) {
+      setTimeout(() => {
+        ["q1","q2","q3"].forEach(qid=>{
+          let v = localStorage.getItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`)||"";
+          let el = document.getElementById(qid);
+          if(el) el.value = v;
+        });
+        const saveBtn = document.getElementById("saveBtn");
+        const quizStatus = document.getElementById("quizStatus");
+        if(saveBtn){
+          saveBtn.onclick = ()=>{
+            ["q1","q2","q3"].forEach(qid=>{
+              let el = document.getElementById(qid);
+              if(el) localStorage.setItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`, el.value.trim());
+            });
+            quizStatus.style.display = "inline";
+            setTimeout(()=>{ quizStatus.style.display = "none"; }, 1500);
+            checkDoneStatus();
+          }
+        }
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        function checkDoneStatus(){
+          let ready = ["q1","q2","q3"].every(qid=>{
+            let el = document.getElementById(qid);
+            return el && el.value.trim();
+          });
+          if(localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`)==="yes"){
+            doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
+            doneBtn.disabled = true;
+            doneBtn.style.background="#ccc";
+          }else{
+            doneStatus.innerHTML = "";
+            doneBtn.disabled = !ready;
+            doneBtn.style.background = ready ? "#388e3c" : "#bbb";
+          }
+        }
+        ["q1","q2","q3"].forEach(qid=>{
+          let el = document.getElementById(qid);
+          if(el) el.oninput = checkDoneStatus;
+        });
+        checkDoneStatus();
+
+        doneBtn.onclick = ()=>{
+          localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+          checkDoneStatus();
+        }
+      }, 200);
+    }
+  </script>
+</body>
+</html>

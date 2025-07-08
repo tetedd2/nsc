@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>รายละเอียดบทเรียน – บทที่ 2 การออมเงิน</title>
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4;}
+    .header { background-color:#009688; color:white; padding:20px; text-align:center; }
+    .container { padding:20px; max-width:800px; margin:0 auto; }
+    .lesson-title { color:#004d40; font-size:1.7rem; margin-bottom:18px; }
+    .lesson-content { font-size:1.07rem; color:#444; line-height:1.8; margin-bottom:24px; }
+    .pagination { text-align:center; margin:28px 0 10px 0;}
+    .page-btn { display:inline-block; background:#009688; color:#fff; padding:8px 20px; border-radius:7px; text-decoration:none; margin:0 12px; transition:background 0.2s;}
+    .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
+    .back-btn { margin-top:30px; display:inline-block; background:#009688; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
+    .back-btn:hover { background:#00796b; }
+    .quiz-label { font-weight:bold; margin-top:1.5em; display:block;}
+    .quiz-input { width:100%; padding:9px; border-radius:6px; border:1px solid #bbb; margin-bottom:7px;}
+    .save-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .save-btn:hover { background:#00796b; }
+    .quiz-status { margin-left:16px; color:#388e3c; font-weight:bold; }
+    table { border-collapse:collapse; width:100%; margin:18px 0;}
+    th,td { border:1px solid #bbb; padding:10px; }
+    th { background:#eee; }
+    ul,ol { margin-bottom:1em; }
+    .emph { color:#d84315; font-weight:bold;}
+    .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
+    .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+  </style>
+</head>
+<body>
+  <div class="header"><h1>รายละเอียดบทเรียน: การออมเงิน</h1></div>
+  <div class="container">
+    <div id="lessonDetails"></div>
+    <div class="pagination" id="pagination"></div>
+    <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
+  </div>
+  <script>
+    const lessonId = 2;
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageNow = Number(urlParams.get("page")||1);
+
+    const pages = [
+      {
+        title: "บทที่ 2: การออมเงิน (หน้า 1/6)",
+        content: `
+          <h2>1. ความหมายและความสำคัญของการออม</h2>
+          <ul>
+            <li>การออมเงิน คือ การกันรายได้บางส่วนไว้ “ใช้ในอนาคต” หรือ “สำหรับเหตุฉุกเฉิน” เพื่อความมั่นคงในชีวิต</li>
+            <li>ช่วยสร้างนิสัยวางแผน ฝึกความอดทน ลดความเสี่ยงเรื่องเงินขาดมือ</li>
+          </ul>
+          <div class="block">
+            <b>ตัวอย่าง:</b> เด็กออมค่าขนมวันละ 10 บาท ครบเดือนมี 300 บาท ซื้อหนังสือที่อยากได้เองโดยไม่ต้องขอเงินเพิ่ม
+          </div>
+          <ul>
+            <li>ออมเงินไม่จำเป็นต้องเริ่มจากเงินก้อน เริ่มทีละนิดก็สร้างนิสัยการเงินดีได้</li>
+            <li>ออมเร็ว ช่วยให้มีเงินตั้งหลักรับมือปัญหา เช่น เจ็บป่วย ตกงาน หรือโอกาสลงทุน</li>
+          </ul>
+          <div class="block">
+            <b>สถานการณ์:</b> นักเรียนคนหนึ่งไม่เคยออม พอมีเหตุฉุกเฉินต้องขอเงินด่วน แต่คนที่ออมมีสำรองไว้เสมอ
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: เทคนิคและรูปแบบการออม (หน้า 2/6)",
+        content: `
+          <h2>2. เทคนิคและรูปแบบการออมเงิน</h2>
+          <ul>
+            <li><b>ออมก่อนใช้</b> - แบ่งเงินออมทันทีที่ได้รับ ไม่ใช่เหลือแล้วค่อยออม</li>
+            <li>ตั้งเตือนในโทรศัพท์/ใช้ซอง/บัญชีแยกเพื่อกันลืมหรือใช้เกิน</li>
+            <li>เขียนเป้าหมายออมติดไว้เตือนใจ เช่น “เพื่อซื้อรองเท้า”</li>
+          </ul>
+          <table>
+            <tr><th>วิธีออม</th><th>ข้อดี</th><th>ข้อควรระวัง</th></tr>
+            <tr>
+              <td>กระปุกออมสิน</td>
+              <td>เห็นเงินสะสมชัด สร้างวินัยง่าย เหมาะกับมือใหม่</td>
+              <td>ต้องอดใจไม่แงะออกก่อนครบเป้าหมาย</td>
+            </tr>
+            <tr>
+              <td>บัญชีออมทรัพย์</td>
+              <td>ปลอดภัย ได้ดอกเบี้ยเล็กน้อย</td>
+              <td>ถอนง่าย ต้องควบคุมใจไม่ใช้หมด</td>
+            </tr>
+            <tr>
+              <td>ฝากประจำ</td>
+              <td>ดอกเบี้ยสูงกว่าออมทรัพย์ เหมาะสำหรับคนมีวินัย</td>
+              <td>ถอนก่อนครบกำหนดเสียผลประโยชน์</td>
+            </tr>
+            <tr>
+              <td>ลงทุนกองทุน/ตราสารหนี้</td>
+              <td>มีโอกาสงอกเงยสูงกว่าออมเงินธรรมดา</td>
+              <td>มีความเสี่ยง ต้องศึกษาก่อนลงทุน</td>
+            </tr>
+          </table>
+          <div class="block">
+            <b>เกร็ดความรู้:</b> ออมก่อนใช้ = ได้ผลแน่นอน ออมหลังใช้ = มักไม่เหลือ
+          </div>
+          <div class="block">
+            <b>เปรียบเทียบ:</b> ออมในกระปุก vs บัญชีธนาคาร<br>
+            กระปุกออมสิน <span class="emph">เห็นเงินชัดแต่เสี่ยงหาย</span>, บัญชีธนาคาร <span class="emph">ปลอดภัยกว่า</span> แต่ต้องระวังถอนเกิน
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: ตั้งเป้าหมายและวางแผน (หน้า 3/6)",
+        content: `
+          <h2>3. การตั้งเป้าหมายและวางแผนออมเงิน</h2>
+          <ul>
+            <li>กำหนด <span class="emph">เป้าหมายชัดเจน</span> เช่น ออมซื้อของขวัญ/ทุนการศึกษา/ไว้ยามฉุกเฉิน</li>
+            <li>ตั้งจำนวนเงินและระยะเวลา เช่น “ออม 3,000 บาท ภายใน 6 เดือน”</li>
+            <li>แบ่งเป็นเป้ารายวัน/สัปดาห์/เดือน เพื่อทำได้จริงและเห็นความคืบหน้า</li>
+            <li>บันทึกทุกครั้งที่ออม (ใช้แอปหรือสมุดช่วยจด)</li>
+          </ul>
+          <table>
+            <tr>
+              <th>ตัวอย่างเป้าหมาย</th><th>จำนวนเงิน</th><th>ระยะเวลา</th><th>วิธีแบ่งออม</th>
+            </tr>
+            <tr>
+              <td>ซื้อจักรยาน</td><td>2,400 บาท</td><td>2 เดือน</td><td>ออมวันละ 40 บาท</td>
+            </tr>
+            <tr>
+              <td>ทัศนศึกษา</td><td>1,200 บาท</td><td>3 เดือน</td><td>ออมเดือนละ 400 บาท</td>
+            </tr>
+            <tr>
+              <td>เงินสำรองฉุกเฉิน</td><td>2,000 บาท</td><td>4 เดือน</td><td>ออมสัปดาห์ละ 125 บาท</td>
+            </tr>
+          </table>
+          <div class="block">
+            <b>สถานการณ์:</b> “น้ำหวานอยากได้หูฟังใหม่ราคา 1,800 บาท เธอวางแผนออมเดือนละ 600 บาท 3 เดือน ได้ครบพอดี”
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: อุปสรรคและวิธีแก้ไข (หน้า 4/6)",
+        content: `
+          <h2>4. อุปสรรคและวิธีแก้ไขเรื่องการออม</h2>
+          <ul>
+            <li><b>ลืมออม:</b> ใช้เทคนิคหยอดทันทีหลังได้เงิน, ตั้งแจ้งเตือน, หรือออมเป็นกลุ่มช่วยเตือนกัน</li>
+            <li><b>เพื่อนชวนใช้:</b> ท่องเป้าหมายไว้ในใจ กล้าปฏิเสธถ้าไม่จำเป็น</li>
+            <li><b>เป้าหมายใหญ่เกินไป:</b> แบ่งเป็นช่วงสั้น สำเร็จทีละเป้า เพิ่มกำลังใจ</li>
+            <li><b>ไม่เห็นผลเร็ว:</b> จำไว้ว่าทุกการออมสะสมเป็นอนาคตที่ดี</li>
+          </ul>
+          <div class="block">
+            <b>เทคนิค:</b> “แข่งกันออม” กับเพื่อน ใครออมครบเป้าหมายก่อนมีรางวัล!
+          </div>
+          <div class="block">
+            <b>ตัวอย่าง:</b> ป๊อกกับปูนแข่งกันออม ใครถึง 500 บาทก่อนชนะ สุดท้ายป๊อกชนะเพราะมีวินัยกว่า
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: ข้อคิดสำคัญ (หน้า 5/6)",
+        content: `
+          <h2>5. ข้อคิดสำคัญ & สถานการณ์สร้างแรงบันดาลใจ</h2>
+          <div class="takeaway">
+            <ul>
+              <li>การออมคือการสร้างอนาคตตัวเองตั้งแต่วันนี้</li>
+              <li>เป้าหมายที่ชัดเจนและวางแผนดี = มีเงินเก็บสำเร็จ</li>
+              <li>เริ่มออมแม้แค่วันละน้อย ผลลัพธ์จะยิ่งใหญ่เมื่อสะสม</li>
+              <li>ไม่มีใครเสียใจที่เริ่มออมเร็วเกินไป มีแต่คนเสียใจที่เริ่มช้า</li>
+            </ul>
+            <div class="block">
+              <b>ตัวอย่างสถานการณ์:</b> 
+              <ul>
+                <li>ปันปันอยากซื้อหูฟังใหม่ราคา 1,200 บาท เขาวางแผนออมวันละ 40 บาท พอครบ 1 เดือนก็ซื้อได้เองโดยไม่ขอเงินเพิ่มจากพ่อแม่</li>
+                <li>ใบหม่อนตั้งเป้าเก็บเงินสำรองยามฉุกเฉิน เดือนละ 100 บาท ผ่านไปปีเดียวก็มีเงินก้อนพร้อมใช้เมื่อจำเป็น</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: การออมเงิน (แบบฝึกหัดท้ายบท)",
+        content: `
+          <form id="quizForm">
+            <label class="quiz-label">1. เล่าประสบการณ์ออมเงินที่ประทับใจของคุณ</label>
+            <textarea class="quiz-input" id="q1" rows="2"></textarea>
+            <label class="quiz-label">2. อุปสรรคที่เคยเจอในการออมและคุณแก้ไขอย่างไร?</label>
+            <textarea class="quiz-input" id="q2" rows="2"></textarea>
+            <label class="quiz-label">3. ตั้งเป้าหมายการออมของคุณในปีนี้</label>
+            <textarea class="quiz-input" id="q3" rows="2"></textarea>
+            <button type="button" class="save-btn" id="saveBtn">บันทึกคำตอบ</button>
+            <span id="quizStatus" class="quiz-status" style="display:none;">บันทึกแล้ว!</span>
+          </form>
+          <div style="margin-top:16px;">
+            <button id="doneBtn" class="save-btn" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status"></span>
+          </div>
+        `
+      }
+    ];
+
+    let page = Math.min(Math.max(pageNow,1), pages.length);
+    let html = `<div class="lesson-title">${pages[page-1].title}</div>
+                <div class="lesson-content">${pages[page-1].content}</div>`;
+    document.getElementById("lessonDetails").innerHTML = html;
+
+    let pag = "";
+    if (page > 1) pag += `<a class="page-btn" href="lesson-detail2.html?page=${page-1}">หน้าก่อนหน้า</a>`;
+    if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail2.html?page=${page+1}">หน้าถัดไป</a>`;
+    document.getElementById("pagination").innerHTML = pag;
+
+    // quiz + ตรวจสอบเรียนจบ
+    if (page === pages.length) {
+      setTimeout(() => {
+        ["q1","q2","q3"].forEach(qid=>{
+          let v = localStorage.getItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`)||"";
+          let el = document.getElementById(qid);
+          if(el) el.value = v;
+        });
+        const saveBtn = document.getElementById("saveBtn");
+        const quizStatus = document.getElementById("quizStatus");
+        if(saveBtn){
+          saveBtn.onclick = ()=>{
+            ["q1","q2","q3"].forEach(qid=>{
+              let el = document.getElementById(qid);
+              if(el) localStorage.setItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`, el.value.trim());
+            });
+            quizStatus.style.display = "inline";
+            setTimeout(()=>{ quizStatus.style.display = "none"; }, 1500);
+            checkDoneStatus();
+          }
+        }
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        function checkDoneStatus(){
+          let ready = ["q1","q2","q3"].every(qid=>{
+            let el = document.getElementById(qid);
+            return el && el.value.trim();
+          });
+          if(localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`)==="yes"){
+            doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
+            doneBtn.disabled = true;
+            doneBtn.style.background="#ccc";
+          }else{
+            doneStatus.innerHTML = "";
+            doneBtn.disabled = !ready;
+            doneBtn.style.background = ready ? "#388e3c" : "#bbb";
+          }
+        }
+        ["q1","q2","q3"].forEach(qid=>{
+          let el = document.getElementById(qid);
+          if(el) el.oninput = checkDoneStatus;
+        });
+        checkDoneStatus();
+
+        doneBtn.onclick = ()=>{
+          localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+          checkDoneStatus();
+        }
+      }, 200);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 กราฟการเงิน - MoneySkillz</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase SDK + config (โปรเจกต์ใหม่) -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+  <style>
+    body {margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #eaf4f4;}
+    .header {background-color: #009688; color: white; padding: 20px; text-align: center;}
+    .container {padding: 20px;}
+    #lineChart, #pieChart {margin-top: 20px; max-width: 90%; height: auto; margin-left:auto; margin-right:auto;}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 กราฟการเงิน</h1>
+  <p>ดูภาพรวมการเงินของคุณในกราฟนี้</p>
+</div>
+
+<div class="container">
+  <canvas id="lineChart"></canvas>
+  <canvas id="pieChart"></canvas>
+</div>
+
+<script>
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) return;
+    db.collection("users").doc(user.uid).collection("transactions").get()
+      .then(snapshot => {
+        let totalIncome = 0, totalExpense = 0;
+        const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        let incomeByMonth = Array(12).fill(0);
+        let expenseByMonth = Array(12).fill(0);
+
+        snapshot.forEach(doc => {
+          const tx = doc.data();
+          const amount = parseFloat(tx.amount);
+          if (!isNaN(amount) && amount >= 0) {
+            const month = tx.date ? new Date(tx.date).getMonth() : 0;
+            if (tx.type === "income") {
+              totalIncome += amount;
+              if (month >= 0 && month < 12) incomeByMonth[month] += amount;
+            } else if (tx.type === "expense") {
+              totalExpense += amount;
+              if (month >= 0 && month < 12) expenseByMonth[month] += amount;
+            }
+          }
+        });
+        const saving = totalIncome * 0.3;
+        const spendable = totalIncome * 0.7;
+
+        // กราฟเส้น
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        new Chart(lineCtx, {
+          type: 'line',
+          data: {
+            labels: months.map(m => `เดือน ${m}`),
+            datasets: [
+              {
+                label: 'รายรับ',
+                data: incomeByMonth,
+                borderColor: '#4caf50',
+                fill: false,
+                tension: 0.1
+              },
+              {
+                label: 'รายจ่าย',
+                data: expenseByMonth,
+                borderColor: '#f44336',
+                fill: false,
+                tension: 0.1
+              },
+              {
+                label: 'เงินออม (30% ของรายรับสะสม)',
+                data: incomeByMonth.map(val => val * 0.3),
+                borderColor: '#2196f3',
+                fill: false,
+                tension: 0.1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: true, position: 'top' } }
+          }
+        });
+
+        // กราฟวงกลม
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+          type: 'pie',
+          data: {
+            labels: ['รายรับ', 'รายจ่าย', 'เงินออม'],
+            datasets: [{
+              label: 'การเงิน',
+              data: [totalIncome, totalExpense, saving],
+              backgroundColor: ['#4caf50', '#f44336', '#2196f3'],
+              borderColor: ['#388e3c', '#c62828', '#1976d2'],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(tooltipItem) {
+                    return tooltipItem.label + ': ' + tooltipItem.raw.toLocaleString() + ' บาท';
+                  }
+                }
+              },
+              legend: { display: true, position: 'top' }
+            }
+          }
+        });
+      });
+  });
+</script>
+
+</body>
+</html>

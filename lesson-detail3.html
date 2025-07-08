@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>รายละเอียดบทเรียน – บทที่ 3 ความอยาก vs จำเป็น</title>
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4;}
+    .header { background-color:#009688; color:white; padding:20px; text-align:center; }
+    .container { padding:20px; max-width:800px; margin:0 auto; }
+    .lesson-title { color:#004d40; font-size:1.7rem; margin-bottom:18px; }
+    .lesson-content { font-size:1.07rem; color:#444; line-height:1.8; margin-bottom:24px; }
+    .pagination { text-align:center; margin:28px 0 10px 0;}
+    .page-btn { display:inline-block; background:#009688; color:#fff; padding:8px 20px; border-radius:7px; text-decoration:none; margin:0 12px; transition:background 0.2s;}
+    .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
+    .back-btn { margin-top:30px; display:inline-block; background:#009688; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
+    .back-btn:hover { background:#00796b; }
+    .quiz-label { font-weight:bold; margin-top:1.5em; display:block;}
+    .quiz-input { width:100%; padding:9px; border-radius:6px; border:1px solid #bbb; margin-bottom:7px;}
+    .save-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .save-btn:hover { background:#00796b; }
+    .quiz-status { margin-left:16px; color:#388e3c; font-weight:bold; }
+    table { border-collapse:collapse; width:100%; margin:18px 0;}
+    th,td { border:1px solid #bbb; padding:10px; }
+    th { background:#eee; }
+    ul,ol { margin-bottom:1em; }
+    .emph { color:#d84315; font-weight:bold;}
+    .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
+    .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+  </style>
+</head>
+<body>
+  <div class="header"><h1>รายละเอียดบทเรียน: ความอยาก vs จำเป็น</h1></div>
+  <div class="container">
+    <div id="lessonDetails"></div>
+    <div class="pagination" id="pagination"></div>
+    <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
+  </div>
+  <script>
+    const lessonId = 3;
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageNow = Number(urlParams.get("page")||1);
+
+    const pages = [
+      {
+        title: "บทที่ 3: ความอยาก vs จำเป็น (หน้า 1/6)",
+        content: `
+          <h2>1. นิยามและความสำคัญ</h2>
+          <ul>
+            <li><span class="emph">ความจำเป็น</span>: สิ่งที่ขาดไม่ได้ ถ้าไม่มีจะกระทบชีวิตและสุขภาพ เช่น อาหารหลัก น้ำ ยารักษาโรค เสื้อผ้าขั้นพื้นฐาน ที่พักอาศัย การศึกษา</li>
+            <li><span class="emph">ความอยาก</span>: สิ่งที่อยากได้แต่ไม่ขาดก็อยู่ได้ เช่น ของเล่น แกดเจ็ตใหม่ๆ ขนมหวาน เสื้อผ้าแฟชั่น กระเป๋าแบรนด์เนม</li>
+          </ul>
+          <div class="block">
+            <b>ตัวอย่าง:</b> อาหารกลางวันคือความจำเป็น, ชานมไข่มุกหลังเลิกเรียนคือความอยาก
+          </div>
+          <div class="block">
+            <b>สถานการณ์ฝึกคิด:</b> ถ้าคุณมีเงินจำกัด จะเลือกซื้อข้าวกลางวันหรือขนม?
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: เทคนิคแยกแยะ (หน้า 2/6)",
+        content: `
+          <h2>2. เทคนิคการแยกแยะ & ตารางเปรียบเทียบ</h2>
+          <ul>
+            <li>ถามตัวเอง: <span class="emph">"ถ้าไม่มีสิ่งนี้ จะกระทบชีวิตประจำวันไหม?"</span> ถ้ากระทบ = จำเป็น</li>
+            <li>เปรียบเทียบรายการใช้จ่ายย้อนหลัง 1 สัปดาห์ แล้วจัดประเภท</li>
+          </ul>
+          <table>
+            <tr><th>ตัวอย่างสถานการณ์</th><th>ความจำเป็น</th><th>ความอยาก</th></tr>
+            <tr><td>ข้าว/น้ำดื่ม</td><td>✔️</td><td></td></tr>
+            <tr><td>ซื้อรองเท้าใหม่ (แต่ของเก่ายังใช้ได้)</td><td></td><td>✔️</td></tr>
+            <tr><td>ค่าเดินทางไปโรงเรียน</td><td>✔️</td><td></td></tr>
+            <tr><td>เกม/ของเล่นใหม่</td><td></td><td>✔️</td></tr>
+          </table>
+          <div class="block">
+            <b>ข้อควรระวัง:</b> โฆษณาหรือเพื่อนชวนซื้อของ มักทำให้เราตัดสินใจตามความอยากโดยไม่รู้ตัว
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: ผลกระทบและเทคนิคตัดสินใจ (หน้า 3/6)",
+        content: `
+          <h2>3. ผลกระทบของการเลือกใช้เงิน</h2>
+          <ul>
+            <li>ถ้าใช้เงินกับสิ่งที่จำเป็นก่อน จะมีพื้นฐานชีวิตมั่นคง</li>
+            <li>ถ้าเลือกใช้เงินกับสิ่งที่อยากได้บ่อยๆ อาจทำให้เงินหมดเร็ว ขาดเงินยามจำเป็น</li>
+            <li>การซื้อของฟุ่มเฟือยอาจสร้างนิสัยใช้เงินเกินตัวจนเป็นหนี้</li>
+          </ul>
+          <div class="block">
+            <b>ตัวอย่างเปรียบเทียบ:</b>
+            <ul>
+              <li>ติ๊กซื้อข้าวกลางวัน (จำเป็น) จ่าย 40 บาท ยังเหลือเงินไปออม</li>
+              <li>ติ๊กซื้อของเล่นใหม่ (อยาก) จ่าย 300 บาท หมดเงินออมทั้งสัปดาห์</li>
+            </ul>
+          </div>
+          <div class="block">
+            <b>เทคนิค:</b> ตั้งงบความอยาก (เช่น สัปดาห์ละ 50 บาท) ถ้าใช้หมดแล้ว ไม่ซื้อเพิ่ม
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: รับมือแรงกระตุ้น & ฝึกคิดก่อนซื้อ (หน้า 4/6)",
+        content: `
+          <h2>4. รับมือกับความอยากและแรงกระตุ้นจากสังคม</h2>
+          <ul>
+            <li>ใช้กฎ “รอ 24 ชั่วโมง” ก่อนซื้อของที่อยากได้มากๆ</li>
+            <li>ชวนเพื่อนแข่งกัน “อดเปรี้ยวไว้กินหวาน”</li>
+            <li>แชร์เป้าหมายการออมกับผู้ปกครองหรือเพื่อน เพื่อช่วยกันเตือน</li>
+          </ul>
+          <div class="block">
+            <b>สถานการณ์จริง:</b> เห็นโปรโมชันมือถือใหม่ในโซเชียล อยากได้แต่ของเก่ายังดี ให้รอ 1 สัปดาห์ ถ้ายังอยากได้จริงๆ ค่อยพิจารณาใหม่
+          </div>
+          <div class="block">
+            <b>ข้อควรระวัง:</b> กระแสแฟชั่นและ FOMO (กลัวตกเทรนด์) ทำให้เสียเงินแบบไม่รู้ตัว!
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: ข้อคิดสำคัญ & สถานการณ์ตัวอย่าง (หน้า 5/6)",
+        content: `
+          <h2>5. ข้อคิดสำคัญ & ตัวอย่างสถานการณ์จริง</h2>
+          <div class="takeaway">
+            <ul>
+              <li>รู้จักแยก “ความอยาก” และ “ความจำเป็น” คือจุดเริ่มต้นชีวิตทางการเงินที่ดี</li>
+              <li>ควรให้รางวัลตัวเองเมื่อทำตามแผนการเงินได้ แต่ไม่ตามใจตัวเองตลอดเวลา</li>
+              <li>วินัยในการใช้เงิน = พื้นฐานสู่ความมั่นคงระยะยาว</li>
+            </ul>
+            <div class="block">
+              <b>ตัวอย่างสถานการณ์:</b>
+              <ul>
+                <li>เตยอยากได้รองเท้าใหม่ แต่ของเดิมยังใช้ได้ดี เลยเลือกออมไว้ก่อน สุดท้ายมีเงินสำรองใช้จ่ายยามฉุกเฉิน</li>
+                <li>ฟิล์มตั้งงบขนมสัปดาห์ละ 50 บาท ถ้าเกินจะไม่ซื้อขนมเพิ่ม ทำให้ควบคุมรายจ่ายได้</li>
+                <li>โจ้ตั้งเป้าออมเงินซื้อหูฟังใหม่ ถ้าเดือนนี้ออมได้ครบจึงอนุญาตให้ตัวเองซื้อ</li>
+              </ul>
+            </div>
+            <div class="block">
+              <b>สถานการณ์ฝึกคิด:</b> ถ้าได้อั่งเปา 500 บาท จะเลือกซื้ออะไรบ้าง? และแบ่งเป็นความอยาก-จำเป็นอย่างไร?
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: ความอยาก vs จำเป็น (แบบฝึกหัดท้ายบท)",
+        content: `
+          <form id="quizForm">
+            <label class="quiz-label">1. ตัวอย่างสถานการณ์ที่คุณเคยเลือกความจำเป็นเหนือความอยาก</label>
+            <textarea class="quiz-input" id="q1" rows="2"></textarea>
+            <label class="quiz-label">2. คุณรับมือกับกระแสโซเชียลหรือโฆษณาที่ทำให้อยากได้ของใหม่อย่างไร?</label>
+            <textarea class="quiz-input" id="q2" rows="2"></textarea>
+            <label class="quiz-label">3. บทเรียนจากการซื้อของตามใจอยาก</label>
+            <textarea class="quiz-input" id="q3" rows="2"></textarea>
+            <button type="button" class="save-btn" id="saveBtn">บันทึกคำตอบ</button>
+            <span id="quizStatus" class="quiz-status" style="display:none;">บันทึกแล้ว!</span>
+          </form>
+          <div style="margin-top:16px;">
+            <button id="doneBtn" class="save-btn" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status"></span>
+          </div>
+        `
+      }
+    ];
+
+    let page = Math.min(Math.max(pageNow,1), pages.length);
+    let html = `<div class="lesson-title">${pages[page-1].title}</div>
+                <div class="lesson-content">${pages[page-1].content}</div>`;
+    document.getElementById("lessonDetails").innerHTML = html;
+
+    let pag = "";
+    if (page > 1) pag += `<a class="page-btn" href="lesson-detail3.html?page=${page-1}">หน้าก่อนหน้า</a>`;
+    if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail3.html?page=${page+1}">หน้าถัดไป</a>`;
+    document.getElementById("pagination").innerHTML = pag;
+
+    // quiz + ตรวจสอบเรียนจบ
+    if (page === pages.length) {
+      setTimeout(() => {
+        ["q1","q2","q3"].forEach(qid=>{
+          let v = localStorage.getItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`)||"";
+          let el = document.getElementById(qid);
+          if(el) el.value = v;
+        });
+        const saveBtn = document.getElementById("saveBtn");
+        const quizStatus = document.getElementById("quizStatus");
+        if(saveBtn){
+          saveBtn.onclick = ()=>{
+            ["q1","q2","q3"].forEach(qid=>{
+              let el = document.getElementById(qid);
+              if(el) localStorage.setItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`, el.value.trim());
+            });
+            quizStatus.style.display = "inline";
+            setTimeout(()=>{ quizStatus.style.display = "none"; }, 1500);
+            checkDoneStatus();
+          }
+        }
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        function checkDoneStatus(){
+          let ready = ["q1","q2","q3"].every(qid=>{
+            let el = document.getElementById(qid);
+            return el && el.value.trim();
+          });
+          if(localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`)==="yes"){
+            doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
+            doneBtn.disabled = true;
+            doneBtn.style.background="#ccc";
+          }else{
+            doneStatus.innerHTML = "";
+            doneBtn.disabled = !ready;
+            doneBtn.style.background = ready ? "#388e3c" : "#bbb";
+          }
+        }
+        ["q1","q2","q3"].forEach(qid=>{
+          let el = document.getElementById(qid);
+          if(el) el.oninput = checkDoneStatus;
+        });
+        checkDoneStatus();
+
+        doneBtn.onclick = ()=>{
+          localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+          checkDoneStatus();
+        }
+      }, 200);
+    }
+  </script>
+</body>
+</html>

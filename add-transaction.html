@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>➕ เพิ่มรายการ - MoneySkillz</title>
+  <link rel="stylesheet" href="add-transaction.css">
+  <!-- Firebase SDK + config (เวอร์ชันใหม่/โปรเจ็กต์ใหม่) -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",  // ← ต้องลงท้าย .appspot.com
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+
+<div class="form-box">
+  <h2>เพิ่มรายการใหม่</h2>
+  <form onsubmit="saveTransaction(event)">
+    <label for="type">ประเภท</label>
+    <select id="type" required>
+      <option value="">-- เลือกประเภท --</option>
+      <option value="income">รายรับ</option>
+      <option value="expense">รายจ่าย</option>
+    </select>
+
+    <label for="name">ชื่อรายการ</label>
+    <input type="text" id="name" required placeholder="เช่น เงินเดือน / ค่าน้ำ">
+
+    <label for="amount">จำนวนเงิน (บาท)</label>
+    <input type="number" id="amount" required min="1" max="1000000" placeholder="กรอกจำนวน">
+
+    <label for="date">วันที่</label>
+    <input type="date" id="date" required>
+
+    <button type="submit">บันทึกรายการ</button>
+  </form>
+</div>
+
+<script src="add-transaction.js"></script>
+</body>
+</html>

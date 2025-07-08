@@ -1,0 +1,32 @@
+body { margin: 0; font-family: 'Segoe UI', 'Prompt', 'Kanit', sans-serif; background-color: #f3f7fa;}
+.header { background: linear-gradient(90deg, #2ec4b6 65%, #16a085 100%); color: white; padding: 26px 10px 20px 10px; text-align: center; letter-spacing: 0.02em; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 4px 24px #0db49622;}
+.header h1 { font-weight: 600; font-size: 2.15rem; margin: 0; letter-spacing: 0.05em; text-shadow: 0 1px 8px #0db4a055;}
+.container { padding: 16px 10px 24px 10px; max-width: 480px; margin: 0 auto;}
+.form-box { background: linear-gradient(90deg, #ffffff 72%, #e0f7fa 100%); padding: 22px 20px 18px 20px; border-radius: 22px; box-shadow: 0 6px 22px #12d0d830, 0 2px 8px #b9f6ca18; margin-bottom: 22px;}
+.form-box h2 { margin: 0 0 12px; color: #00837f; font-size: 1.18rem; font-weight: 600; letter-spacing: 0.01em;}
+label { margin-top: 10px; display: block; font-weight: bold; color: #00695c;}
+input, select { width: 100%; padding: 10px; margin-top: 6px; margin-bottom: 12px; border: 1px solid #b2dfdb; border-radius: 8px; background-color: #f1fdfc;}
+button { background-color: #009688; color: white; padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.15s, transform 0.15s;}
+button:hover { background-color: #00796b; transform: scale(1.05);}
+.goal-box { background: linear-gradient(96deg, #e3f6ff 50%, #ffffff 100%); border-left: 6px solid #00b8d4; border-radius: 20px; margin-top: 28px; padding: 28px 18px 23px 18px; box-shadow: 0 8px 28px #22c2e925, 0 2px 10px #2196f355; overflow: hidden; position:relative;}
+.goal-content { min-width: 66%; text-align: left; font-size: 1.11rem; display: flex; flex-direction: column; gap: 16px;}
+.goal-block { position: relative; background: #fff; border-radius: 16px; box-shadow: 0 2px 9px #00bfae18; padding: 12px 12px 18px 12px; margin-bottom: 12px;}
+.goal-title { font-weight: 600; color: #0286c3; font-size: 1.15rem; margin-bottom: 3px; display: flex; align-items: center; gap: 8px;}
+.goal-money { color: #222b34; font-size: 1.12rem; margin-bottom: 2px; display: flex; align-items: center; gap: 9px; font-weight: 400; letter-spacing: 0.01em;}
+.progress-bar-bg { background: linear-gradient(90deg, #e3ecf7, #e6f7ff 75%, #cce8fb 100%); border-radius: 12px; height: 15px; width: 99%; margin: 7px 0 0 0; overflow: hidden; border: 1.3px solid #b0d6efcc; position: relative; box-shadow: 0 2px 10px #90caf918 inset;}
+.progress-bar { background: linear-gradient(90deg, #22b7f7 15%, #0dd8c8 65%, #fff7e6 100%); height: 100%; border-radius: 12px 0 0 12px; transition: width 0.36s cubic-bezier(.4, 0, .2, 1); min-width: 3.5%; box-shadow: 0 2px 10px #81d4fa15;}
+.delete-btn { position: absolute; top: 8px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 24px; cursor: pointer; font-size: 1.4rem;}
+.delete-btn:hover { background: #e53935;}
+.saving-plan-title { margin-top: 14px; font-weight: bold; color: #009688;}
+.saving-plan-list { margin-top: 8px; display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; scrollbar-color: #c0e7ef #e0f7fa; }
+.saving-row { min-width: 210px; max-width: 220px; flex: 0 0 210px; background: #f6ffff; border-radius: 16px; box-shadow: 0 2px 9px #00bfae22; padding: 10px 14px; border: 1px solid #d0f0f5; display: flex; flex-direction: column; align-items: stretch; justify-content: center; }
+.bar-bg { background:#e0f7fa;border-radius:8px;overflow:hidden;height:16px;box-shadow:0 2px 6px #80deea33;margin:7px 0 6px 0; }
+.bar { height:100%;background:linear-gradient(90deg,#00b8d4,#00bfae);transition:width .4s;}
+.bar-label { font-size:0.92rem;color:#009688;margin-left:2px;}
+.bar-btn { margin-top:7px;padding:4px 12px;border:none;border-radius:7px;background:#00897b;color:white;cursor:pointer;}
+@media (max-width: 560px) {
+  .container { padding: 9px 3vw 16px 3vw; }
+  .goal-content { margin: 0 6vw; font-size: 1.05rem;}
+  .goal-box { padding: 19px 7px 16px 7px;}
+  .saving-row { min-width: 78vw; max-width: 84vw; }
+}

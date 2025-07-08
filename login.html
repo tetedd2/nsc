@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>เข้าสู่ระบบ – MoneySkillz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f6f6f9; }
+    .login-box { max-width: 400px; margin: 70px auto; background: #fff; padding: 40px; border-radius: 18px; box-shadow: 0 8px 32px #00808018; }
+    h1 { text-align: center; color: #009688; margin-bottom: 14px; }
+    input, button { width: 100%; padding: 12px; margin: 10px 0; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; }
+    button { background-color: #009688; color: #fff; border: none; cursor: pointer; }
+    button:hover { background-color: #00796b; }
+    #message { text-align: center; margin-top: 10px; }
+    a { color: #00796b; text-decoration: none; }
+    .forgot-link { float: right; font-size: 0.9rem; margin: 6px 0 14px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h1>เข้าสู่ระบบ</h1>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="อีเมล" required />
+      <input type="password" id="password" placeholder="รหัสผ่าน" required />
+      <a href="forgetpassword.html" class="forgot-link">ลืมรหัสผ่าน?</a>
+      <button type="submit">เข้าสู่ระบบ</button>
+    </form>
+    <div id="message"></div>
+    <p style="text-align:center; margin-top: 12px;">ยังไม่มีบัญชี? <a href="signup.html">สมัครสมาชิก</a></p>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = 'กำลังเข้าสู่ระบบ...';
+      messageDiv.style.color = 'blue';
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        messageDiv.textContent = 'เกิดข้อผิดพลาด: ' + error.message;
+        messageDiv.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>

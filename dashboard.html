@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💼 หน้าหลัก - MoneySkillz</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <!-- Firebase SDK + config (ใหม่ล่าสุด, compat) -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com", // ถูกต้อง!
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+  <div class="header">
+    <h1>MoneySkillz</h1>
+    <p>สวัสดีผู้ใช้งาน ยินดีต้อนรับสู่แอปวางแผนการเงิน!</p>
+  </div>
+
+  <div class="container">
+    <!-- ภาพรวมการเงิน -->
+    <div class="summary">
+      <h2>ภาพรวมการเงิน</h2>
+      <p class="income">รายรับทั้งหมด: <span id="income">0.00</span> บาท</p>
+      <p class="expense">ควรใช้จ่ายไม่เกิน: <span id="expense">0.00</span> บาท</p>
+      <p class="savings">เงินออมคงเหลือ: <span id="savings">0.00</span> บาท</p>
+      <p class="real-expense">รายจ่ายจริง: <span id="real-expense">0.00</span> บาท</p>
+      <p class="net-expense" id="net-expense-row" style="display: none;"></p>
+      <p class="net-expense-real" id="net-expense-real-row"></p>
+    </div>
+
+    <!-- เมนู -->
+    <div class="menu">
+      <div class="menu-card" onclick="location.href='add-transaction.html'">
+        <span>📎</span><p>บันทึกรายรับ-รายจ่าย</p>
+      </div>
+      <div class="menu-card" onclick="location.href='goals.html'">
+        <span>🌟</span><p>เป้าหมายการเงิน</p>
+      </div>
+      <div class="menu-card" onclick="location.href='lesson.html'">
+        <span>📒</span><p>บทเรียน</p>
+      </div>
+      <div class="menu-card" onclick="location.href='money-quiz.html'">
+        <span>🎮</span><p>แบบทดสอบการเงิน</p>
+      </div>
+      <div class="menu-card" onclick="location.href='finance-game.html'">
+        <span>🎲</span><p>เกมการเงิน</p>
+      </div>
+      <div class="menu-card" onclick="location.href='graph.html'">
+        <span>📊</span><p>กราฟ</p>
+      </div>
+      <div class="menu-card" onclick="location.href='settings.html'">
+        <span>⚙️</span><p>ตั้งค่า</p>
+      </div>
+    </div>
+
+    <!-- ภารกิจวันนี้ -->
+    <div class="mission">
+      <h3>ภารกิจวันนี้</h3>
+      <p>บันทึกรายจ่ายอย่างน้อย 1 รายการ เพื่อสะสมคะแนน!</p>
+      <button onclick="location.href='add-transaction.html'">เริ่มภารกิจ</button>
+    </div>
+
+    <!-- เป้าหมายของคุณ -->
+    <div class="goal-box">
+      <h3>เป้าหมายของคุณ</h3>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button id="prevGoal" class="goal-nav-btn">&#8592;</button>
+        <p id="goalName" style="flex:1; margin:0; text-align:center;">- ยังไม่มีเป้าหมายที่ตั้งไว้ -</p>
+        <button id="nextGoal" class="goal-nav-btn">&#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script สำหรับการทำงาน (ต้องอยู่ท้ายสุด) -->
+  <script src="dashboard.js"></script>
+</body>
+</html>
