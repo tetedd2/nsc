@@ -4,86 +4,153 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>💼 หน้าหลัก - MoneySkillz</title>
-  <link rel="stylesheet" href="dashboard.css" />
-  <!-- Firebase SDK + config (ใหม่ล่าสุด, compat) -->
-  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
-      authDomain: "myapplication-bd04c034.firebaseapp.com",
-      projectId: "myapplication-bd04c034",
-      storageBucket: "myapplication-bd04c034.appspot.com", // ถูกต้อง!
-      messagingSenderId: "49782830313",
-      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="theme-darkmode.css">
 </head>
 <body>
-  <div class="header">
-    <h1>MoneySkillz</h1>
-    <p>สวัสดีผู้ใช้งาน ยินดีต้อนรับสู่แอปวางแผนการเงิน!</p>
-  </div>
+  <div id="main-page" class="nav-page active">
+    <header class="header">
+      <h1>MoneySkillz</h1>
+      <p>ออมวันนี้ เก่งการเงินวันหน้า!</p>
+      <div class="avatar-box">
+        <img id="profilePicture" src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Avatar">
+      </div>
+    </header>
 
-  <div class="container">
-    <!-- ภาพรวมการเงิน -->
-    <div class="summary">
-      <h2>ภาพรวมการเงิน</h2>
-      <p class="income">รายรับทั้งหมด: <span id="income">0.00</span> บาท</p>
-      <p class="expense">ควรใช้จ่ายไม่เกิน: <span id="expense">0.00</span> บาท</p>
-      <p class="savings">เงินออมคงเหลือ: <span id="savings">0.00</span> บาท</p>
-      <p class="real-expense">รายจ่ายจริง: <span id="real-expense">0.00</span> บาท</p>
-      <p class="net-expense" id="net-expense-row" style="display: none;"></p>
-      <p class="net-expense-real" id="net-expense-real-row"></p>
+    <div class="container user-info">
+      <div id="usernameDisplay" class="username-display"></div>
+      <div class="user-level" id="userLevel">Level - กำลังโหลด...</div>
+      <p class="quote" id="userQuote">"กำลังโหลดคำคม..."</p>
+      <div class="progress-section">
+        <div class="progress-outer">
+          <div class="progress-inner" id="userProgress">
+            <span class="progress-text" id="progressValue">0%</span>
+          </div>
+        </div>
+        <p class="xp-text">
+          คะแนน XP: <span id="currentXP">0</span> / <span id="nextLevelXP">0</span>
+        </p>
+      </div>
     </div>
 
-    <!-- เมนู -->
-    <div class="menu">
+    <div class="container card-section badge-section">
+        <h2><span class="icon">🏆</span> เหรียญตราความสำเร็จ</h2>
+        <div class="badge-row" id="userBadges">
+            <div class="badge placeholder" title="กำลังโหลดเหรียญตรา...">❓</div>
+        </div>
+    </div>
+
+    <div class="container card-section">
+      <h2><span class="icon">💰</span> ภาพรวมการเงิน</h2>
+      <div class="summary-item income">
+        <strong>รายรับ:</strong> <span class="amount" id="income">0.00 ฿</span>
+      </div>
+      <div class="summary-item expense">
+        <strong>รายจ่าย:</strong> <span class="amount" id="expense">0.00 ฿</span>
+      </div>
+      <div class="summary-item balance">
+        <strong>คงเหลือ:</strong> <span class="amount" id="balance">0.00 ฿</span>
+      </div>
+    </div>
+
+    <div class="container main-menu-grid">
       <div class="menu-card" onclick="location.href='add-transaction.html'">
-        <span>📎</span><p>บันทึกรายรับ-รายจ่าย</p>
+        <span style="font-size:2.1em;">📝</span>
+        <p>บันทึกรายจ่าย</p>
       </div>
-      <div class="menu-card" onclick="location.href='goals.html'">
-        <span>🌟</span><p>เป้าหมายการเงิน</p>
-      </div>
-      <div class="menu-card" onclick="location.href='lesson.html'">
-        <span>📒</span><p>บทเรียน</p>
-      </div>
-      <div class="menu-card" onclick="location.href='money-quiz.html'">
-        <span>🎮</span><p>แบบทดสอบการเงิน</p>
-      </div>
-      <div class="menu-card" onclick="location.href='finance-game.html'">
-        <span>🎲</span><p>เกมการเงิน</p>
+      <div class="menu-card" onclick="location.href='add-goal.html'">
+        <span style="font-size:2.1em;">🎯</span>
+        <p>เป้าหมาย</p>
       </div>
       <div class="menu-card" onclick="location.href='graph.html'">
-        <span>📊</span><p>กราฟ</p>
+        <span style="font-size:2.1em;">📈</span>
+        <p>กราฟการเงิน</p>
       </div>
-      <div class="menu-card" onclick="location.href='settings.html'">
-        <span>⚙️</span><p>ตั้งค่า</p>
+      <div class="menu-card" onclick="location.href='lesson.html'">
+        <span style="font-size:2.1em;">📚</span>
+        <p>บทเรียน</p>
       </div>
     </div>
 
-    <!-- ภารกิจวันนี้ -->
-    <div class="mission">
-      <h3>ภารกิจวันนี้</h3>
-      <p>บันทึกรายจ่ายอย่างน้อย 1 รายการ เพื่อสะสมคะแนน!</p>
-      <button onclick="location.href='add-transaction.html'">เริ่มภารกิจ</button>
+    <div id="goalDisplay" class="container card-section">
+      <h2><span class="icon">🎯</span> เป้าหมายการออมของฉัน</h2>
+      <div class="goal-navigation">
+        <button id="prevGoal" class="goal-nav-btn">&#8249;</button>
+        <div id="goalDetails">
+          <h3 id="goalTitle">- ยังไม่มีเป้าหมาย -</h3>
+          <div class="goal-progress-bar-container">
+            <div id="goalProgressBar" class="goal-progress-bar">0%</div>
+          </div>
+          <p id="goalAmount">เป้าหมาย: 0.00 ฿</p>
+          <p id="goalSavings">ออมแล้ว: 0.00 ฿</p>
+          <p id="goalDueDate">กำหนด: -</p>
+        </div>
+        <button id="nextGoal" class="goal-nav-btn">&#8250;</button>
+      </div>
     </div>
 
-    <!-- เป้าหมายของคุณ -->
-    <div class="goal-box">
-      <h3>เป้าหมายของคุณ</h3>
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <button id="prevGoal" class="goal-nav-btn">&#8592;</button>
-        <p id="goalName" style="flex:1; margin:0; text-align:center;">- ยังไม่มีเป้าหมายที่ตั้งไว้ -</p>
-        <button id="nextGoal" class="goal-nav-btn">&#8594;</button>
+    <div class="container card-section">
+      <h2><span class="icon">🧾</span> รายการล่าสุด</h2>
+      <div id="transactionsContainer">
+        <p class="no-transactions-message">ไม่มีรายการธุรกรรมในขณะนี้</p>
       </div>
     </div>
   </div>
 
-  <!-- Script สำหรับการทำงาน (ต้องอยู่ท้ายสุด) -->
-  <script src="dashboard.js"></script>
+  <div id="goalModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeGoalModal()">&times;</span>
+      <h2>ตั้งเป้าหมายใหม่</h2>
+      <form id="goalForm">
+        <input type="text" id="goalNameInput" placeholder="ชื่อเป้าหมาย (เช่น ซื้อจักรยาน)" required>
+        <input type="number" id="goalTargetAmount" placeholder="จำนวนเงินเป้าหมาย" required>
+        <input type="number" id="goalCurrentSavings" placeholder="เงินออมเริ่มต้น (ถ้ามี)" value="0">
+        <label for="goalDueDateInput">วันครบกำหนด (ถ้ามี):</label>
+        <input type="date" id="goalDueDateInput">
+        <button type="submit">สร้างเป้าหมาย</button>
+      </form>
+      <div id="goalMessage" class="message-div"></div>
+    </div>
+  </div>
+
+  <div class="ai-chat-btn" onclick="document.getElementById('aiChatBox').style.display='flex'">
+    <span>🤖</span>
+  </div>
+  <div id="aiChatBox">
+    <div class="chat-header">
+      <b>AI ผู้ช่วยโค้ชการเงิน</b>
+      <span class="chat-close-btn" onclick="document.getElementById('aiChatBox').style.display='none'">✖️</span>
+    </div>
+    <div id="aiChatHistory">
+      <div class="chat-message ai">สวัสดีครับ! ผมคือ AI ผู้ช่วยโค้ชการเงิน มีอะไรให้ช่วยไหมครับ?</div>
+    </div>
+    <form id="aiChatForm">
+      <input id="aiChatInput" autocomplete="off" placeholder="พิมพ์คำถาม..." />
+      <button type="submit">ส่ง</button>
+    </form>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="#" class="bottom-nav-item active">
+      <span>🏠</span><p>หน้าหลัก</p>
+    </a>
+    <a href="game-mode.html" class="bottom-nav-item">
+      <span>🎮</span><p>เกม</p>
+    </a>
+    <a href="settings.html" class="bottom-nav-item">
+      <span>⚙️</span><p>ตั้งค่า</p>
+    </a>
+  </nav>
+
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+  
+  <script type="module" src="dashboard.js" defer></script>
+  <script src="darkmode-toggle.js"></script>
 </body>
 </html>

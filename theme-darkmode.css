@@ -1,0 +1,35 @@
+:root {
+  --primary-color: #26A69A;
+  --primary-darker: #00796B;
+  --background-color: #f4f7f6;
+  --card-background: #ffffff;
+  --text-color: #333;
+  --text-secondary: #666;
+  --border-color: #e0e0e0;
+  --shadow-color: rgba(0, 100, 100, 0.1);
+}
+body.dark-mode {
+  --primary-color: #4DB6AC;
+  --primary-darker: #26A69A;
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --text-color: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #2c2c2c;
+  --shadow-color: rgba(0,0,0,0.22);
+}
+body {
+  background: var(--background-color) !important;
+  color: var(--text-color);
+  transition: background 0.3s, color 0.3s;
+}
+.container, .form-box, .header, .goal-box, .card, .box {
+  background: var(--card-background) !important;
+  color: var(--text-color) !important;
+  box-shadow: 0 6px 22px var(--shadow-color), 0 2px 8px var(--shadow-color);
+}
+input, select {
+  background: var(--background-color) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}

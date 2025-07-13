@@ -5,33 +5,109 @@
   <title>สมัครสมาชิก – MoneySkillz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f3f6f8; }
-    .signup-box { background: #fff; max-width: 400px; margin: 60px auto; border-radius: 18px; box-shadow: 0 8px 28px #00808018; padding: 38px 32px; }
-    h1 { text-align: center; color: #009688; margin-bottom: 14px; }
-    input, button { width: 100%; padding: 12px; margin: 10px 0; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; }
-    button { background-color: #009688; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #00796b; }
-    #message { margin-top: 10px; text-align: center; }
-    a { color: #00796b; text-decoration: none; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #eaf4f4, #b2dfdb 75%, #b2ebf2);
+      min-height: 100vh; margin: 0;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .login-box {
+      background: #fff;
+      padding: 2.7rem 2rem 2.1rem;
+      border-radius: 24px;
+      box-shadow: 0 10px 36px #00968823;
+      width: 360px; max-width: 98vw;
+      text-align: center;
+      position: relative;
+      overflow: visible;
+    }
+    .avatar-login {
+      width: 82px; height: 82px;
+      border-radius: 50%;
+      background: #fff url('https://cdn-icons-png.flaticon.com/512/4712/4712035.png') center/84% no-repeat;
+      box-shadow: 0 6px 22px #00bfae22;
+      border: 3.2px solid #b2dfdb;
+      position: absolute; left: 50%; top: -41px; transform: translateX(-50%);
+      z-index: 2;
+    }
+    .login-box h1 {
+      margin-bottom: 0.2rem;
+      font-size: 2.1rem;
+      color: #009688;
+      font-weight: 800;
+      margin-top: 47px;
+      letter-spacing: 1px;
+    }
+    .login-box p {
+      margin-bottom: 1.2rem;
+      color: #444;
+      font-size: 1.13rem;
+      opacity: 0.85;
+    }
+    input {
+      width: 100%; padding: 11px;
+      margin: 10px 0 5px;
+      border: 1px solid #b2dfdb;
+      border-radius: 8px;
+      font-size: 1.04rem;
+      background: #f8fefe;
+      transition: border 0.19s;
+    }
+    input:focus { border: 1.5px solid #009688; outline: none; }
+    button {
+      width: 100%;
+      background-color: #009688;
+      color: white;
+      padding: 12px;
+      font-size: 1.09rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 12px;
+      font-weight: 700;
+      box-shadow: 0 2px 10px #00bfae2a;
+      transition: background 0.17s, transform 0.11s;
+    }
+    button:disabled { background-color: #b2dfdb; cursor: not-allowed; }
+    button:active:not(:disabled) { background: #00796b; transform: scale(0.97);}
+    .divider {
+      margin: 22px 0 14px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .signup-link {
+      margin-top: 11px; font-size: 1rem;
+    }
+    .signup-link a { color: #009688; text-decoration: none; }
+    #message {
+      margin-top: 13px;
+      font-size: 1.01rem;
+      min-height: 23px;
+      text-align: center;
+    }
+    @media (max-width: 470px) {
+      .login-box { padding: 1.6rem 2vw 1.5rem; width: 99vw; border-radius: 0; box-shadow: none;}
+      .avatar-login { width:64px;height:64px;top:-33px; }
+      .login-box h1 { margin-top: 36px; font-size: 1.25em;}
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
-  <div class="signup-box">
+  <div class="login-box">
+    <div class="avatar-login"></div>
     <h1>สมัครสมาชิก</h1>
-    <form id="registerForm">
-      <input type="text" id="username" placeholder="ชื่อผู้ใช้" required />
-      <input type="email" id="email" placeholder="อีเมล" required />
-      <input type="password" id="password" placeholder="รหัสผ่าน" required />
+    <form id="registerForm" autocomplete="on">
+      <input type="text" id="username" placeholder="ชื่อผู้ใช้" required autocomplete="username"/>
+      <input type="email" id="email" placeholder="อีเมล" required autocomplete="email"/>
+      <input type="password" id="password" placeholder="รหัสผ่าน" required autocomplete="new-password"/>
       <button type="submit">สมัครสมาชิก</button>
     </form>
     <div id="message"></div>
-    <p style="text-align:center; margin-top: 12px;">มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
+    <div class="divider"></div>
+    <div class="signup-link">มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a></div>
   </div>
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
@@ -41,7 +117,7 @@
       messagingSenderId: "49782830313",
       appId: "1:49782830313:web:c81b5d86a937f22d296c78"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
@@ -52,7 +128,7 @@
       const password = document.getElementById('password').value;
       const messageDiv = document.getElementById('message');
       messageDiv.textContent = 'กำลังสมัครสมาชิก...';
-      messageDiv.style.color = 'blue';
+      messageDiv.style.color = '#009688';
 
       if(password.length < 6){
         messageDiv.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
@@ -70,15 +146,16 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         messageDiv.textContent = 'สมัครสมาชิกสำเร็จ! กำลังไปยังหน้าเข้าสู่ระบบ...';
-        messageDiv.style.color = 'green';
+        messageDiv.style.color = '#43cea2';
         setTimeout(() => {
           window.location.href = "login.html";
-        }, 1500);
+        }, 1400);
       } catch (error) {
         messageDiv.textContent = 'เกิดข้อผิดพลาด: ' + error.message;
         messageDiv.style.color = 'red';
       }
     });
   </script>
+  <script src="darkmode-toggle.js"></script>
 </body>
 </html>

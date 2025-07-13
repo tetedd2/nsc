@@ -1,32 +1,561 @@
-body { margin: 0; font-family: 'Segoe UI', 'Prompt', 'Kanit', sans-serif; background-color: #f3f7fa;}
-.header { background: linear-gradient(90deg, #2ec4b6 65%, #16a085 100%); color: white; padding: 26px 10px 20px 10px; text-align: center; letter-spacing: 0.02em; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 4px 24px #0db49622;}
-.header h1 { font-weight: 600; font-size: 2.15rem; margin: 0; letter-spacing: 0.05em; text-shadow: 0 1px 8px #0db4a055;}
-.container { padding: 16px 10px 24px 10px; max-width: 480px; margin: 0 auto;}
-.form-box { background: linear-gradient(90deg, #ffffff 72%, #e0f7fa 100%); padding: 22px 20px 18px 20px; border-radius: 22px; box-shadow: 0 6px 22px #12d0d830, 0 2px 8px #b9f6ca18; margin-bottom: 22px;}
-.form-box h2 { margin: 0 0 12px; color: #00837f; font-size: 1.18rem; font-weight: 600; letter-spacing: 0.01em;}
-label { margin-top: 10px; display: block; font-weight: bold; color: #00695c;}
-input, select { width: 100%; padding: 10px; margin-top: 6px; margin-bottom: 12px; border: 1px solid #b2dfdb; border-radius: 8px; background-color: #f1fdfc;}
-button { background-color: #009688; color: white; padding: 8px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.15s, transform 0.15s;}
-button:hover { background-color: #00796b; transform: scale(1.05);}
-.goal-box { background: linear-gradient(96deg, #e3f6ff 50%, #ffffff 100%); border-left: 6px solid #00b8d4; border-radius: 20px; margin-top: 28px; padding: 28px 18px 23px 18px; box-shadow: 0 8px 28px #22c2e925, 0 2px 10px #2196f355; overflow: hidden; position:relative;}
-.goal-content { min-width: 66%; text-align: left; font-size: 1.11rem; display: flex; flex-direction: column; gap: 16px;}
-.goal-block { position: relative; background: #fff; border-radius: 16px; box-shadow: 0 2px 9px #00bfae18; padding: 12px 12px 18px 12px; margin-bottom: 12px;}
-.goal-title { font-weight: 600; color: #0286c3; font-size: 1.15rem; margin-bottom: 3px; display: flex; align-items: center; gap: 8px;}
-.goal-money { color: #222b34; font-size: 1.12rem; margin-bottom: 2px; display: flex; align-items: center; gap: 9px; font-weight: 400; letter-spacing: 0.01em;}
-.progress-bar-bg { background: linear-gradient(90deg, #e3ecf7, #e6f7ff 75%, #cce8fb 100%); border-radius: 12px; height: 15px; width: 99%; margin: 7px 0 0 0; overflow: hidden; border: 1.3px solid #b0d6efcc; position: relative; box-shadow: 0 2px 10px #90caf918 inset;}
-.progress-bar { background: linear-gradient(90deg, #22b7f7 15%, #0dd8c8 65%, #fff7e6 100%); height: 100%; border-radius: 12px 0 0 12px; transition: width 0.36s cubic-bezier(.4, 0, .2, 1); min-width: 3.5%; box-shadow: 0 2px 10px #81d4fa15;}
-.delete-btn { position: absolute; top: 8px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; text-align: center; line-height: 24px; cursor: pointer; font-size: 1.4rem;}
-.delete-btn:hover { background: #e53935;}
-.saving-plan-title { margin-top: 14px; font-weight: bold; color: #009688;}
-.saving-plan-list { margin-top: 8px; display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; scrollbar-color: #c0e7ef #e0f7fa; }
-.saving-row { min-width: 210px; max-width: 220px; flex: 0 0 210px; background: #f6ffff; border-radius: 16px; box-shadow: 0 2px 9px #00bfae22; padding: 10px 14px; border: 1px solid #d0f0f5; display: flex; flex-direction: column; align-items: stretch; justify-content: center; }
-.bar-bg { background:#e0f7fa;border-radius:8px;overflow:hidden;height:16px;box-shadow:0 2px 6px #80deea33;margin:7px 0 6px 0; }
-.bar { height:100%;background:linear-gradient(90deg,#00b8d4,#00bfae);transition:width .4s;}
-.bar-label { font-size:0.92rem;color:#009688;margin-left:2px;}
-.bar-btn { margin-top:7px;padding:4px 12px;border:none;border-radius:7px;background:#00897b;color:white;cursor:pointer;}
+/* ตัวแปรสีพื้นฐาน (คัดลอกมาจาก dashboard.css เพื่อความสอดคล้อง) */
+:root {
+  --primary-color: #26A69A;
+  --primary-darker: #00796B;
+  --background-color: #f4f7f6;
+  --card-background: #ffffff;
+  --text-color: #333;
+  --text-secondary: #666;
+  --border-color: #e0e0e0;
+  --danger-color: #ef5350;
+  --success-color: #66BB6A;
+  --shadow-color: rgba(0, 100, 100, 0.15); /* Slightly stronger shadow for more pop */
+  --highlight-color: #80CBC4;
+  --accent-color: #FFD700; /* Gold accent for progress/highlights */
+  --light-teal: #E0F2F1; /* Lighter teal for backgrounds */
+}
+
+/* Dark Mode (คัดลอกมาจาก dashboard.css เพื่อความสอดคล้อง) */
+body.dark-mode {
+  --background-color: #1a1a1a;
+  --card-background: #282828;
+  --text-color: #e0e0e0;
+  --text-secondary: #aaaaaa;
+  --border-color: #444;
+  --shadow-color: rgba(0, 0, 0, 0.5); /* Stronger shadow in dark mode */
+  --light-teal: #2a3a39;
+}
+
+body {
+  margin: 0;
+  font-family: 'Kanit', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding-bottom: 30px; /* More space at bottom */
+  transition: background-color 0.3s, color 0.3s;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+/* Header (ปรับปรุงให้มีชีวิตชีวาขึ้น) */
+.header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--highlight-color) 100%);
+  color: white;
+  padding: 40px 20px 80px;
+  text-align: center;
+  position: relative;
+  border-bottom-left-radius: 35px; /* More rounded */
+  border-bottom-right-radius: 35px;
+  box-shadow: 0 6px 18px var(--shadow-color); /* Stronger shadow */
+}
+.header h1 {
+    font-size: 2.8em; /* Larger title */
+    margin-bottom: 8px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* Text shadow for pop */
+}
+.header p {
+    font-size: 1.2em;
+    margin-top: 0;
+    opacity: 0.9;
+}
+.avatar-box {
+  width: 110px; height: 110px; /* Slightly larger */
+  background: var(--card-background);
+  border-radius: 50%;
+  box-shadow: 0 5px 20px var(--shadow-color); /* Stronger shadow */
+  border: 5px solid var(--accent-color); /* Accent color border */
+  position: absolute;
+  bottom: -55px; left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
+}
+.avatar-box img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+.back-btn {
+  position: absolute;
+  left: 25px; /* Adjusted position */
+  top: 35px;
+  background: rgba(255,255,255,0.9); /* Slightly transparent white */
+  color: var(--primary-darker);
+  border: none;
+  border-radius: 28px; /* More rounded */
+  font-size: 1.1rem;
+  padding: 8px 18px 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15); /* Stronger shadow */
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.back-btn:hover {
+  background: var(--highlight-color);
+  color: white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+  transform: translateY(-3px) scale(1.02); /* More pronounced hover */
+}
+body.dark-mode .back-btn {
+  background: rgba(50,50,50,0.9);
+  color: var(--highlight-color);
+}
+body.dark-mode .back-btn:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Placeholder for user-info spacing */
+.user-info-placeholder {
+    margin-top: 70px; /* Adjusted spacing */
+    margin-bottom: 30px;
+    height: 0;
+}
+
+/* Card Sections (ปรับปรุงให้มีมิติมากขึ้น) */
+.card-section {
+    background: var(--card-background);
+    border-radius: 20px; /* More rounded */
+    box-shadow: 0 8px 25px var(--shadow-color); /* Stronger shadow */
+    padding: 30px; /* More padding */
+    margin-bottom: 30px; /* Consistent margin */
+    border: 1px solid var(--border-color); /* Subtle border */
+}
+.card-section h2 {
+    color: var(--primary-darker);
+    margin-top: 0;
+    margin-bottom: 25px; /* More space below heading */
+    border-bottom: 2px solid var(--border-color); /* Thicker border */
+    padding-bottom: 12px;
+    font-weight: 700; /* Bolder heading */
+    font-size: 1.8em; /* Larger heading */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icon and text */
+}
+.card-section h2 .icon {
+    font-size: 1.4em; /* Larger icon */
+    color: var(--accent-color); /* Accent color for icons */
+}
+
+/* Form Styles (ปรับปรุงให้ดูทันสมัยและใช้งานง่าย) */
+.form-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* More space between inputs */
+}
+.form-box label {
+    font-size: 1em; /* Slightly larger label */
+    color: var(--text-color); /* Darker label for clarity */
+    margin-bottom: -12px; /* Move label closer to input */
+    font-weight: 600; /* Bolder label */
+}
+.form-box input[type="text"],
+.form-box input[type="number"],
+.form-box input[type="date"],
+.form-box select {
+    width: 100%;
+    padding: 16px; /* More padding for inputs */
+    border-radius: 12px; /* More rounded corners */
+    border: 1px solid var(--border-color);
+    font-size: 1.1rem;
+    font-family: 'Kanit', sans-serif;
+    box-sizing: border-box;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.form-box input:focus,
+.form-box select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(38, 166, 154, 0.3); /* More prominent focus ring */
+    background-color: var(--card-background); /* White background on focus */
+}
+
+/* Primary Button Style (ปรับปรุงให้โดดเด่น) */
+.primary-button {
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-darker)); /* Gradient background */
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 700; /* Bolder text */
+    font-size: 1.2em; /* Larger text */
+    padding: 18px; /* More padding */
+    border-radius: 12px; /* Consistent rounded corners */
+    transition: all 0.3s ease;
+    margin-top: 15px; /* More space above button */
+    box-shadow: 0 5px 15px rgba(0, 121, 107, 0.2); /* Shadow for button */
+}
+.primary-button:hover {
+    background: linear-gradient(90deg, var(--primary-darker), var(--primary-color)); /* Reverse gradient on hover */
+    transform: translateY(-3px) scale(1.01); /* More pronounced lift */
+    box-shadow: 0 8px 20px rgba(0, 121, 107, 0.3);
+}
+.primary-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 121, 107, 0.2);
+}
+
+/* Latest Goal Display Section */
+.goal-detail-section {
+    background: linear-gradient(135deg, var(--light-teal), var(--card-background)); /* Subtle gradient for this section */
+    border: 1px solid var(--primary-color); /* Border to match theme */
+}
+body.dark-mode .goal-detail-section {
+    background: linear-gradient(135deg, #2a3a39, #282828);
+    border-color: #4a5b5a;
+}
+
+#latestGoalDisplay {
+    text-align: center;
+    padding: 15px 0;
+}
+#latestGoalDisplay .no-goals-message {
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 10px;
+}
+#latestGoalDisplay .goal-title {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--primary-darker);
+    margin-bottom: 10px;
+    text-shadow: 0.5px 0.5px 1px rgba(0,0,0,0.1);
+}
+#latestGoalDisplay p {
+    margin: 8px 0;
+    font-size: 1.1em;
+    color: var(--text-color);
+}
+#latestGoalDisplay .bar-bg {
+    background: var(--border-color);
+    border-radius: 10px; /* More rounded */
+    overflow: hidden;
+    height: 20px; /* Taller bar */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Inner shadow for depth */
+    margin: 15px auto;
+    max-width: 90%;
+}
+#latestGoalDisplay .bar-fill {
+    background: linear-gradient(90deg, var(--success-color), var(--accent-color)); /* Vibrant gradient */
+    height: 100%;
+    width: 0%; /* Set by JS */
+    border-radius: 10px;
+    transition: width 0.8s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    box-sizing: border-box;
+    color: white;
+    font-size: 0.9em;
+    font-weight: 700;
+    text-shadow: 0.5px 0.5px 1px rgba(0,0,0,0.2);
+}
+
+/* Saving Plan List Section */
+.saving-plan-section {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+}
+.saving-plan-list {
+    display: flex;
+    gap: 15px; /* Space between plan items */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    padding-bottom: 10px;
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: var(--primary-color) var(--border-color); /* For Firefox */
+}
+.saving-plan-list::-webkit-scrollbar {
+    height: 8px;
+}
+.saving-plan-list::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+.saving-plan-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+}
+
+.saving-plan-item {
+    min-width: 180px; /* Minimum width for each item */
+    flex: 0 0 auto; /* Do not grow, do not shrink, base on content */
+    background: var(--light-teal); /* Light background for items */
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 100, 100, 0.1); /* Subtle shadow */
+    padding: 18px;
+    border: 1px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+body.dark-mode .saving-plan-item {
+    background: #2a3a39;
+    border-color: #4a5b5a;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.saving-plan-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 100, 100, 0.2);
+}
+
+.saving-plan-item.completed {
+    background: var(--success-color);
+    color: white;
+    border-color: #229954;
+}
+body.dark-mode .saving-plan-item.completed {
+    background: #1e8449;
+    border-color: #1a733e;
+}
+
+.saving-plan-item.completed .plan-amount,
+.saving-plan-item.completed .plan-date,
+.saving-plan-item.completed .plan-status {
+    color: white;
+}
+
+.plan-title {
+    font-weight: 700;
+    font-size: 1.2em;
+    color: var(--primary-darker);
+    margin-bottom: 5px;
+}
+.plan-amount {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+.plan-date {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+.plan-status {
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    align-self: flex-start; /* Align to left */
+    margin-top: 5px;
+}
+.plan-status.pending { background-color: #FFECB3; color: #FF8F00; } /* Light yellow/orange */
+.plan-status.saved { background-color: #C8E6C9; color: #388E3C; } /* Light green */
+body.dark-mode .plan-status.pending { background-color: #5a4b1e; color: #ffca28; }
+body.dark-mode .plan-status.saved { background-color: #2e7d32; color: #a5d6a7; }
+
+.saving-input-group {
+    display: flex;
+    gap: 8px; /* Tighter gap */
+    margin-top: 15px;
+}
+.saving-input-group input {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 10px; /* More rounded */
+    font-size: 1em;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+.saving-input-group button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px; /* More padding */
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.saving-input-group button:hover {
+    background-color: var(--primary-darker);
+    transform: translateY(-2px);
+}
+
+/* Delete button for plan item */
+.delete-plan-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    font-size: 1.3em;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    padding: 5px;
+}
+.delete-plan-btn:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+
+/* Current Goals List Section */
+.current-goals-list-section {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+}
+.current-goals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between list items */
+}
+.current-goals-list .no-goals-message {
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 10px;
+}
+
+.current-goal-item {
+    background-color: var(--light-teal); /* Lighter background for list items */
+    border-radius: 15px; /* More rounded */
+    padding: 18px; /* More padding */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+    border: 1px solid var(--primary-color); /* Border to match theme */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+body.dark-mode .current-goal-item {
+    background-color: #2a3a39;
+    border-color: #4a5b5a;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+.current-goal-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.current-goal-details {
+    flex-grow: 1;
+    cursor: pointer; /* Indicate clickable */
+}
+.current-goal-details h3 {
+    margin: 0;
+    font-size: 1.3em;
+    color: var(--primary-darker);
+    font-weight: 700;
+}
+.current-goal-details p {
+    margin: 5px 0 0;
+    font-size: 0.95em;
+    color: var(--text-secondary);
+}
+
+.current-goal-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.current-goal-actions .delete-btn {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    font-size: 1.5em;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    padding: 5px;
+}
+.current-goal-actions .delete-btn:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Responsive adjustments */
 @media (max-width: 560px) {
-  .container { padding: 9px 3vw 16px 3vw; }
-  .goal-content { margin: 0 6vw; font-size: 1.05rem;}
-  .goal-box { padding: 19px 7px 16px 7px;}
-  .saving-row { min-width: 78vw; max-width: 84vw; }
+  .header {
+    padding: 30px 15px 70px;
+  }
+  .back-btn {
+    top: 20px;
+    left: 15px;
+    font-size: 0.95rem;
+    padding: 6px 15px 6px 10px;
+  }
+  .header h1 {
+    font-size: 2em;
+  }
+  .header p {
+    font-size: 1em;
+  }
+  .avatar-box {
+    width: 80px;
+    height: 80px;
+    bottom: -40px;
+    border-width: 3px;
+  }
+  .container {
+    margin: 15px auto;
+    padding: 0 15px;
+  }
+  .card-section {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .card-section h2 {
+    font-size: 1.4em;
+    margin-bottom: 15px;
+  }
+  .card-section h2 .icon {
+    font-size: 1.2em;
+  }
+  .form-box input,
+  .form-box select,
+  .primary-button {
+    padding: 12px;
+    font-size: 1rem;
+  }
+  .form-box label {
+    font-size: 0.9em;
+  }
+  #latestGoalDisplay .goal-title {
+    font-size: 1.5em;
+  }
+  #latestGoalDisplay p {
+    font-size: 1em;
+  }
+  #latestGoalDisplay .bar-bg {
+    height: 18px;
+  }
+  .saving-plan-item {
+    min-width: 160px;
+    padding: 15px;
+  }
+  .plan-title {
+    font-size: 1.1em;
+  }
+  .plan-amount {
+    font-size: 1em;
+  }
+  .saving-input-group input,
+  .saving-input-group button {
+    padding: 8px;
+    font-size: 0.9em;
+  }
+  .current-goal-item {
+    padding: 15px;
+  }
+  .current-goal-details h3 {
+    font-size: 1.1em;
+  }
+  .current-goal-details p {
+    font-size: 0.9em;
+  }
 }

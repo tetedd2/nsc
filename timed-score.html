@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Arcade Combo - จับคู่การเงิน</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <style>
+    .title {
+      font-size: 2.2em;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.4;
+      margin-bottom: 22px;
+      padding: 16px 8px;
+      background: linear-gradient(to right, #26a69a, #00796b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 1px 1px 2px #ffffff77;
+    }
+    body {
+      background: linear-gradient(135deg, #e0f7fa 80%, #b2ebf2 100%);
+      font-family: 'Kanit', sans-serif;
+      margin: 0; padding: 0; min-height: 100vh;
+      transition: background 0.35s;
+    }
+    body.comboing {
+      background: linear-gradient(135deg, #fff176 80%, #ffe082 100%) !important;
+    }
+    body.comboing.super {
+      background: linear-gradient(135deg, #c471ed 60%, #f64f59 100%) !important;
+    }
+    .container {
+      max-width: 570px;
+      margin: 22px auto;
+      padding: 19px 9px 30px 9px;
+      border-radius: 23px;
+      background: rgba(255,255,255,0.83);
+      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.12), 0 1.5px 5px #b2dfdb33;
+      min-height: 90vh;
+    }
+    .combo-toast {
+      position: fixed;
+      left: 50%; top: 32px;
+      transform: translateX(-50%);
+      min-width: 100px;
+      padding: 14px 36px;
+      background: #ffe082;
+      color: #8e24aa;
+      font-size: 2em;
+      font-weight: bold;
+      border-radius: 20px;
+      box-shadow: 0 6px 32px #fff17667;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+      animation: comboToastShow 1.15s cubic-bezier(.47,1.64,.41,1.09);
+      text-align: center;
+      letter-spacing: 1px;
+      border: 2.5px solid #fff5;
+    }
+    .combo-toast.super {
+      background: #ba68c8;
+      color: #fff;
+      box-shadow: 0 7px 44px #7c21a5ab;
+      border: 2.5px solid #fff7;
+    }
+    @keyframes comboToastShow {
+      0% {opacity: 0; transform:translateX(-50%) scale(0.7);}
+      17% {opacity: 1; transform:translateX(-50%) scale(1.13);}
+      74% {opacity: 1;}
+      100% {opacity: 0; transform:translateX(-50%) scale(0.97);}
+    }
+    .status-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 13px; gap: 10px; flex-wrap: wrap;
+    }
+    .status-item {
+      background: #e0f2f1bd;
+      padding: 7px 15px; border-radius: 13px;
+      font-weight: 700; font-size: 1em;
+      color: #00796b; min-width: 90px;
+      text-align: center; margin-bottom: 3px;
+    }
+    .combo {
+      color: #fff;
+      font-size: 1.09em;
+      background: #fce4ec;
+      padding: 8px 24px; border-radius: 13px;
+      font-weight: bold; margin-bottom: 3px;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px #f8bbd044;
+      min-width: 130px; position: relative; z-index: 1;
+      transition: background 0.36s, color 0.28s;
+      text-shadow: 0 2px 10px #6a1b9a11, 0 0.5px 2px #fff9;
+    }
+    .combo.combo-yellow { background: #ffe082; color: #b71c1c; }
+    .combo.combo-purple { background: #ba68c8; color: #fff; }
+    .combo.combo-normal  { background: #fce4ec; color: #c2185b;}
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px 8px;
+      justify-items: center;
+      align-items: center;
+      min-height: 330px;
+      margin-bottom: 9px;
+    }
+    .card {
+      width: 97%; min-width: 100px; min-height: 56px;
+      background: #f8fbfd;
+      border: 2px solid #c6ecee;
+      border-radius: 18px;
+      box-shadow: 2px 4px 14px #c6ecee38, 0 0.5px 2px #eeeefa36, 0 2px 0 #fff;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; font-size: 1.04em; font-weight: 700;
+      color: #027d80; cursor: pointer;
+      transition: background 0.14s, border 0.14s, color 0.13s,
+                  box-shadow 0.13s, transform 0.12s, opacity 0.31s;
+      user-select: none; position: relative; outline: none;
+      will-change: transform, opacity;
+      z-index: 1; padding: 10px 8px;
+      word-break: break-word; white-space: pre-line; box-sizing: border-box;
+      opacity: 1; pointer-events: auto;
+    }
+    .card.flipped {
+      background: #e0f7fa;
+      border-color: #26c6da;
+      color: #00838f;
+      box-shadow: 0 4px 22px #26c6da2c, 0 3px 7px #e0f2f17f;
+      transform: scale(0.94); z-index: 2;
+    }
+    .card.correct {
+      animation: fadeOutCard 0.43s forwards cubic-bezier(.62,1.7,.51,1);
+      pointer-events: none !important;
+    }
+    @keyframes fadeOutCard {
+      0% { opacity: 1; }
+      80% { opacity: 0.45; }
+      100% { opacity: 0; }
+    }
+    .card.appear {
+      animation: appearCard 1.11s cubic-bezier(.56,1.61,.49,1) both;
+    }
+    @keyframes appearCard {
+      0% { transform: scale(0.08); opacity: 0; }
+      70% { transform: scale(1.13); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .card.wrong {
+      background: #ffcdd2;
+      border-color: #d84315;
+      color: #b71c1c;
+      animation: wrongpop 0.16s;
+      z-index: 3;
+    }
+    @keyframes wrongpop {
+      0% {transform: scale(0.94);}
+      36% {transform: scale(1.10);}
+      100% {transform: scale(1);}
+    }
+    .main-btn {
+      background: linear-gradient(90deg, #26a69a 70%, #64d8cb 100%);
+      color: #fff; border: none; border-radius: 16px;
+      font-size: 1.09em; padding: 11px 32px; font-weight: 700;
+      cursor: pointer; margin: 18px auto 0 auto; display: block;
+      box-shadow: 0 3px 16px #26a69a25;
+      transition: background 0.16s, transform 0.13s, box-shadow 0.14s;
+      outline: none; will-change: transform;
+    }
+    .main-btn:active {
+      background: linear-gradient(90deg, #009688 60%, #26a69a 100%);
+      transform: scale(0.97);
+      box-shadow: 0 1px 7px #26a69a1a;
+    }
+    .main-btn.home-btn {
+      background: linear-gradient(90deg, #ff9800 70%, #ffb74d 100%);
+      box-shadow: 0 3px 16px #ff980025;
+    }
+    .main-btn.home-btn:active {
+      background: linear-gradient(90deg, #f57c00 60%, #ff9800 100%);
+      box-shadow: 0 1px 7px #ff98001a;
+    }
+    .result-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #f4f8ff;
+      color: #5329b4;
+      border-radius: 21px;
+      font-size: 1.18em;
+      font-weight: 600;
+      box-shadow: 0 1px 18px #6a1b9a13;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2.3px dashed #e1bfff;
+      padding: 22px 0 18px 0;
+      letter-spacing: 0.5px;
+      animation: resultpop 0.6s;
+      z-index: 999;
+      width: 90%;
+      max-width: 360px;
+    }
+    @keyframes resultpop {
+      0% { transform: translate(-50%, -50%) scale(0.82); opacity: 0; }
+      75% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    .emoji-grade {
+      font-size: 1.4em;
+      color: #512da8;
+      margin-bottom: 6px;
+    }
+    .score-lg {
+      font-size: 2.4em;
+      color: #2e7d32;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+    .result-line strong {
+      font-size: 1em;
+    }
+    .combo-lg {
+      color: #d500f9;
+      font-weight: 700;
+      font-size: 1.5em;
+    }
+    .high-lg {
+      color: #2196f3;
+      font-weight: 700;
+      font-size: 1.2em;
+    }
+    
+    /* สไตล์สำหรับการแสดงคะแนนสูงสุดตอนเล่น */
+    .personal-best {
+      background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+      color: #d84315;
+      font-weight: 700;
+      font-size: 1.1em;
+      padding: 8px 16px;
+      border-radius: 12px;
+      margin: 8px 0;
+      text-align: center;
+      box-shadow: 0 3px 12px #ffd70033;
+      border: 2px solid #fff8;
+    }
+    
+    /* ปรับปรุงสีของคะแนนสูงสุด */
+    .status-item.high-score {
+      background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+      color: #fff;
+      box-shadow: 0 3px 12px #4caf5033;
+    }
+  </style>
+</head>
+<body>
+<div class="combo-toast" id="comboToast" style="display:none"></div>
+<div class="container">
+  <div class="header">
+    <div class="title">Arcade Combo<br>จับคู่การเงิน</div>
+  </div>
+  <div class="status-row">
+    <div class="status-item">คะแนน: <span id="score">0</span></div>
+    <div class="status-item">เวลา: <span id="timer">60</span>s</div>
+    <div class="status-item high-score">สูงสุด: <span id="highScore">0</span></div>
+    <div class="combo combo-normal" id="comboBox">COMBO: <span id="combo">0</span></div>
+  </div>
+  
+  <!-- แสดงคะแนนสูงสุดส่วนตัว -->
+  <div class="personal-best" id="personalBest" style="display:none;">
+    🏆 สถิติส่วนตัว: <span id="personalBestScore">0</span> คะแนน
+  </div>
+  
+  <div class="board" id="gameBoard"></div>
+  <div class="result-box" id="resultBox"></div>
+  <button class="main-btn" onclick="startArcade()">เริ่มเล่นใหม่</button>
+  <button class="main-btn home-btn" onclick="goToHome()">🏠 กลับหน้าหลัก</button>
+</div>
+
+<script>
+  // ปุ่มกลับหน้าหลัก
+  function goToHome() {
+    window.location.href = 'game.html';
+  }
+
+  // ข้อมูลคำศัพท์
+  const easyMidPairs = [
+    {q:"เงินออม", a:"เงินที่เก็บไว้ใช้ในอนาคต"},
+    {q:"รายรับ", a:"เงินที่ได้เข้ามา"},
+    {q:"รายจ่าย", a:"เงินที่ต้องจ่ายออก"},
+    {q:"สินทรัพย์", a:"ของมีค่า/เงินฝาก"},
+    {q:"หนี้สิน", a:"เงินที่ต้องใช้คืน"},
+    {q:"งบประมาณ", a:"แผนการใช้เงิน"},
+    {q:"การลงทุน", a:"นำเงินไปต่อยอด"},
+    {q:"บัตรเครดิต", a:"บัตรใช้จ่ายแทนเงินสด"},
+    {q:"ดอกเบี้ย", a:"เงินเพิ่มที่จ่าย/รับจากการยืม"},
+    {q:"ประกันชีวิต", a:"คุ้มครองเงิน/ชีวิตจากเหตุการณ์ไม่คาดฝัน"},
+    {q:"ดอกเบี้ยทบต้น", a:"ดอกเบี้ยคำนวณบนเงินต้นและสะสม"},
+    {q:"งบกระแสเงินสด", a:"บันทึกการรับจ่ายเงินสดของธุรกิจ"},
+    {q:"ลงทุนกองทุนรวม", a:"ฝากเงินรวมกระจายความเสี่ยง"},
+    {q:"หนี้ดี", a:"หนี้ที่ใช้เพิ่มรายได้ เช่น กู้เพื่อการศึกษา"},
+    {q:"บัตรกดเงินสด", a:"บัตรเบิกถอนเงินสดได้"},
+    {q:"กองทุนสำรองเลี้ยงชีพ", a:"เงินสะสมหลังเกษียณ"},
+    {q:"เงินฉุกเฉิน", a:"เงินสำรองกรณีฉุกเฉิน"},
+    {q:"สัญญากู้ยืม", a:"เอกสารยืนยันการยืมเงิน"},
+    {q:"ประกันสุขภาพ", a:"คุ้มครองค่ารักษาพยาบาล"},
+    {q:"ค่าใช้จ่ายประจำ", a:"ค่าใช้จ่ายทุกเดือน เช่น อินเทอร์เน็ต"},
+    {q:"รายได้ประจำ", a:"เงินทุกเดือนจากการทำงาน"}
+  ];
+  const hardPairs = [
+    {q:"ภาษีมูลค่าเพิ่ม (VAT)", a:"ภาษีซื้อขายสินค้า/บริการ"},
+    {q:"เงินเฟ้อ", a:"ราคาสินค้าปรับสูงขึ้น"}
+  ];
+  const allPairs = [...easyMidPairs, ...hardPairs];
+  let arcadeScore = 0, arcadeTime = 60, timerInterval = null, combo = 0, maxCombo = 0, highScore = 0, personalBest = 0;
+  let cards = [], selected = [], matchedCount = 0, locked = false, correctStreak = 0;
+  let boardPairs = [];
+  const BOARD_PAIR_COUNT = 11;
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function randomBoardPairs() {
+    let idxs = shuffle([...Array(allPairs.length).keys()]);
+    let easyMidIdx = idxs.filter(i => i < easyMidPairs.length).slice(0, 9);
+    let hardIdx = idxs.filter(i => i >= easyMidPairs.length).slice(0, 2);
+    return shuffle([...easyMidIdx, ...hardIdx]);
+  }
+
+  function loadPersonalBest() {
+    personalBest = Number(localStorage.getItem("arcadePersonalBest") || 0);
+    if (personalBest > 0) {
+      document.getElementById("personalBest").style.display = "block";
+      document.getElementById("personalBestScore").textContent = personalBest;
+    }
+  }
+
+  function savePersonalBest() {
+    localStorage.setItem("arcadePersonalBest", personalBest);
+  }
+
+  function startArcade() {
+    arcadeScore = 0;
+    arcadeTime = 60;
+    combo = 0;
+    maxCombo = 0;
+    correctStreak = 0;
+    document.getElementById("score").textContent = arcadeScore;
+    document.getElementById("timer").textContent = arcadeTime;
+    document.getElementById("combo").textContent = combo;
+    updateComboBox();
+    document.getElementById("resultBox").style.display = "none";
+    document.getElementById("resultBox").innerHTML = "";
+    highScore = Number(localStorage.getItem("arcadeHighScore") || 0);
+    document.getElementById("highScore").textContent = highScore;
+    
+    // โหลดคะแนนสูงสุดส่วนตัว
+    loadPersonalBest();
+    
+    boardPairs = randomBoardPairs();
+    prepareBoard();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      arcadeTime--;
+      document.getElementById("timer").textContent = arcadeTime;
+      if (arcadeTime <= 0) endArcade();
+    }, 1000);
+  }
+
+  function prepareBoard() {
+    cards = [];
+    boardPairs.forEach(i => {
+      cards.push({ id: i, text: allPairs[i].q, pair: "q", correct: false, appear: false });
+      cards.push({ id: i, text: allPairs[i].a, pair: "a", correct: false, appear: false });
+    });
+    cards = shuffle(cards);
+    matchedCount = 0;
+    selected = [];
+    locked = false;
+    renderCards();
+  }
+
+  function renderCards() {
+    document.getElementById("gameBoard").innerHTML =
+      cards.map((c, idx) =>
+        `<div class="card${c.correct ? ' correct' : ''}${selected.includes(idx) ? ' flipped' : ''}${c.appear ? ' appear' : ''}" onclick="selectCard(${idx})" id="card${idx}">${!c.correct ? c.text : ""}</div>`
+      ).join('');
+  }
+
+  function showComboToast(num) {
+    const toast = document.getElementById("comboToast");
+    toast.className = "combo-toast" + (num >= 5 ? " super" : "");
+    toast.textContent = num >= 5 ? `SUPER COMBO ${num}!` : `COMBO ${num}!`;
+    toast.style.display = "";
+    toast.style.animation = "none";
+    void toast.offsetWidth;
+    toast.style.animation = "";
+    setTimeout(() => { toast.style.display = "none"; }, 1100);
+  }
+
+  function updateComboBox() {
+    let box = document.getElementById("comboBox");
+    if (combo >= 5) {
+      box.className = "combo combo-purple";
+      box.innerHTML = `🔥 SUPER COMBO: <span id="combo">${combo}</span> 🔥`;
+      document.body.className = "comboing super";
+    } else if (combo >= 2) {
+      box.className = "combo combo-yellow";
+      box.innerHTML = `🔥 COMBO: <span id="combo">${combo}</span> 🔥`;
+      document.body.className = "comboing";
+    } else {
+      box.className = "combo combo-normal";
+      box.innerHTML = `COMBO: <span id="combo">${combo}</span>`;
+      document.body.className = "";
+    }
+  }
+
+  window.selectCard = function (idx) {
+    if (locked) return;
+    if (cards[idx].correct || selected.includes(idx)) return;
+    selected.push(idx);
+    renderCards();
+    if (selected.length === 2) {
+      locked = true;
+      const [i1, i2] = selected;
+      if (cards[i1].id === cards[i2].id && cards[i1].pair !== cards[i2].pair) {
+        cards[i1].correct = true;
+        cards[i2].correct = true;
+        arcadeScore += 15;
+        correctStreak++;
+        matchedCount++;
+        if (correctStreak >= 2) {
+          combo++;
+          if (combo > maxCombo) maxCombo = combo;
+          arcadeScore += 25;
+          showComboToast(combo);
+        } else {
+          combo = 0;
+        }
+        updateComboBox();
+        document.getElementById("score").textContent = arcadeScore;
+        document.getElementById("combo").textContent = combo;
+        setTimeout(() => {
+          selected = [];
+          renderCards();
+          setTimeout(generateNewBoard, 1000);
+        }, 430);
+      } else {
+        arcadeScore -= 8;
+        combo = 0;
+        correctStreak = 0;
+        updateComboBox();
+        document.getElementById("combo").textContent = combo;
+        document.getElementById("score").textContent = arcadeScore;
+        document.getElementById("card" + i1).classList.add('wrong');
+        document.getElementById("card" + i2).classList.add('wrong');
+        setTimeout(() => {
+          selected = [];
+          renderCards();
+          locked = false;
+        }, 340);
+      }
+    }
+  }
+
+  function generateNewBoard() {
+    boardPairs = randomBoardPairs();
+    cards = [];
+    boardPairs.forEach(i => {
+      cards.push({ id: i, text: allPairs[i].q, pair: "q", correct: false, appear: true });
+      cards.push({ id: i, text: allPairs[i].a, pair: "a", correct: false, appear: true });
+    });
+    cards = shuffle(cards);
+    selected = [];
+    matchedCount = 0;
+    renderCards();
+    setTimeout(() => {
+      cards.forEach(c => { if (c.appear) c.appear = false; });
+      renderCards();
+      locked = false;
+    }, 1110);
+  }
+
+  function endArcade() {
+    clearInterval(timerInterval);
+    document.body.className = "";
+    document.getElementById("comboToast").style.display = "none";
+    
+    // อัพเดทคะแนนสูงสุด
+    if (arcadeScore > highScore) {
+      localStorage.setItem("arcadeHighScore", arcadeScore);
+      highScore = arcadeScore;
+    }
+    
+    // อัพเดทคะแนนสูงสุดส่วนตัว
+    if (arcadeScore > personalBest) {
+      personalBest = arcadeScore;
+      savePersonalBest();
+    }
+    
+    // บันทึกคะแนนโหมดจับเวลา (สำหรับหน้า game.html)
+    localStorage.setItem("money_score_timed", arcadeScore);
+    
+    document.getElementById("highScore").textContent = highScore;
+    document.getElementById("resultBox").style.display = "flex";
+    const levelText = arcadeScore >= 300 ? "สุดยอด! คุณคือเซียนการเงิน!" :
+                     arcadeScore >= 180 ? "เยี่ยมมาก! คุณทำได้ดี!" :
+                     arcadeScore >= 90 ? "พยายามดีมาก!" :
+                                          "ฝึกอีกนิดนะ!";
+    document.getElementById("resultBox").innerHTML = `
+      <div class="emoji-grade">${levelText}</div>
+      <div class="score-lg">+${arcadeScore}</div>
+      <div class="result-line"><strong>คอมโบสูงสุด:</strong> <span class="combo-lg">${maxCombo}</span></div>
+      <div class="result-line"><strong>คะแนนสูงสุด:</strong> <span class="high-lg">${highScore}</span></div>
+      <div class="result-line"><strong>สถิติส่วนตัว:</strong> <span class="high-lg">${personalBest}</span></div>
+      <button class="main-btn" onclick="startArcade()" style="margin-top:16px;">เล่นอีกครั้ง</button>
+      <button class="main-btn home-btn" onclick="goToHome()" style="margin-top:8px;">กลับหน้าเมนู</button>
+    `;
+    document.getElementById("gameBoard").innerHTML = "";
+  }
+
+  // เริ่มเกมเมื่อโหลดหน้า
+  startArcade();
+</script>
+<script src="darkmode-toggle.js"></script>
+</body>
+</html>

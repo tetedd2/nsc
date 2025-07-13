@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚙️ ตั้งค่า - MoneySkillz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ตัวแปรสีพื้นฐาน - ควรเหมือนกับใน dashboard.html */
+    :root {
+      --primary-color: #26A69A;
+      --primary-darker: #00796B;
+      --background-color: #f4f7f6;
+      --card-background: #ffffff;
+      --text-color: #333;
+      --text-secondary: #666;
+      --border-color: #e0e0e0;
+      --danger-color: #ef5350;
+      --success-color: #66BB6A;
+      --shadow-color: rgba(0, 100, 100, 0.1);
+      --toggle-bg-off: #ccc;
+      --toggle-bg-on: var(--primary-color);
+      --toggle-circle: #fff;
+    }
+    body.dark-mode {
+      --primary-color: #00897B;
+      --primary-darker: #00695C;
+      --background-color: #1a1a1a;
+      --card-background: #282828;
+      --text-color: #e0e0e0;
+      --text-secondary: #aaaaaa;
+      --border-color: #444;
+      --danger-color: #ff8a80;
+      --success-color: #a5d6a7;
+      --shadow-color: rgba(0, 0, 0, 0.4);
+      --toggle-bg-off: #555;
+      --toggle-bg-on: var(--primary-color);
+      --toggle-circle: #ccc;
+    }
+    body {
+      font-family: 'Kanit', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+      padding-bottom: 70px; /* เว้นที่ให้ bottom nav */
+    }
+    .header {
+      background: linear-gradient(to right, #FF9800, #FFC107); /* สีส้ม */
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      font-weight: 600;
+    }
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+    .settings-section {
+      background: var(--card-background);
+      margin-bottom: 25px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px var(--shadow-color);
+      padding: 25px 30px;
+      transition: background-color 0.3s;
+    }
+    .settings-section h2 {
+      color: var(--primary-darker);
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-top: 0;
+      font-size: 1.6rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+    .settings-section h2 .icon { margin-right: 12px; font-size: 1.8rem;}
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    .profile-picture-settings { /* เปลี่ยนชื่อ class เพื่อไม่ให้ซ้ำกับ .profile-picture ในหน้าหลัก */
+        width: 80px; height: 80px; border-radius: 50%;
+        object-fit: cover; border: 4px solid var(--primary-color); cursor: pointer; transition: transform 0.2s;
+    }
+    .profile-picture-settings:hover { transform: scale(1.05);}
+    #profilePictureInput { display: none; }
+    .profile-details { flex-grow: 1; }
+    .profile-info p { color: var(--text-secondary); line-height: 1.7; font-size: 1rem; margin: 4px 0;}
+    .profile-info strong { color: var(--text-color); font-weight: 500;}
+    .stat-item { display: flex; align-items: center; font-size: 1.2rem; color: var(--text-color);}
+    .stat-item .icon { font-size: 2.5rem; margin-right: 15px; color: #FF9800;}
+    textarea, .settings-section button { /* ใช้ .settings-section button เพื่อเจาะจง */
+        width: 100%; padding: 14px; margin-top: 10px;
+        border-radius: 12px; border: 1px solid var(--border-color);
+        font-size: 1rem; font-family: 'Kanit', sans-serif; box-sizing: border-box;
+    }
+    textarea { background-color: var(--background-color); color: var(--text-color); resize: vertical;}
+    .settings-section button { /* ใช้ .settings-section button เพื่อเจาะจง */
+      color: white; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s; letter-spacing: 0.5px;
+      background: var(--primary-color); /* กำหนดสีเริ่มต้นให้ปุ่มใน settings */
+    }
+    .settings-section button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.15);}
+    #submitFeedbackBtn { background: var(--primary-darker);}
+    #logoutBtn { background-color: var(--danger-color); margin-top: 20px;}
+    .theme-switch-wrapper { display: flex; align-items: center; gap: 10px; margin-bottom: 20px;}
+    .theme-switch { display: inline-block; height: 34px; position: relative; width: 60px;}
+    .theme-switch input { display: none; }
+    .slider {
+        background-color: var(--toggle-bg-off); bottom: 0; cursor: pointer; left: 0;
+        position: absolute; right: 0; top: 0; transition: .4s; border-radius: 34px;
+    }
+    .slider:before {
+        background-color: var(--toggle-circle); bottom: 4px; content: ""; height: 26px; left: 4px;
+        position: absolute; transition: .4s; width: 26px; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--toggle-bg-on);}
+    input:checked + .slider:before { transform: translateX(26px);}
+    .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary-darker); text-decoration: none; font-weight: 500; font-size: 1rem;}
+
+    /* Bottom Navigation Bar (เหมือนใน dashboard.html) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--card-background);
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 1000;
+      border-top-left-radius: 18px;
+      border-top-right-radius: 18px;
+    }
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 5px 10px;
+      cursor: pointer;
+      color: var(--text-color);
+      font-size: 0.85em;
+      text-decoration: none;
+      transition: color 0.2s;
+      flex: 1;
+    }
+    .bottom-nav-item:hover {
+      color: var(--primary-color);
+    }
+    .bottom-nav-item span {
+      font-size: 1.8em;
+      margin-bottom: 4px;
+    }
+    .bottom-nav-item.active {
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+  </script>
+</head>
+<body>
+  <header class="header">
+    <h1>ตั้งค่า</h1>
+    <p>ปรับแต่งบัญชีของคุณ</p>
+  </header>
+
+  <main class="container">
+    <a href="dashboard.html" class="back-link">&larr; กลับไปหน้าหลัก</a>
+
+    <section class="settings-section">
+      <h2><span class="icon">🎨</span> การแสดงผล</h2>
+      <div class="theme-switch-wrapper">
+          <label class="theme-switch" for="dark-mode-toggle">
+              <input type="checkbox" id="dark-mode-toggle" />
+              <span class="slider"></span>
+          </label>
+          <span>โหมดกลางคืน</span>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2><span class="icon">👤</span> โปรไฟล์ของคุณ</h2>
+      <div class="profile-header">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Profile Picture" class="profile-picture-settings" id="settingsProfilePicture" onclick="document.getElementById('profilePictureInput').click();">
+        <input type="file" id="profilePictureInput" accept="image/*">
+        <div class="profile-details">
+            <h3 id="username" style="margin: 0; font-size: 1.5rem; color: var(--text-color);">กำลังโหลด...</h3>
+            <p id="email" style="margin: 0; color: var(--text-secondary);">กำลังโหลด...</p>
+        </div>
+      </div>
+      <button id="logoutBtn">ออกจากระบบ</button>
+    </section>
+
+    <section class="settings-section">
+        <h2><span class="icon">📊</span> สถิติของฉัน</h2>
+        <div class="stat-item">
+<div style="display: flex; align-items: center; gap: 10px;">
+    <span class="icon">🔥</span>
+    <div>
+        <strong>Saving Streak</strong>
+        <p style="margin:0; font-size: 1rem; color: var(--text-secondary);">บันทึกการออมต่อเนื่อง <strong id="saving-streak-days">--</strong> วันแล้ว!</p>
+    </div>
+</div>
+
+<script>
+    // This is a simplified example. In a real application, 'getSavingStreak()' would
+    // interact with your data storage (e.g., a database or local storage).
+    function getSavingStreak() {
+        // For demonstration, let's pretend you have an array of saving dates
+        // (formatted as YYYY-MM-DD for easy comparison).
+        // In a real scenario, these would come from your actual saving records.
+        const savingDates = [
+            '2025-07-13', // Today
+            '2025-07-12',
+            '2025-07-11',
+            '2025-07-10',
+            '2025-07-08' // Gap here, streak ends on 2025-07-11
+        ].map(dateString => new Date(dateString)); // Convert to Date objects
+
+        if (savingDates.length === 0) {
+            return 0; // No savings yet
+        }
+
+        // Sort dates in descending order (most recent first)
+        savingDates.sort((a, b) => b.getTime() - a.getTime());
+
+        let streak = 1;
+        for (let i = 0; i < savingDates.length - 1; i++) {
+            const currentDay = savingDates[i];
+            const previousDay = savingDates[i + 1];
+
+            // Calculate the difference in days
+            const diffTime = Math.abs(currentDay.getTime() - previousDay.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // If the difference is exactly one day, the streak continues
+            if (diffDays === 1) {
+                streak++;
+            } else {
+                // Otherwise, the streak is broken
+                break;
+            }
+        }
+        return streak;
+    }
+
+    // Update the display when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        const streakDaysElement = document.getElementById('saving-streak-days');
+        const currentStreak = getSavingStreak();
+        streakDaysElement.textContent = currentStreak;
+    });
+</script>
+        </div>
+    </section>
+
+    <section class="settings-section">
+        <h2><span class="icon">✍️</span> ข้อเสนอแนะถึงผู้พัฒนา</h2>
+        <form id="feedbackForm">
+          <textarea id="feedbackText" rows="5" placeholder="มีความคิดเห็น, ข้อเสนอแนะ, หรือเจอปัญหา? บอกเราได้เลย..."></textarea>
+          <button id="submitFeedbackBtn" type="submit">ส่งข้อเสนอแนะ</button>
+        </form>
+        <div id="feedbackMessage" style="text-align: center; margin-top: 15px; font-size: 0.9em;"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="bottom-nav-item">
+      <span>🏠</span><p>หน้าหลัก</p>
+    </a>
+    <a href="game-mode.html" class="bottom-nav-item">
+      <span>🎮</span><p>เกม</p>
+    </a>
+    <a href="#" class="bottom-nav-item active">
+      <span>⚙️</span><p>ตั้งค่า</p>
+    </a>
+  </nav>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const settingsProfilePicture = document.getElementById('settingsProfilePicture');
+        const profilePictureInput = document.getElementById('profilePictureInput');
+        const toggleSwitch = document.getElementById('dark-mode-toggle');
+        
+        // --- Dark Mode Logic ---
+        // ตรวจสอบสถานะ Dark Mode จาก localStorage เมื่อโหลดหน้า
+        const enableDark = localStorage.getItem("moneySkillzDarkMode") === "true";
+        if (enableDark) {
+            document.body.classList.add("dark-mode");
+            if (toggleSwitch) toggleSwitch.checked = true;
+        }
+
+        if (toggleSwitch) {
+            toggleSwitch.addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('moneySkillzDarkMode', 'true');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('moneySkillzDarkMode', 'false');
+                }
+            });
+        }
+
+        // --- Firebase & User Logic ---
+        auth.onAuthStateChanged(user => {
+          if (user) {
+            document.getElementById('username').textContent = user.displayName || 'ยังไม่ได้ตั้งชื่อ';
+            document.getElementById('email').textContent = user.email;
+            if (user.photoURL) {
+                if (settingsProfilePicture) settingsProfilePicture.src = user.photoURL;
+            }
+          } else {
+            window.location.href = "login.html"; // Redirect if not logged in
+          }
+        });
+
+        // Profile Picture Upload Logic
+        if (profilePictureInput) {
+            profilePictureInput.addEventListener('change', function() {
+              const file = this.files[0];
+              if (!file) return;
+              const user = auth.currentUser;
+              if (!user) {
+                alert("กรุณาเข้าสู่ระบบก่อนอัปโหลดรูปโปรไฟล์");
+                return;
+              }
+              const storageRef = storage.ref('profile_pictures/' + user.uid);
+              storageRef.put(file).then(() => {
+                storageRef.getDownloadURL().then(url => {
+                  user.updateProfile({ photoURL: url }).then(() => {
+                    if (settingsProfilePicture) settingsProfilePicture.src = url;
+                    alert('อัปโหลดรูปโปรไฟล์เรียบร้อยแล้ว');
+                  }).catch(error => {
+                      console.error("Error updating profile photoURL:", error);
+                      alert("เกิดข้อผิดพลาดในการอัปเดต URL รูปโปรไฟล์: " + error.message);
+                  });
+                });
+              }).catch(error => {
+                  console.error("Error uploading profile picture:", error);
+                  alert("เกิดข้อผิดพลาดในการอัปโหลดรูปโปรไฟล์: " + error.message);
+              });
+            });
+        }
+
+        // Logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+              auth.signOut().then(() => {
+                window.location.href = "login.html";
+              }).catch(error => {
+                  console.error("Error signing out:", error);
+                  alert("เกิดข้อผิดพลาดในการออกจากระบบ: " + error.message);
+              });
+            });
+        }
+        
+        // Feedback Form
+        const feedbackForm = document.getElementById('feedbackForm');
+        if (feedbackForm) {
+            feedbackForm.addEventListener('submit', function(e){
+                e.preventDefault();
+                const text = document.getElementById('feedbackText').value.trim();
+                const feedbackMessageElem = document.getElementById('feedbackMessage');
+                if (!text) {
+                    if (feedbackMessageElem) {
+                        feedbackMessageElem.textContent = "กรุณากรอกข้อความ";
+                        feedbackMessageElem.style.color = "red";
+                    }
+                    return;
+                }
+                db.collection('feedback').add({
+                    message: text,
+                    createdAt: new Date(),
+                    user: auth.currentUser ? auth.currentUser.uid : null
+                }).then(() => {
+                    if (feedbackMessageElem) {
+                        feedbackMessageElem.textContent = "ส่งข้อความเรียบร้อยแล้ว ขอบคุณ!";
+                        feedbackMessageElem.style.color = "var(--success-color)";
+                    }
+                    document.getElementById('feedbackText').value = '';
+                }).catch(error => {
+                    console.error("Error sending feedback:", error);
+                    if (feedbackMessageElem) {
+                        feedbackMessageElem.textContent = "เกิดข้อผิดพลาดในการส่งข้อความ: " + error.message;
+                        feedbackMessageElem.style.color = "red";
+                    }
+                });
+            });
+        }
+    });
+  </script>
+</body>
+</html>
