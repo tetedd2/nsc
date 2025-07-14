@@ -1,53 +1,68 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>➕ เพิ่มรายการ - MoneySkillz</title>
-  <link rel="stylesheet" href="add-transaction.css">
-  <link rel="stylesheet" href="theme-darkmode.css">
-  <!-- Firebase SDK + config (เวอร์ชันใหม่/โปรเจ็กต์ใหม่) -->
-  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
-      authDomain: "myapplication-bd04c034.firebaseapp.com",
-      projectId: "myapplication-bd04c034",
-      storageBucket: "myapplication-bd04c034.appspot.com",  // ← ต้องลงท้าย .appspot.com
-      messagingSenderId: "49782830313",
-      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-  </script>
+    <meta charset="UTF-8">
+    <title>💰 เพิ่มรายการ - MoneySkillz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="add-goal.css">
+    <link rel="stylesheet" href="theme-darkmode.css">
+    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+            authDomain: "myapplication-bd04c034.firebaseapp.com",
+            projectId: "myapplication-bd04c034",
+            storageBucket: "myapplication-bd04c034.appspot.com",
+            messagingSenderId: "49782830313",
+            appId: "1:49782830313:web:c81b5d868940fe1c03e031"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+    </script>
 </head>
 <body>
 
-<div class="form-box">
-  <h2>เพิ่มรายการใหม่</h2>
-  <form onsubmit="saveTransaction(event)">
-    <label for="type">ประเภท</label>
-    <select id="type" required>
-      <option value="">-- เลือกประเภท --</option>
-      <option value="income">รายรับ</option>
-      <option value="expense">รายจ่าย</option>
-    </select>
+    <header class="header">
+        <a href="dashboard.html" class="back-btn">
+            <span class="arrow">‹</span> กลับไปหน้าหลัก
+        </a>
+        <h1>MoneySkillz</h1>
+        <p>บันทึกรายรับ-รายจ่ายของคุณ</p>
+        <div class="avatar-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Avatar">
+        </div>
+    </header>
 
-    <label for="name">ชื่อรายการ</label>
-    <input type="text" id="name" required placeholder="เช่น เงินเดือน / ค่าน้ำ">
+    <div class="container user-info-placeholder"></div>
 
-    <label for="amount">จำนวนเงิน (บาท)</label>
-    <input type="number" id="amount" required min="1" max="1000000" placeholder="กรอกจำนวน">
+    <div class="container card-section form-box">
+        <h2>💰 เพิ่มรายการธุรกรรม</h2>
+        <form onsubmit="saveTransaction(event)">
+            <label for="type">ประเภท</label>
+            <select id="type" onchange="updateCategories()" required>
+                <option value="income">รายรับ</option>
+                <option value="expense" selected>รายจ่าย</option>
+            </select>
+            <label for="amount">จำนวนเงิน (บาท)</label>
+            <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required>
 
-    <label for="date">วันที่</label>
-    <input type="date" id="date" required>
+            <label for="date">วันที่</label>
+            <input type="date" id="date" required>
 
-    <button type="submit">บันทึกรายการ</button>
-  </form>
-</div>
+            <label for="description">คำอธิบาย (ไม่บังคับ)</label>
+            <textarea id="description" rows="3" placeholder="เช่น ค่ากาแฟ, เงินเดือน"></textarea>
 
-<script src="add-transaction.js"></script>
-<script src="darkmode-toggle.js"></script>
+            <button type="submit" class="submit-btn">บันทึกรายการ</button>
+        </form>
+    </div>
+
+    <script src="add-transaction.js"></script>
+    <script src="darkmode-toggle.js"></script>
 </body>
 </html>

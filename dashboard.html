@@ -75,21 +75,27 @@
       </div>
     </div>
 
-    <div id="goalDisplay" class="container card-section">
-      <h2><span class="icon">🎯</span> เป้าหมายการออมของฉัน</h2>
-      <div class="goal-navigation">
-        <button id="prevGoal" class="goal-nav-btn">&#8249;</button>
-        <div id="goalDetails">
-          <h3 id="goalTitle">- ยังไม่มีเป้าหมาย -</h3>
-          <div class="goal-progress-bar-container">
-            <div id="goalProgressBar" class="goal-progress-bar">0%</div>
-          </div>
-          <p id="goalAmount">เป้าหมาย: 0.00 ฿</p>
-          <p id="goalSavings">ออมแล้ว: 0.00 ฿</p>
-          <p id="goalDueDate">กำหนด: -</p>
-        </div>
-        <button id="nextGoal" class="goal-nav-btn">&#8250;</button>
+<div id="goalDisplay" class="container card-section">
+  <h2><span class="icon">🎯</span> เป้าหมายการออมของฉัน</h2>
+  <div class="goal-navigation">
+    <button id="prevGoal" class="goal-nav-btn">&#8249;</button>
+    <div id="goalDetails">
+      <!-- กรณีไม่มีเป้าหมาย -->
+      <p class="no-goal-message" id="noGoalMsg">- ยังไม่มีเป้าหมายที่ตั้งไว้ -</p>
+      <!-- กรณีมีเป้าหมาย ซ่อนบรรทัดบน แล้วโชว์ข้อมูลเป้าหมายจริง -->
+      <h3 id="goalTitle" style="display:none;">-</h3>
+      <div class="goal-progress-bar-container" style="display:none;">
+        <div id="goalProgressBar" class="goal-progress-bar">0%</div>
       </div>
+      <p id="goalAmount" style="display:none;">เป้าหมาย: 0.00 ฿</p>
+      <p id="goalSavings" style="display:none;">ออมแล้ว: 0.00 ฿</p>
+      <p id="goalDueDate" style="display:none;">กำหนด: -</p>
+    </div>
+    <button id="nextGoal" class="goal-nav-btn">&#8250;</button>
+    
+  </div>
+</div>
+
     </div>
 
     <div class="container card-section">

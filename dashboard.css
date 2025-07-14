@@ -497,3 +497,17 @@ body.dark-mode .chat-message.ai { background-color: #3a3a3a; }
     font-weight: 600; transition: background-color 0.2s ease;
 }
 #aiChatForm button:hover { background: var(--primary-darker); }
+.no-goal-message {
+  font-size: 0.82em;      /* <<< ลดขนาดลง */
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin: 24px 0 8px 0;
+  text-align: center;
+  letter-spacing: 0.1px;
+  opacity: 0.8;
+}
+@media (max-width: 500px) {
+  .no-goal-message {
+    font-size: 0.78em;
+  }
+}
