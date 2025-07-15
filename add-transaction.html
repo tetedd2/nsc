@@ -1,232 +1,172 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <title>💰 เพิ่มรายการ - MoneySkillz</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="add-transaction.css">
-    <link rel="stylesheet" href="theme-darkmode.css">
-    <!-- Firebase Modular SDKs -->
-    <script type="module">
-        // Import necessary Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        // Global variables provided by the Canvas environment for Firebase configuration
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Initialize Firebase app
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app); // Get Firestore instance
-        const auth = getAuth(app);   // Get Auth instance
-
-        // Make Firebase instances and functions globally accessible to add-transaction.js
-        // This is crucial for the separate JS file to interact with Firebase
-        window.app = app;
-        window.db = db;
-        window.auth = auth;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.collection = collection;
-        window.addDoc = addDoc;
-        window.serverTimestamp = serverTimestamp;
-        window.appId = appId; // Make appId globally accessible for Firestore paths
-
-        // Function for custom message box (moved here to ensure it's defined before any calls)
-        // This function displays a custom modal-like message box instead of alert()
-        window.showMessageBox = function(message, type = "info", onConfirm = null) {
-            const messageBox = document.getElementById('messageBox');
-            const messageBoxContent = document.getElementById('messageBoxContent');
-            const messageText = document.getElementById('messageText');
-            const messageCloseBtn = document.getElementById('messageCloseBtn');
-
-            // Update message text
-            messageText.textContent = message;
-
-            // Remove all previous type classes and add the new one for styling
-            messageBoxContent.classList.remove('success', 'error', 'info');
-            messageBoxContent.classList.add(type);
-
-            // Show the message box by changing display style
-            messageBox.style.display = 'flex';
-            // Add a small delay to allow CSS transition to work for the 'show' class
-            setTimeout(() => {
-                messageBox.classList.add('show'); // Trigger animation
-            }, 10);
-
-            // Event listener for the close button inside the message box
-            messageCloseBtn.onclick = function() {
-                messageBox.classList.remove('show'); // Trigger reverse animation
-                // Hide the message box after the animation completes
-                setTimeout(() => {
-                    messageBox.style.display = 'none';
-                    if (onConfirm) {
-                        onConfirm(); // Execute the callback function if provided
-                    }
-                }, 300); // Duration matches CSS transition
-            };
-
-            // Event listener to close the message box if clicking outside its content
-            messageBox.onclick = function(event) {
-                if (event.target === messageBox) { // Check if the click was on the overlay itself
-                    messageBox.classList.remove('show');
-                    setTimeout(() => {
-                        messageBox.style.display = 'none';
-                        if (onConfirm) {
-                            onConfirm();
-                        }
-                    }, 300);
-                }
-            };
-        };
-
-        // Function to authenticate the user (either with custom token or anonymously)
-        async function authenticateUser() {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("Signed in with custom token.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Signed in anonymously.");
-                }
-            } catch (error) {
-                console.error("Firebase authentication error:", error);
-                // Display an error message using the custom message box
-                if (typeof window.showMessageBox === 'function') {
-                    window.showMessageBox("เกิดข้อผิดพลาดในการเข้าสู่ระบบ: " + error.message, "error");
-                } else {
-                    console.error("showMessageBox function not found. Cannot display error.");
-                }
-            }
-        }
-
-        // Call authentication function when the script loads
-        authenticateUser();
-    </script>
+  <meta charset="UTF-8">
+  <title>💰 เพิ่มรายการ - MoneySkillz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="add-transaction.css">
+  <link rel="stylesheet" href="theme-darkmode.css">
 </head>
 <body>
 
-    <header class="header">
-        <a href="dashboard.html" class="back-btn">
-            <span class="arrow">‹</span> กลับไปหน้าหลัก
-        </a>
-        <h1>MoneySkillz</h1>
-        <p>บันทึกรายรับ-รายจ่ายของคุณ</p>
-        <div class="avatar-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Avatar">
-        </div>
-    </header>
-
-    <div class="container user-info-placeholder"></div>
-
-    <div class="container card-section form-box">
-        <h2>💰 เพิ่มรายการธุรกรรม</h2>
-        <form onsubmit="saveTransaction(event)">
-            <label for="type">ประเภท</label>
-            <select id="type" onchange="updateCategories()" required>
-                <option value="income">รายรับ</option>
-                <option value="expense" selected>รายจ่าย</option>
-            </select>
-            <label for="amount">จำนวนเงิน (บาท)</label>
-            <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required>
-
-            <label for="date">วันที่</label>
-            <input type="date" id="date" required>
-
-            <label for="description">คำอธิบาย (ไม่บังคับ)</label>
-            <textarea id="description" rows="3" placeholder="เช่น ค่ากาแฟ, เงินเดือน"></textarea>
-
-            <button type="submit" class="submit-btn">บันทึกรายการ</button>
-        </form>
+  <header class="header">
+    <a href="dashboard.html" class="back-btn">
+      <span class="arrow">‹</span> กลับไปหน้าหลัก
+    </a>
+    <h1>MoneySkillz</h1>
+    <p>บันทึกรายรับ-รายจ่ายของคุณ</p>
+    <div class="avatar-box">
+      <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Avatar">
     </div>
+  </header>
 
-    <!-- Custom Message Box HTML structure -->
-    <div id="messageBox" class="message-box">
-        <div id="messageBoxContent" class="message-box-content">
-            <p id="messageText"></p>
-            <button id="messageCloseBtn">ตกลง</button>
-        </div>
+  <div class="container card-section form-box">
+    <h2>💰 เพิ่มรายการธุรกรรม</h2>
+    <form onsubmit="saveTransaction(event)">
+      <label for="type">ประเภท</label>
+      <select id="type" required>
+        <option value="income">รายรับ</option>
+        <option value="expense" selected>รายจ่าย</option>
+      </select>
+
+      <label for="amount">จำนวนเงิน (บาท)</label>
+      <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required>
+
+      <label for="date">วันที่</label>
+      <input type="date" id="date" required>
+
+      <label for="description">คำอธิบาย (ไม่บังคับ)</label>
+      <textarea id="description" rows="3" placeholder="เช่น ค่ากาแฟ, เงินเดือน"></textarea>
+
+      <button type="submit" class="submit-btn">บันทึกรายการ</button>
+    </form>
+  </div>
+
+  <!-- กล่องแจ้งเตือนแบบ modal -->
+  <div id="messageBox" class="message-box">
+    <div id="messageBoxContent" class="message-box-content">
+      <p id="messageText"></p>
+      <button id="messageCloseBtn">ตกลง</button>
     </div>
+  </div>
 
-    <!-- Link to external JavaScript and dark mode toggle script -->
-    <script src="add-transaction.js"></script>
-    <script src="darkmode-toggle.js"></script>
+  <script>
+    // ตั้งค่าวันที่อัตโนมัติ
+    document.addEventListener("DOMContentLoaded", () => {
+      const dateInput = document.getElementById('date');
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+    });
 
-    <!-- Inline CSS for the custom message box -->
-    <style>
-        .message-box {
-            display: none; /* Hidden by default, controlled by JS */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top of everything */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if content is too large */
-            background-color: rgba(0,0,0,0.6); /* Semi-transparent black overlay */
-            justify-content: center; /* Center content horizontally */
-            align-items: center; /* Center content vertically */
-            text-align: center;
+    // กล่องข้อความสวยงาม
+    function showMessageBox(message, type = "info", onConfirm = null) {
+      const box = document.getElementById("messageBox");
+      const content = document.getElementById("messageBoxContent");
+      const text = document.getElementById("messageText");
+      const closeBtn = document.getElementById("messageCloseBtn");
+
+      text.textContent = message;
+      content.classList.remove("success", "error", "info");
+      content.classList.add(type);
+      box.style.display = "flex";
+      setTimeout(() => box.classList.add("show"), 10);
+
+      closeBtn.onclick = () => {
+        box.classList.remove("show");
+        setTimeout(() => {
+          box.style.display = "none";
+          if (onConfirm) onConfirm();
+        }, 300);
+      };
+
+      box.onclick = (e) => {
+        if (e.target === box) {
+          box.classList.remove("show");
+          setTimeout(() => {
+            box.style.display = "none";
+            if (onConfirm) onConfirm();
+          }, 300);
         }
+      };
+    }
 
-        .message-box-content {
-            background-color: var(--card-background);
-            margin: auto;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 25px var(--shadow-color);
-            width: 90%;
-            max-width: 400px;
-            transform: scale(0.9); /* Initial state for animation */
-            opacity: 0; /* Initial state for animation */
-            transition: all 0.3s ease-out; /* Smooth transition for appearance */
-        }
+    // ฟังก์ชันบันทึกรายการ
+    function saveTransaction(event) {
+      event.preventDefault();
 
-        .message-box.show .message-box-content {
-            transform: scale(1); /* Final state for animation */
-            opacity: 1; /* Final state for animation */
-        }
+      const type = document.getElementById('type').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const date = document.getElementById('date').value;
+      const description = document.getElementById('description').value.trim();
+      const name = description || (type === "income" ? "รายรับไม่ระบุ" : "รายจ่ายไม่ระบุ");
 
-        .message-box-content p {
-            font-size: 1.1em;
-            margin-bottom: 25px;
-            color: var(--text-color);
-        }
+      if (!type || !amount || amount <= 0 || !date) {
+        showMessageBox("กรุณากรอกข้อมูลให้ครบถ้วน", "error");
+        return;
+      }
 
-        .message-box-content button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
-        }
+      const transaction = { type, name, amount, date };
+      let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+      transactions.push(transaction);
+      localStorage.setItem("transactions", JSON.stringify(transactions));
 
-        .message-box-content button:hover {
-            background-color: var(--primary-darker);
-        }
+      showMessageBox("บันทึกรายการสำเร็จ!", "success", () => {
+        window.location.href = "dashboard.html";
+      });
+    }
+  </script>
 
-        /* Styling for different message types */
-        .message-box-content.success {
-            border: 2px solid var(--success-color);
-        }
+  <style>
+    .message-box {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
 
-        .message-box-content.error {
-            border: 2px solid var(--danger-color);
-        }
+    .message-box-content {
+      background-color: var(--card-background, white);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 400px;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.3s ease-out;
+    }
 
-        .message-box-content.info {
-            border: 2px solid var(--highlight-color);
-        }
-    </style>
+    .message-box.show .message-box-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .message-box-content p {
+      font-size: 1.1em;
+      margin-bottom: 25px;
+      color: var(--text-color, #333);
+    }
+
+    .message-box-content button {
+      background-color: #009688;
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    .message-box-content.success { border: 2px solid green; }
+    .message-box-content.error { border: 2px solid red; }
+    .message-box-content.info { border: 2px solid #2196f3; }
+  </style>
 </body>
 </html>
