@@ -7,23 +7,107 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="add-goal.css">
+    <link rel="stylesheet" href="add-transaction.css">
     <link rel="stylesheet" href="theme-darkmode.css">
-    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
-            authDomain: "myapplication-bd04c034.firebaseapp.com",
-            projectId: "myapplication-bd04c034",
-            storageBucket: "myapplication-bd04c034.appspot.com",
-            messagingSenderId: "49782830313",
-            appId: "1:49782830313:web:c81b5d868940fe1c03e031"
+    <!-- Firebase Modular SDKs -->
+    <script type="module">
+        // Import necessary Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment for Firebase configuration
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase app
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // Get Firestore instance
+        const auth = getAuth(app);   // Get Auth instance
+
+        // Make Firebase instances and functions globally accessible to add-transaction.js
+        // This is crucial for the separate JS file to interact with Firebase
+        window.app = app;
+        window.db = db;
+        window.auth = auth;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.serverTimestamp = serverTimestamp;
+        window.appId = appId; // Make appId globally accessible for Firestore paths
+
+        // Function for custom message box (moved here to ensure it's defined before any calls)
+        // This function displays a custom modal-like message box instead of alert()
+        window.showMessageBox = function(message, type = "info", onConfirm = null) {
+            const messageBox = document.getElementById('messageBox');
+            const messageBoxContent = document.getElementById('messageBoxContent');
+            const messageText = document.getElementById('messageText');
+            const messageCloseBtn = document.getElementById('messageCloseBtn');
+
+            // Update message text
+            messageText.textContent = message;
+
+            // Remove all previous type classes and add the new one for styling
+            messageBoxContent.classList.remove('success', 'error', 'info');
+            messageBoxContent.classList.add(type);
+
+            // Show the message box by changing display style
+            messageBox.style.display = 'flex';
+            // Add a small delay to allow CSS transition to work for the 'show' class
+            setTimeout(() => {
+                messageBox.classList.add('show'); // Trigger animation
+            }, 10);
+
+            // Event listener for the close button inside the message box
+            messageCloseBtn.onclick = function() {
+                messageBox.classList.remove('show'); // Trigger reverse animation
+                // Hide the message box after the animation completes
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                    if (onConfirm) {
+                        onConfirm(); // Execute the callback function if provided
+                    }
+                }, 300); // Duration matches CSS transition
+            };
+
+            // Event listener to close the message box if clicking outside its content
+            messageBox.onclick = function(event) {
+                if (event.target === messageBox) { // Check if the click was on the overlay itself
+                    messageBox.classList.remove('show');
+                    setTimeout(() => {
+                        messageBox.style.display = 'none';
+                        if (onConfirm) {
+                            onConfirm();
+                        }
+                    }, 300);
+                }
+            };
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+
+        // Function to authenticate the user (either with custom token or anonymously)
+        async function authenticateUser() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Signed in with custom token.");
+                } else {
+                    await signInAnonymously(auth);
+                    console.log("Signed in anonymously.");
+                }
+            } catch (error) {
+                console.error("Firebase authentication error:", error);
+                // Display an error message using the custom message box
+                if (typeof window.showMessageBox === 'function') {
+                    window.showMessageBox("เกิดข้อผิดพลาดในการเข้าสู่ระบบ: " + error.message, "error");
+                } else {
+                    console.error("showMessageBox function not found. Cannot display error.");
+                }
+            }
+        }
+
+        // Call authentication function when the script loads
+        authenticateUser();
     </script>
 </head>
 <body>
@@ -62,7 +146,87 @@
         </form>
     </div>
 
+    <!-- Custom Message Box HTML structure -->
+    <div id="messageBox" class="message-box">
+        <div id="messageBoxContent" class="message-box-content">
+            <p id="messageText"></p>
+            <button id="messageCloseBtn">ตกลง</button>
+        </div>
+    </div>
+
+    <!-- Link to external JavaScript and dark mode toggle script -->
     <script src="add-transaction.js"></script>
     <script src="darkmode-toggle.js"></script>
+
+    <!-- Inline CSS for the custom message box -->
+    <style>
+        .message-box {
+            display: none; /* Hidden by default, controlled by JS */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top of everything */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if content is too large */
+            background-color: rgba(0,0,0,0.6); /* Semi-transparent black overlay */
+            justify-content: center; /* Center content horizontally */
+            align-items: center; /* Center content vertically */
+            text-align: center;
+        }
+
+        .message-box-content {
+            background-color: var(--card-background);
+            margin: auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px var(--shadow-color);
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9); /* Initial state for animation */
+            opacity: 0; /* Initial state for animation */
+            transition: all 0.3s ease-out; /* Smooth transition for appearance */
+        }
+
+        .message-box.show .message-box-content {
+            transform: scale(1); /* Final state for animation */
+            opacity: 1; /* Final state for animation */
+        }
+
+        .message-box-content p {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            color: var(--text-color);
+        }
+
+        .message-box-content button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .message-box-content button:hover {
+            background-color: var(--primary-darker);
+        }
+
+        /* Styling for different message types */
+        .message-box-content.success {
+            border: 2px solid var(--success-color);
+        }
+
+        .message-box-content.error {
+            border: 2px solid var(--danger-color);
+        }
+
+        .message-box-content.info {
+            border: 2px solid var(--highlight-color);
+        }
+    </style>
 </body>
 </html>

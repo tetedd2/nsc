@@ -1,5 +1,6 @@
-/* add-goal.css */
+/* add-goal.css - General styling for the form and page */
 :root {
+  /* Define CSS variables for colors to easily switch themes */
   --primary-color: #26A69A;
   --primary-darker: #00796B;
   --background-color: #f4f7f6;
@@ -14,6 +15,7 @@
   --light-teal: #E0F2F1;
 }
 
+/* Dark mode specific styles */
 body.dark-mode {
   --background-color: #1a1a1a;
   --card-background: #282828;
@@ -23,12 +25,14 @@ body.dark-mode {
   --shadow-color: rgba(0, 0, 0, 0.4);
 }
 
+/* Universal box-sizing for consistent layout */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* Body styling: font, background, text color, line height */
 body {
   font-family: 'Kanit', sans-serif;
   background-color: var(--background-color);
@@ -36,6 +40,7 @@ body {
   line-height: 1.6;
 }
 
+/* Container for main content, responsive width */
 .container {
   width: 90%;
   max-width: 550px;
@@ -43,6 +48,7 @@ body {
   padding: 0 20px;
 }
 
+/* Header styling with gradient background */
 .header {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-darker));
   color: white;
@@ -64,6 +70,7 @@ body {
   opacity: 0.9;
 }
 
+/* Avatar box styling, positioned at the bottom center of the header */
 .avatar-box {
   width: 100px;
   height: 100px;
@@ -87,10 +94,12 @@ body {
   object-fit: cover;
 }
 
+/* Placeholder to push content down due to avatar box */
 .user-info-placeholder {
   height: 60px;
 }
 
+/* Back button styling */
 .back-btn {
   position: absolute;
   top: 25px;
@@ -116,6 +125,7 @@ body {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
+/* Form box styling */
 .card-section.form-box {
   background-color: var(--card-background);
   padding: 30px;
@@ -132,10 +142,12 @@ body {
   font-weight: 600;
 }
 
+/* Dark mode specific heading color */
 body.dark-mode .form-box h2 {
     color: var(--highlight-color);
 }
 
+/* Label styling */
 label {
   display: block;
   margin-bottom: 8px;
@@ -144,6 +156,7 @@ label {
   font-size: 1em;
 }
 
+/* Styling for input fields, select, and textarea */
 input[type="text"],
 input[type="number"],
 input[type="date"],
@@ -161,16 +174,19 @@ textarea {
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
+/* Focus state for input fields */
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px var(--highlight-color);
 }
 
+/* Allow vertical resizing for textarea */
 textarea {
     resize: vertical;
 }
 
+/* Submit button styling */
 .submit-btn {
   width: 100%;
   padding: 15px;
