@@ -9,6 +9,50 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="add-transaction.css">
   <link rel="stylesheet" href="theme-darkmode.css">
+  <style>
+    .message-box {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .message-box-content {
+      background-color: var(--card-background, white);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 400px;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.3s ease-out;
+    }
+    .message-box.show .message-box-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .message-box-content p {
+      font-size: 1.1em;
+      margin-bottom: 25px;
+      color: var(--text-color, #333);
+    }
+    .message-box-content button {
+      background-color: #009688;
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    .message-box-content.success { border: 2px solid green; }
+    .message-box-content.error { border: 2px solid red; }
+    .message-box-content.info { border: 2px solid #2196f3; }
+  </style>
 </head>
 <body>
 
@@ -45,7 +89,6 @@
     </form>
   </div>
 
-  <!-- กล่องแจ้งเตือนแบบ modal -->
   <div id="messageBox" class="message-box">
     <div id="messageBoxContent" class="message-box-content">
       <p id="messageText"></p>
@@ -53,7 +96,29 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <script>
+    // Firebase Config (เหมือนกับไฟล์อื่น)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.firebasestorage.app",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
     // ตั้งค่าวันที่อัตโนมัติ
     document.addEventListener("DOMContentLoaded", () => {
       const dateInput = document.getElementById('date');
@@ -61,7 +126,7 @@
       dateInput.value = today;
     });
 
-    // กล่องข้อความสวยงาม
+    // กล่องข้อความ
     function showMessageBox(message, type = "info", onConfirm = null) {
       const box = document.getElementById("messageBox");
       const content = document.getElementById("messageBoxContent");
@@ -69,12 +134,12 @@
       const closeBtn = document.getElementById("messageCloseBtn");
 
       text.textContent = message;
-      content.classList.remove("success", "error", "info");
+      content.className = 'message-box-content'; // Reset classes
       content.classList.add(type);
       box.style.display = "flex";
       setTimeout(() => box.classList.add("show"), 10);
 
-      closeBtn.onclick = () => {
+      const closeHandler = () => {
         box.classList.remove("show");
         setTimeout(() => {
           box.style.display = "none";
@@ -82,91 +147,56 @@
         }, 300);
       };
 
+      closeBtn.onclick = closeHandler;
       box.onclick = (e) => {
         if (e.target === box) {
-          box.classList.remove("show");
-          setTimeout(() => {
-            box.style.display = "none";
-            if (onConfirm) onConfirm();
-          }, 300);
+          closeHandler();
         }
       };
     }
 
-    // ฟังก์ชันบันทึกรายการ
+    // ฟังก์ชันบันทึกรายการ (แก้ไขให้ใช้ v8 compat)
     function saveTransaction(event) {
-      event.preventDefault();
+        event.preventDefault();
 
-      const type = document.getElementById('type').value;
-      const amount = parseFloat(document.getElementById('amount').value);
-      const date = document.getElementById('date').value;
-      const description = document.getElementById('description').value.trim();
-      const name = description || (type === "income" ? "รายรับไม่ระบุ" : "รายจ่ายไม่ระบุ");
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                const type = document.getElementById('type').value;
+                const amount = parseFloat(document.getElementById('amount').value);
+                const date = document.getElementById('date').value;
+                const description = document.getElementById('description').value.trim();
+                
+                if (!type || !amount || amount <= 0 || !date) {
+                    showMessageBox("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง", "error");
+                    return;
+                }
 
-      if (!type || !amount || amount <= 0 || !date) {
-        showMessageBox("กรุณากรอกข้อมูลให้ครบถ้วน", "error");
-        return;
-      }
+                const transaction = {
+                    type: type,
+                    description: description || (type === 'income' ? 'รายรับไม่ระบุ' : 'รายจ่ายไม่ระบุ'),
+                    amount: amount,
+                    date: date,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
 
-      const transaction = { type, name, amount, date };
-      let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-      transactions.push(transaction);
-      localStorage.setItem("transactions", JSON.stringify(transactions));
+                db.collection('users').doc(user.uid).collection('transactions').add(transaction)
+                    .then(() => {
+                        showMessageBox("บันทึกรายการสำเร็จ!", "success", () => {
+                            window.location.href = "dashboard.html";
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error adding document: ", error);
+                        showMessageBox("เกิดข้อผิดพลาดในการบันทึก: " + error.message, "error");
+                    });
 
-      showMessageBox("บันทึกรายการสำเร็จ!", "success", () => {
-        window.location.href = "dashboard.html";
-      });
+            } else {
+                showMessageBox("กรุณาเข้าสู่ระบบก่อนบันทึกรายการ", "info", () => {
+                    window.location.href = "login.html";
+                });
+            }
+        });
     }
   </script>
-
-  <style>
-    .message-box {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0; top: 0; width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-
-    .message-box-content {
-      background-color: var(--card-background, white);
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-      width: 90%;
-      max-width: 400px;
-      transform: scale(0.9);
-      opacity: 0;
-      transition: all 0.3s ease-out;
-    }
-
-    .message-box.show .message-box-content {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    .message-box-content p {
-      font-size: 1.1em;
-      margin-bottom: 25px;
-      color: var(--text-color, #333);
-    }
-
-    .message-box-content button {
-      background-color: #009688;
-      color: white;
-      padding: 10px 25px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1em;
-    }
-
-    .message-box-content.success { border: 2px solid green; }
-    .message-box-content.error { border: 2px solid red; }
-    .message-box-content.info { border: 2px solid #2196f3; }
-  </style>
 </body>
 </html>
