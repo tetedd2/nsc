@@ -1,8 +1,7 @@
-/* exit-app.js (ฉบับแก้ไข) */
-/* Logic สำหรับการกดย้อนกลับสองครั้งเพื่อออกจากแอป */
-
+/* exit-app.js (Final Version) */
+/* สคริปต์นี้จะทำงานเฉพาะหน้าหลัก เพื่อดักจับการกดย้อนกลับ 2 ครั้งเพื่อออกจากแอป */
 document.addEventListener('DOMContentLoaded', () => {
-    // สร้างกล่องข้อความ (Toast) ด้วย JavaScript
+    // สร้างกล่องข้อความ (Toast) ขึ้นมาเอง ถ้ายังไม่มี
     let toast = document.getElementById('exitToast');
     if (!toast) {
         toast = document.createElement('div');
@@ -12,35 +11,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(toast);
     }
 
-    // --- เริ่ม Logic ใหม่ที่เสถียรกว่า ---
+    let backPressTimer = null;
 
-    // 1. "วางกับดัก" ใน history เมื่อหน้าเว็บโหลดเสร็จ
-    // ทำให้ history stack เป็น [..., หน้าปัจจุบัน, กับดัก]
-    history.pushState(null, '', null);
+    // 1. "วางกับดัก" ใน history ของเบราว์เซอร์เมื่อหน้าเว็บโหลดเสร็จ
+    history.pushState({ isTrap: true }, null, "");
 
-    let allowExit = false;
-
-    window.addEventListener('popstate', function(event) {
-        // 2. เมื่อผู้ใช้กดย้อนกลับครั้งแรก browser จะ pop "กับดัก" ออก
-        // แต่ตัว event listener ของเราจะทำงานก่อนที่หน้าจะเปลี่ยน
-        if (allowExit) {
-            // ถ้ากดครั้งที่ 2 ภายใน 2 วินาที (allowExit เป็น true)
-            // เราจะไม่ทำอะไรเลย ปล่อยให้ browser ทำงานย้อนกลับตามปกติ (ซึ่งก็คือการออกจากแอป)
-            return;
+    window.addEventListener('popstate', function(e) {
+        // 2. เมื่อผู้ใช้กดย้อนกลับครั้งแรก
+        if (backPressTimer) {
+            // ถ้ากดครั้งที่ 2 ภายในเวลาที่กำหนด ให้ปล่อยแอปปิดไปตามปกติ
+            clearTimeout(backPressTimer);
+            return; // ไม่ต้องทำอะไร ปล่อยให้ browser ทำงาน
         }
 
-        // ถ้าเป็นการกดครั้งแรก (allowExit เป็น false)
-        allowExit = true; // ตั้งค่าสถานะว่ากดครั้งแรกแล้ว
-        toast.classList.add('show'); // แสดงข้อความ
+        // 3. แสดงข้อความเตือน
+        toast.classList.add('show');
 
-        // ถ้าไม่กดครั้งที่ 2 ภายใน 2 วินาที ให้รีเซ็ตสถานะ
-        setTimeout(() => {
-            allowExit = false;
+        // 4. "วางกับดัก" กลับเข้าไปใน history อีกครั้งทันที!
+        //    ขั้นตอนนี้สำคัญมาก เพราะมันจะ "ยกเลิก" การย้อนกลับครั้งแรก
+        //    และ "ล็อก" ให้ผู้ใช้ยังคงอยู่ในหน้าแอปเหมือนเดิม
+        history.pushState({ isTrap: true }, null, "");
+
+        // 5. ตั้งเวลา 2 วินาที ถ้าไม่กดซ้ำ สถานะจะถูกรีเซ็ต
+        backPressTimer = setTimeout(() => {
             toast.classList.remove('show');
+            backPressTimer = null;
         }, 2000);
-
-        // 3. "วางกับดัก" กลับเข้าไปใน history อีกครั้ง
-        // เพื่อดักการกดครั้งต่อไป และป้องกันไม่ให้แอปปิดในครั้งแรก
-        history.pushState(null, '', null);
     });
 });
