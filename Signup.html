@@ -44,6 +44,11 @@
       font-size: 1.13rem;
       opacity: 0.85;
     }
+    /* Style for password container */
+    .password-container {
+      position: relative;
+      width: 100%;
+    }
     input {
       width: 100%; padding: 11px;
       margin: 10px 0 5px;
@@ -52,6 +57,21 @@
       font-size: 1.04rem;
       background: #f8fefe;
       transition: border 0.19s;
+      box-sizing: border-box; /* Ensure padding doesn't affect width */
+    }
+    /* Make password input have padding on the right for the icon */
+    input[type="password"], input[type="text"]#password {
+        padding-right: 40px;
+    }
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+        font-size: 1.2rem;
+        user-select: none; /* Prevents text selection */
     }
     input:focus { border: 1.5px solid #009688; outline: none; }
     button {
@@ -101,7 +121,17 @@
     <form id="registerForm" autocomplete="on">
       <input type="text" id="username" placeholder="ชื่อผู้ใช้" required autocomplete="username"/>
       <input type="email" id="email" placeholder="อีเมล" required autocomplete="email"/>
-      <input type="password" id="password" placeholder="รหัสผ่าน" required autocomplete="new-password"/>
+      
+      <div class="password-container">
+        <input type="password" id="password" placeholder="รหัสผ่าน" required autocomplete="new-password"/>
+        <span class="toggle-password">👁️</span>
+      </div>
+
+      <div class="password-container">
+        <input type="password" id="confirmPassword" placeholder="ยืนยันรหัสผ่าน" required autocomplete="new-password"/>
+        <span class="toggle-password">👁️</span>
+      </div>
+
       <button type="submit">สมัครสมาชิก</button>
     </form>
     <div id="message"></div>
@@ -126,9 +156,17 @@
       const username = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
       const messageDiv = document.getElementById('message');
       messageDiv.textContent = 'กำลังสมัครสมาชิก...';
       messageDiv.style.color = '#009688';
+
+      // --- 1. ตรวจสอบรหัสผ่าน ---
+      if (password !== confirmPassword) {
+        messageDiv.textContent = 'รหัสผ่านไม่ตรงกัน';
+        messageDiv.style.color = 'red';
+        return;
+      }
 
       if(password.length < 6){
         messageDiv.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
@@ -155,7 +193,18 @@
         messageDiv.style.color = 'red';
       }
     });
+    
+    // --- 2. โค้ดสำหรับปุ่มเปิด/ปิดรหัสผ่าน ---
+    document.querySelectorAll('.toggle-password').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            const passwordInput = toggle.previousElementSibling;
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            // เปลี่ยนไอคอน (ถ้าต้องการ)
+            toggle.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+    });
+
   </script>
-  <script src="darkmode-toggle.js"></script>
 </body>
 </html>

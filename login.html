@@ -12,32 +12,97 @@
       display: flex; justify-content: center; align-items: center;
     }
     .login-box {
-      background: #fff; padding: 2.7rem 2rem 2.1rem; border-radius: 24px;
-      box-shadow: 0 10px 36px #00968823; width: 360px; max-width: 98vw;
-      text-align: center; position: relative;
+      background: #fff;
+      padding: 2.7rem 2rem 2.1rem;
+      border-radius: 24px;
+      box-shadow: 0 10px 36px #00968823;
+      width: 360px; max-width: 98vw;
+      text-align: center;
+      position: relative;
     }
     .avatar-login {
-      width: 82px; height: 82px; border-radius: 50%;
+      width: 82px; height: 82px;
+      border-radius: 50%;
       background: #fff url('https://cdn-icons-png.flaticon.com/512/4712/4712035.png') center/84% no-repeat;
-      position: absolute; top: -42px; left: 50%;
-      transform: translateX(-50%); box-shadow: 0 4px 16px rgba(0, 150, 136, 0.2);
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 16px rgba(0, 150, 136, 0.2);
     }
-    h1 { font-size: 1.8em; color: #00796B; margin-top: 30px; margin-bottom: 25px; }
-    .input-group { margin-bottom: 18px; text-align: left; }
-    .input-group label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; }
-    .input-group input {
-      width: 100%; padding: 12px; border: 1px solid #ddd;
-      border-radius: 8px; font-size: 1em; box-sizing: border-box;
+    h1 {
+      font-size: 2.1rem;
+      color: #00796B;
+      margin-top: 30px;
+      margin-bottom: 25px;
+      font-weight: 800;
+    }
+    .password-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 10px; /* Add margin to container */
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #b2dfdb;
+      border-radius: 8px;
+      font-size: 1.04rem;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+    /* Add padding for the icon */
+    .password-container input {
+        padding-right: 40px;
+        margin-bottom: 0;
+    }
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+        font-size: 1.2rem;
+        user-select: none;
     }
     button {
-      width: 100%; padding: 14px; border: none; border-radius: 8px;
-      background-color: #009688; color: white; font-size: 1.1em;
-      font-weight: bold; cursor: pointer; margin-top: 10px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #009688;
+      color: white;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s, transform 0.1s;
     }
-    .links { margin-top: 25px; font-size: 0.9em; }
-    .links a { color: #00796B; text-decoration: none; margin: 0 8px; }
-    #messageDiv { margin-top: 20px; font-size: 0.95em; color: red; min-height: 20px; }
-    .google-btn { background-color: #db4437; }
+    button:active {
+        transform: scale(0.98);
+    }
+    .google-btn {
+      background-color: #db4437; /* Red for Google */
+    }
+    .google-btn:hover {
+        background-color: #c53c2e;
+    }
+    .links {
+      margin-top: 25px;
+      font-size: 0.9em;
+    }
+    .links a {
+      color: #00796B;
+      text-decoration: none;
+      margin: 0 8px;
+    }
+    #messageDiv {
+      margin-top: 20px;
+      font-size: 0.95em;
+      color: red;
+      min-height: 20px;
+    }
   </style>
 </head>
 <body>
@@ -45,13 +110,10 @@
     <div class="avatar-login"></div>
     <h1>MoneySkillz</h1>
     <form id="loginForm">
-      <div class="input-group">
-        <label for="email">อีเมล</label>
-        <input type="email" id="email" placeholder="อีเมลของคุณ" required />
-      </div>
-      <div class="input-group">
-        <label for="password">รหัสผ่าน</label>
+      <input type="email" id="email" placeholder="อีเมล" required />
+      <div class="password-container">
         <input type="password" id="password" placeholder="รหัสผ่าน" required />
+        <span class="toggle-password">👁️</span>
       </div>
       <button type="submit" id="loginBtn">เข้าสู่ระบบ</button>
       <button type="button" id="googleSignIn" class="google-btn">เข้าสู่ระบบด้วย Google</button>
@@ -96,14 +158,13 @@
         const password = document.getElementById('password').value;
         auth.signInWithEmailAndPassword(email, password)
           .then(() => { window.location.href = "dashboard.html"; })
-          .catch(error => { messageDiv.textContent = "อีเมลหรือรหัสผ่านไม่ถูกต้อง: " + error.message; });
+          .catch(error => { messageDiv.textContent = "อีเมลหรือรหัสผ่านไม่ถูกต้อง"; });
       });
 
       document.getElementById('googleSignIn').addEventListener('click', () => {
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider)
           .then((result) => {
-            // Check if user is new, if so, create a profile doc
             const userRef = db.collection('users').doc(result.user.uid);
             return userRef.get().then(doc => {
                 if (!doc.exists) {
@@ -122,6 +183,14 @@
           })
           .then(() => { window.location.href = "dashboard.html"; })
           .catch(error => { messageDiv.textContent = "เกิดข้อผิดพลาดกับ Google Sign-In: " + error.message; });
+      });
+
+      // --- Logic for password toggle ---
+      document.querySelector('.toggle-password').addEventListener('click', function() {
+          const passwordInput = document.getElementById('password');
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          this.textContent = type === 'password' ? '👁️' : '🙈';
       });
     });
   </script>
