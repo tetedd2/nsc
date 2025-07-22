@@ -198,5 +198,19 @@
         });
     }
   </script>
+<script src="add-transaction.js"></script>
+<script>
+  if (performance.navigation.type !== 2) {
+    history.replaceState({ from: document.referrer || "dashboard.html" }, '');
+    history.pushState({}, '');
+  }
+
+  window.addEventListener('popstate', function(event) {
+    if (history.state && history.state.from) {
+      window.location.href = history.state.from;
+    } else {
+      window.location.href = "dashboard.html";
+    }
+  });
+</script>
 </body>
-</html>
