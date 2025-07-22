@@ -189,6 +189,43 @@
       letter-spacing: 0.5px;
       padding-top: 20px;
     }
+    
+    /* === โค้ด CSS ใหม่สำหรับปุ่ม Back มุมซ้ายบน === */
+    .top-left-back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #00796B;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em; /* ขนาดไอคอนลูกศร */
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1001;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.2s ease-in-out;
+    }
+    .top-left-back-btn:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 1);
+    }
+    .top-left-back-btn:active {
+      transform: scale(0.95);
+    }
+    body.dark-mode .top-left-back-btn {
+      background: rgba(40, 40, 40, 0.8);
+      color: #4DB6AC;
+    }
+    /* === สิ้นสุดโค้ด CSS ใหม่ === */
+
 
     @media (max-width:540px) {
       .main-container { max-width: 99vw; min-height: 99vh;}
@@ -203,6 +240,8 @@
   </style>
 </head>
 <body>
+  <a href="game-mode.html" class="top-left-back-btn">←</a>
+
   <div class="main-container">
     <div class="logo-circle"><span>฿</span></div>
     <div class="app-title">MoneySkillz</div>
@@ -223,7 +262,6 @@
       <span id="userIdDisplay" style="font-size:0.7em; margin-left: 10px;"></span>
     </div>
 
-    <!-- ปุ่มเมนู -->
     <div class="menu-list">
       <a href="match-easy.html" class="menu-btn menu-btn-common" data-difficulty="easy">จับคู่ระดับง่าย</a>
       <a href="match-medium.html" class="menu-btn menu-btn-common" data-difficulty="medium">จับคู่ระดับปานกลาง</a>
@@ -232,7 +270,6 @@
       <a href="leaderboard.html" class="menu-btn menu-btn-common">กระดานคะแนน</a>
     </div>
 
-    <!-- กระดานคะแนนย่อ -->
     <div class="leaderboard-preview" id="leaderboardPreview" style="display:none;">
       <div class="leaderboard-preview-title">TOP 3 กระดานคะแนน</div>
       <div id="leaderboardRows"></div>
@@ -266,72 +303,46 @@
     const auth = getAuth(app);
 
     let userId = null;
-    // Note: appId is not directly used for the 'users' collection path
-    // as it's assumed to be at the root level as per your Firebase console image.
-    // const appId = firebaseConfig.appId; // No longer needed for this path
-
-    // Authenticate user and listen for auth state changes
+    
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User is signed in (either anonymously or via custom token if it worked)
         userId = user.uid;
         document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)}...)`;
-        console.log("User authenticated:", userId);
       } else {
-        // No user signed in, sign in anonymously
         try {
           const anonymousUserCredential = await signInAnonymously(auth);
           userId = anonymousUserCredential.user.uid;
           document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)}...)`;
-          console.log("User signed in anonymously:", userId);
         } catch (error) {
           console.error("Error signing in anonymously:", error);
-          // Fallback if anonymous sign-in fails or is not yet complete
           userId = crypto.randomUUID(); 
           document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)} - fallback)`;
         }
       }
-      // After userId is definitively set, fetch and display EXP
       await fetchAndDisplayExp();
     });
 
-    // Function to fetch and display total EXP from Firestore
     async function fetchAndDisplayExp() {
-      if (!userId) {
-        console.warn("User ID not available yet for fetching EXP.");
-        return;
-      }
+      if (!userId) return;
       try {
-        // Changed path to directly target the user document in 'users' collection
         const userRef = doc(db, `users`, userId);
-        // Use onSnapshot for real-time updates
         onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             document.getElementById("totalExpValue").textContent = data.totalExp || 0;
-            console.log("Total EXP fetched:", data.totalExp);
           } else {
             document.getElementById("totalExpValue").textContent = 0;
-            console.log("No user data found for this ID. Initializing totalExp to 0.");
-            // Initialize totalExp to 0 if the user document doesn't exist or doesn't have totalExp
             setDoc(userRef, { totalExp: 0 }, { merge: true });
           }
-        }, (error) => {
-          console.error("Error listening to user data:", error);
         });
       } catch (error) {
         console.error("Error setting up user data listener:", error);
       }
     }
 
-    // Function to add EXP
     async function addExp(expAmount) {
-      if (!userId) {
-        console.error("Cannot add EXP: User not authenticated.");
-        return;
-      }
+      if (!userId) return;
       try {
-        // Changed path to directly target the user document in 'users' collection
         const userRef = doc(db, `users`, userId);
         const docSnap = await getDoc(userRef);
         let currentExp = 0;
@@ -340,86 +351,50 @@
         }
         const newExp = currentExp + expAmount;
         await setDoc(userRef, { totalExp: newExp }, { merge: true });
-        console.log(`Added ${expAmount} EXP. New total: ${newExp}`);
       } catch (error) {
         console.error("Error adding EXP:", error);
       }
     }
-
-    // Simulate game completion and add EXP (for demonstration purposes)
-    // In a real game, you would call this function when a game level is completed.
-    // Example: addExpForGameCompletion('easy');
-    // Example: addExpForGameCompletion('timed', 100); // 100 is the score from timed mode
-
-    const EXP_VALUES = {
-      easy: 100,
-      medium: 200,
-      hard: 300,
-      timed_multiplier: 5 // EXP multiplier for timed mode (1 point = 5 EXP)
-    };
+    
+    const EXP_VALUES = { easy: 100, medium: 200, hard: 300, timed_multiplier: 5 };
 
     function addExpForGameCompletion(difficulty, score = 0) {
       let expGained = 0;
-      if (difficulty === 'easy') {
-        expGained = EXP_VALUES.easy;
-      } else if (difficulty === 'medium') {
-        expGained = EXP_VALUES.medium;
-      } else if (difficulty === 'hard') {
-        expGained = EXP_VALUES.hard;
+      if (difficulty in EXP_VALUES) {
+        expGained = EXP_VALUES[difficulty];
       } else if (difficulty === 'timed') {
-        // For timed mode, score directly contributes to EXP, then multiply by the multiplier
         expGained = score * EXP_VALUES.timed_multiplier;
       }
-
-      if (expGained > 0) {
-        addExp(expGained);
-      }
+      if (expGained > 0) addExp(expGained);
     }
-
-    // Event listeners for menu buttons to simulate game completion
+    
     document.querySelectorAll('.menu-btn').forEach(button => {
       button.addEventListener('click', (event) => {
         const difficulty = event.currentTarget.dataset.difficulty;
         if (difficulty) {
-          // Simulate a small delay and then add EXP, as if a game just finished
           setTimeout(() => {
-            // For demonstration, we'll assume a fixed score for timed mode completion.
-            // IMPORTANT: In a real game, 'score' would need to come from the actual result
-            // of the 'timed-score.html' game, possibly passed via localStorage or a query parameter.
-            const score = difficulty === 'timed' ? 50 : 0; // Example score for timed mode
+            const score = difficulty === 'timed' ? 50 : 0;
             addExpForGameCompletion(difficulty, score);
-            console.log(`Simulated completion of ${difficulty} mode.`);
-          }, 1000); // Simulate 1 second game play
+          }, 1000);
         }
       });
     });
 
-
-    // โชว์คะแนนรวมเฉพาะโหมดจับเวลา
     function showTotalScore() {
       let val = localStorage.getItem("money_score_timed");
       document.getElementById("totalScoreValue").textContent = val ? parseInt(val) : 0;
     }
 
-    // โชว์คะแนนสูงสุดจากโหมดจับเวลา
     function showHighScore() {
       let highScore = localStorage.getItem("arcadeHighScore");
       let highScoreValue = highScore ? parseInt(highScore) : 0;
       document.getElementById("highScoreValue").textContent = highScoreValue;
-      
-      // ซ่อนคะแนนสูงสุดถ้าไม่มีคะแนน
-      if (highScoreValue === 0) {
-        document.getElementById("highScore").style.display = "none";
-      } else {
-        document.getElementById("highScore").style.display = "block";
-      }
+      document.getElementById("highScore").style.display = highScoreValue === 0 ? "none" : "block";
     }
 
-    // เรียกใช้ฟังก์ชันเมื่อโหลดหน้า
     showTotalScore();
     showHighScore();
 
-    // แสดง TOP 3 leaderboard (mock ข้อมูล, หรือดึงจาก localStorage/เซิร์ฟเวอร์จริง)
     function showLeaderboardPreview() {
       let leaderboard = JSON.parse(localStorage.getItem("money_leaderboard")||"[]");
       if(leaderboard && leaderboard.length > 0) {
@@ -435,5 +410,8 @@
     
   </script>
   <script src="darkmode-toggle.js"></script>
+  
+  <link rel="stylesheet" href="navigation.css">
+  <script src="navigation.js"></script>
 </body>
 </html>
