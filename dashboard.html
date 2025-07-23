@@ -36,12 +36,14 @@
       </div>
     </div>
 
-    <div class="container card-section badge-section">
-        <h2><span class="icon">🏆</span> เหรียญตราความสำเร็จ</h2>
-        <div class="badge-row" id="userBadges">
-            <div class="badge placeholder" title="กำลังโหลดเหรียญตรา...">❓</div>
-        </div>
-    </div>
+
+<div class="container card-section badge-section">
+  <h2><span class="icon">🛒</span> เหรียญของคุณ</h2>
+  <div class="badge-row" id="shopItemsRow"></div>
+  <div class="summary-item">
+    <strong>เหรียญคงเหลือ:</strong> <span class="amount" id="userCoins">0</span>
+  </div>
+</div>
 
     <div class="container card-section">
       <h2><span class="icon">💰</span> ภาพรวมการเงิน</h2>
@@ -74,6 +76,11 @@
         <p>บทเรียน</p>
       </div>
     </div>
+    <div class="menu-card" onclick="location.href='shop.html'">
+  <span style="font-size:2.1em;">🛒</span>
+  <p>ร้านค้า</p>
+</div>
+
 
 <div id="goalDisplay" class="container card-section">
   <h2><span class="icon">🎯</span> เป้าหมายการออมของฉัน</h2>
