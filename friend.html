@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>ระบบเพื่อน - MoneySkillz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Kanit', sans-serif; background: #f7fafc; color: #222; padding: 24px; }
+    h2 { color: #13bba9; }
+    .box { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px #d0ebe8; max-width: 420px; margin: 24px auto; }
+    input[type="text"] { padding: 8px; border-radius: 7px; border: 1px solid #cfd8dc; margin-right: 8px; width: 60%; }
+    button { background: #13bba9; color: #fff; border: none; border-radius: 7px; padding: 8px 14px; cursor: pointer; font-family: 'Kanit'; font-size: 1em; }
+    button:hover { background: #0b9387; }
+    .list-box { margin-top: 16px; }
+    ul { list-style: none; padding: 0; }
+    li { background: #f1fefb; border-radius: 7px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .msg { color: #db1f4b; margin: 12px 0; }
+    @media (max-width: 600px) {
+      .box { padding: 10px; }
+      input[type="text"] { width: 90%; margin-bottom: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>🔗 เพิ่มเพื่อน</h2>
+    <div>
+      <input id="friendSearchInput" type="text" placeholder="กรอกชื่อผู้ใช้...">
+      <button onclick="searchFriend()">ค้นหา</button>
+      <div id="friendSearchResult" class="msg"></div>
+    </div>
+  </div>
+
+  <div class="box list-box">
+    <h2>📨 คำขอเป็นเพื่อน</h2>
+    <ul id="friendRequestsList"></ul>
+  </div>
+
+  <div class="box list-box">
+    <h2>👫 เพื่อนของคุณ</h2>
+    <ul id="friendsList"></ul>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <!-- สคริปต์ระบบเพื่อน -->
+  <script>
+    // ==== Firebase Config ====
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.firebasestorage.app",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78",
+      measurementId: "G-Z2ZBWGB245"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUserId = null;
+    let currentUserName = "";
+
+    // ==== Auth: รอจน login ก่อน ====
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUserId = user.uid;
+        // ดึงชื่อผู้ใช้
+        const userSnap = await db.collection("users").doc(currentUserId).get();
+        if(userSnap.exists) {
+          currentUserName = userSnap.data().name || "";
+        }
+        loadFriendRequests();
+        loadFriends();
+      } else {
+        window.location = "login.html"; // หรือเส้นทางหน้า login ของคุณ
+      }
+    });
+
+    // ==== 1. ค้นหาเพื่อน ====
+    async function searchFriend() {
+      const input = document.getElementById("friendSearchInput").value.trim();
+      if (!input) return;
+      document.getElementById("friendSearchResult").textContent = "กำลังค้นหา...";
+      const usersRef = db.collection("users");
+      let snapshot = await usersRef.where("name", "==", input).get();
+      if (snapshot.empty) {
+        document.getElementById("friendSearchResult").textContent = "ไม่พบผู้ใช้";
+        return;
+      }
+      let found = false;
+      snapshot.forEach(doc => {
+        if(doc.id === currentUserId) {
+          document.getElementById("friendSearchResult").textContent = "นี่คือคุณเอง!";
+          found = true;
+          return;
+        }
+        found = true;
+        document.getElementById("friendSearchResult").innerHTML = `
+          <b>${doc.data().name}</b>
+          <button onclick="sendFriendRequest('${doc.id}')">ส่งคำขอเป็นเพื่อน</button>
+        `;
+      });
+      if(!found) document.getElementById("friendSearchResult").textContent = "ไม่พบผู้ใช้";
+    }
+
+    // ==== 2. ส่งคำขอเป็นเพื่อน ====
+    async function sendFriendRequest(friendId) {
+      if(friendId === currentUserId) return;
+      // ป้องกันส่งซ้ำ
+      const userSnap = await db.collection("users").doc(friendId).get();
+      if(userSnap.exists) {
+        let reqs = userSnap.data().friendRequests || [];
+        let alreadyFriend = (userSnap.data().friends || []).includes(currentUserId);
+        if(alreadyFriend) {
+          document.getElementById("friendSearchResult").textContent = "เป็นเพื่อนกันอยู่แล้ว!";
+          return;
+        }
+        if(reqs.includes(currentUserId)) {
+          document.getElementById("friendSearchResult").textContent = "ส่งคำขอแล้ว รอการตอบรับ!";
+          return;
+        }
+      }
+      await db.collection("users").doc(friendId).update({
+        friendRequests: firebase.firestore.FieldValue.arrayUnion(currentUserId)
+      });
+      document.getElementById("friendSearchResult").textContent = "ส่งคำขอแล้ว! รอการตอบรับ";
+    }
+
+    // ==== 3. โหลดคำขอเป็นเพื่อน ====
+    async function loadFriendRequests() {
+      const userDoc = await db.collection("users").doc(currentUserId).get();
+      const requests = (userDoc.data().friendRequests || []);
+      let html = "";
+      if(requests.length === 0) html = "<li>ไม่มีคำขอ</li>";
+      for(const reqId of requests) {
+        const reqDoc = await db.collection("users").doc(reqId).get();
+        if(!reqDoc.exists) continue;
+        html += `<li>
+          <b>${reqDoc.data().name}</b>
+          <span>
+            <button onclick="acceptFriend('${reqId}')">รับ</button>
+            <button onclick="declineFriend('${reqId}')">ปฏิเสธ</button>
+          </span>
+        </li>`;
+      }
+      document.getElementById("friendRequestsList").innerHTML = html;
+    }
+
+    // ==== 4. ตอบรับเพื่อน ====
+    async function acceptFriend(friendId) {
+      const batch = db.batch();
+      const userRef = db.collection("users").doc(currentUserId);
+      const friendRef = db.collection("users").doc(friendId);
+      batch.update(userRef, {
+        friends: firebase.firestore.FieldValue.arrayUnion(friendId),
+        friendRequests: firebase.firestore.FieldValue.arrayRemove(friendId)
+      });
+      batch.update(friendRef, {
+        friends: firebase.firestore.FieldValue.arrayUnion(currentUserId)
+      });
+      await batch.commit();
+      loadFriendRequests();
+      loadFriends();
+    }
+
+    // ==== 5. ปฏิเสธคำขอ ====
+    async function declineFriend(friendId) {
+      const userRef = db.collection("users").doc(currentUserId);
+      await userRef.update({
+        friendRequests: firebase.firestore.FieldValue.arrayRemove(friendId)
+      });
+      loadFriendRequests();
+    }
+
+    // ==== 6. โหลดรายชื่อเพื่อน ====
+    async function loadFriends() {
+      const userDoc = await db.collection("users").doc(currentUserId).get();
+      const friends = (userDoc.data().friends || []);
+      let html = "";
+      if(friends.length === 0) html = "<li>ยังไม่มีเพื่อน</li>";
+      for(const friendId of friends) {
+        const friendDoc = await db.collection("users").doc(friendId).get();
+        if(!friendDoc.exists) continue;
+        html += `<li>
+          <b>${friendDoc.data().name}</b>
+          <button onclick="removeFriend('${friendId}')">ลบเพื่อน</button>
+        </li>`;
+      }
+      document.getElementById("friendsList").innerHTML = html;
+    }
+
+    // ==== 7. ลบเพื่อน ====
+    async function removeFriend(friendId) {
+      if(!confirm("ยืนยันการลบเพื่อนคนนี้?")) return;
+      const batch = db.batch();
+      const userRef = db.collection("users").doc(currentUserId);
+      const friendRef = db.collection("users").doc(friendId);
+      batch.update(userRef, {
+        friends: firebase.firestore.FieldValue.arrayRemove(friendId)
+      });
+      batch.update(friendRef, {
+        friends: firebase.firestore.FieldValue.arrayRemove(currentUserId)
+      });
+      await batch.commit();
+      loadFriends();
+    }
+  </script>
+</body>
+</html>
