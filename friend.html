@@ -53,7 +53,7 @@
   <div class="box">
     <h2>🔗 เพิ่มเพื่อน</h2>
     <div>
-      <input id="friendSearchInput" type="text" placeholder="กรอกชื่อผู้ใช้...">
+      <input id="friendSearchInput" type="text" placeholder="กรอกชื่อผู้ใช้ หรืออีเมล">
       <button onclick="searchFriend()">ค้นหา</button>
       <div id="friendSearchResult" class="msg"></div>
     </div>
@@ -103,17 +103,21 @@
         loadFriendRequests();
         loadFriends();
       } else {
-        window.location = "login.html"; // หรือเส้นทางหน้า login ของคุณ
+        window.location = "login.html";
       }
     });
 
-    // ==== 1. ค้นหาเพื่อน ====
+    // ==== 1. ค้นหาเพื่อน (ทั้งอีเมลและชื่อ) ====
     async function searchFriend() {
       const input = document.getElementById("friendSearchInput").value.trim();
       if (!input) return;
       document.getElementById("friendSearchResult").textContent = "กำลังค้นหา...";
-      const usersRef = db.collection("users");
-      let snapshot = await usersRef.where("name", "==", input).get();
+      let usersRef = db.collection("users");
+      let snapshot = await usersRef.where("email", "==", input).get();
+      // ถ้าไม่เจอ email ให้ค้นด้วย name
+      if (snapshot.empty) {
+        snapshot = await usersRef.where("name", "==", input).get();
+      }
       if (snapshot.empty) {
         document.getElementById("friendSearchResult").textContent = "ไม่พบผู้ใช้";
         return;
@@ -127,7 +131,7 @@
         }
         found = true;
         document.getElementById("friendSearchResult").innerHTML = `
-          <b>${doc.data().name}</b>
+          <b>${doc.data().name} (${doc.data().email || ''})</b>
           <button onclick="sendFriendRequest('${doc.id}')">ส่งคำขอเป็นเพื่อน</button>
         `;
       });
