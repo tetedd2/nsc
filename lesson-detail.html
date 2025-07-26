@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
    <link rel="stylesheet" href="theme-darkmode.css">
+   <script async src="https://www.tiktok.com/embed.js"></script>
   <title>รายละเอียดบทเรียน – บทที่ 1 เงินคืออะไร?</title>
   <style>
     body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4;}
@@ -28,12 +29,14 @@
     .emph { color:#d84315; font-weight:bold;}
     .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
     .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+    .video-container { margin: 24px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
   <div class="header"><h1>รายละเอียดบทเรียน: เงินคืออะไร?</h1></div>
   <div class="container">
     <div id="lessonDetails"></div>
+    <div id="tiktokVideo"></div>
     <div class="pagination" id="pagination"></div>
     <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
   </div>
@@ -198,6 +201,21 @@
     if (page > 1) pag += `<a class="page-btn" href="lesson-detail.html?page=${page-1}">หน้าก่อนหน้า</a>`;
     if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail.html?page=${page+1}">หน้าถัดไป</a>`;
     document.getElementById("pagination").innerHTML = pag;
+
+    // เฉพาะหน้า 1 เท่านั้นที่แสดงคลิป TikTok
+    if (page === 1) {
+      document.getElementById("tiktokVideo").innerHTML = `
+        <div class="video-container">
+          <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@ckfastwork/video/7214687099662912773" data-video-id="7214687099662912773" style="max-width: 605px;min-width: 325px;">
+            <section>
+              <a target="_blank" title="@ckfastwork" href="https://www.tiktok.com/@ckfastwork">@ckfastwork</a>
+              <p>เงินคืออะไร? อธิบายง่าย เข้าใจไว</p>
+              <a target="_blank" title="TikTok Sound" href="https://www.tiktok.com/music">♬ ต้นฉบับ - ckfastwork</a>
+            </section>
+          </blockquote>
+        </div>
+      `;
+    }
 
     if (page === pages.length) {
       setTimeout(() => {

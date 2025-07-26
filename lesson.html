@@ -129,8 +129,8 @@
       <div class="lesson-description">
         เรียนรู้พื้นฐานเกี่ยวกับความหมายของเงิน บทบาท และคุณค่าของเงินในชีวิตประจำวัน
       </div>
-      <div class="lesson-status completed">เรียนจบแล้ว</div>
-      <a href="lesson-detail.html?id=1" class="start-btn">ดูบทเรียน</a>
+      <div class="lesson-status" id="status-1">ยังไม่ได้เรียน</div>
+      <a href="lesson-detail.html" class="start-btn">เริ่มบทเรียน</a>
     </div>
 
     <div class="lesson-item" data-lesson="2" data-keywords="ออม, เงินเก็บ, แผนการเงิน">
@@ -141,8 +141,8 @@
       <div class="lesson-description">
         เรียนรู้แนวคิดและวิธีการออมเงินที่เหมาะสมกับวัย เริ่มสร้างนิสัยการออมตั้งแต่วันนี้
       </div>
-      <div class="lesson-status not-started"> ยังไม่ได้เรียน</div>
-      <a href="lesson-detail.html?id=2" class="start-btn">เริ่มบทเรียน</a>
+      <div class="lesson-status" id="status-2">ยังไม่ได้เรียน</div>
+      <a href="lesson-detail2.html" class="start-btn">เริ่มบทเรียน</a>
     </div>
 
     <div class="lesson-item" data-lesson="3" data-keywords="ความอยาก, ความจำเป็น, วางแผนใช้จ่าย">
@@ -153,8 +153,8 @@
       <div class="lesson-description">
         แยกแยะระหว่างสิ่งที่จำเป็นกับสิ่งที่อยากได้ เพื่อการตัดสินใจใช้เงินที่ชาญฉลาด
       </div>
-      <div class="lesson-status not-started">ยังไม่ได้เรียน</div>
-      <a href="lesson-detail.html?id=3" class="start-btn">เริ่มบทเรียน</a>
+      <div class="lesson-status" id="status-3">ยังไม่ได้เรียน</div>
+      <a href="lesson-detail3.html" class="start-btn">เริ่มบทเรียน</a>
     </div>
 
     <div class="lesson-item" data-lesson="4" data-keywords="วางแผน, งบประมาณ, รายรับรายจ่าย">
@@ -165,8 +165,8 @@
       <div class="lesson-description">
         วางแผนการใช้เงินให้เหมาะสมกับเป้าหมาย ช่วยให้มีชีวิตที่มั่นคงและไม่ขาดสภาพคล่อง
       </div>
-      <div class="lesson-status not-started"> ยังไม่ได้เรียน</div>
-      <a href="lesson-detail.html?id=4" class="start-btn">เริ่มบทเรียน</a>
+      <div class="lesson-status" id="status-4">ยังไม่ได้เรียน</div>
+      <a href="lesson-detail4.html" class="start-btn">เริ่มบทเรียน</a>
     </div>
 
     <div class="lesson-item" data-lesson="5" data-keywords="รายได้เสริม, อาชีพ, หารายได้">
@@ -177,8 +177,8 @@
       <div class="lesson-description">
         รู้จักวิธีหารายได้เพิ่มเติมจากกิจกรรมหรืองานเสริมที่เหมาะกับความถนัดของคุณ
       </div>
-      <div class="lesson-status not-started"> ยังไม่ได้เรียน</div>
-      <a href="lesson-detail.html?id=5" class="start-btn">เริ่มบทเรียน</a>
+      <div class="lesson-status" id="status-5">ยังไม่ได้เรียน</div>
+      <a href="lesson-detail5.html" class="start-btn">เริ่มบทเรียน</a>
     </div>
 
     <div class="lesson-item" data-lesson="6" data-keywords="ความเสี่ยง, ประกัน, เงินสำรอง">
@@ -189,12 +189,37 @@
       <div class="lesson-description">
         เรียนรู้การป้องกันความเสี่ยง เช่น การทำประกัน หรือการมีเงินสำรองฉุกเฉิน
       </div>
-      <div class="lesson-status not-started"> ยังไม่ได้เรียน</div>
-      <a href="lesson-detail.html?id=6" class="start-btn">เริ่มบทเรียน</a>
+      <div class="lesson-status" id="status-6">ยังไม่ได้เรียน</div>
+      <a href="lesson-detail6.html" class="start-btn">เริ่มบทเรียน</a>
     </div>
 
     <a href="dashboard.html" class="back-btn"> กลับหน้าหลัก</a>
     <script src="darkmode-toggle.js"></script>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // สคริปต์นี้จะวนลูปเพื่อตรวจสอบสถานะของแต่ละบทเรียนจาก localStorage
+      for (let i = 1; i <= 6; i++) {
+        const statusElement = document.getElementById(`status-${i}`);
+        const lessonItem = document.querySelector(`.lesson-item[data-lesson='${i}']`);
+        const startBtn = lessonItem ? lessonItem.querySelector('.start-btn') : null;
+
+        if (statusElement) {
+          const storageKey = `MoneySkillz-lesson${i}-done`;
+          const isDone = localStorage.getItem(storageKey) === "yes";
+
+          if (isDone) {
+            statusElement.textContent = "เรียนจบแล้ว";
+            statusElement.className = "lesson-status completed";
+            if (startBtn) startBtn.textContent = "ดูบทเรียน";
+          } else {
+            statusElement.textContent = "ยังไม่ได้เรียน";
+            statusElement.className = "lesson-status not-started";
+            if (startBtn) startBtn.textContent = "เริ่มบทเรียน";
+          }
+        }
+      }
+    });
+  </script>
 </body>
 </html>
