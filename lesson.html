@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="theme-darkmode.css">
-  <title>บทเรียนการเงิน – MoneySkillz</title>
+  <title>บทเรียน-การเงินของคุณ – MoneySkillz</title>
   <style>
     body {
       margin: 0;
@@ -25,16 +25,22 @@
       padding: 20px;
       border-radius: 12px;
       font-size: 2rem;
-      margin-bottom: 10px;
-    }
-
-    #xpDisplay {
-      text-align: center;
-      font-weight: 500;
-      color: #00695c;
       margin-bottom: 30px;
-      font-size: 1.05rem;
     }
+    
+    /* Message Box for notifications */
+    #statusMessage {
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+        display: none; /* Hidden by default */
+        transition: opacity 0.3s ease;
+    }
+    #statusMessage.success { background-color: #d4edda; color: #155724; }
+    #statusMessage.error { background-color: #f8d7da; color: #721c24; }
+
 
     .lesson-item {
       background-color: #ffffff;
@@ -101,10 +107,17 @@
       border-radius: 8px;
       text-decoration: none;
       transition: background-color 0.2s ease;
+      cursor: pointer; /* เพิ่ม cursor pointer เพื่อให้รู้ว่ากดได้ */
+      border: none; /* เอาเส้นขอบออก */
     }
 
     .start-btn:hover {
       background-color: #00796b;
+    }
+    
+    .start-btn.disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
     }
 
     .back-btn {
@@ -128,120 +141,253 @@
 <body>
   <div class="container">
     <h1>บทเรียน<br>การเงินของคุณ</h1>
-    <div id="xpDisplay">XP: 0 / 100</div>
+    
+    <div id="statusMessage"></div>
 
-    <!-- รายการบทเรียน -->
-    <div class="lesson-item" data-lesson="1">
+    <div class="lesson-item" data-lesson="1" data-xp="80">
       <div class="lesson-header">
         <div class="lesson-number">บทที่ 1</div>
         <div class="lesson-title">เงินคืออะไร?</div>
       </div>
-      <div class="lesson-description">เรียนรู้พื้นฐานเกี่ยวกับความหมายของเงิน บทบาท และคุณค่าของเงินในชีวิตประจำวัน</div>
+      <div class="lesson-description">
+        เรียนรู้พื้นฐานเกี่ยวกับความหมายของเงิน บทบาท และคุณค่าของเงินในชีวิตประจำวัน
+      </div>
       <div class="lesson-status" id="status-1">ยังไม่ได้เรียน</div>
-      <a href="lesson-detail.html" class="start-btn">เริ่มบทเรียน</a>
+      <button class="start-btn">เริ่มบทเรียน</button>
     </div>
 
-    <div class="lesson-item" data-lesson="2">
+    <div class="lesson-item" data-lesson="2" data-xp="80">
       <div class="lesson-header">
         <div class="lesson-number">บทที่ 2</div>
         <div class="lesson-title">วิธีออมเงิน</div>
       </div>
-      <div class="lesson-description">เรียนรู้แนวคิดและวิธีการออมเงินที่เหมาะสมกับวัย เริ่มสร้างนิสัยการออมตั้งแต่วันนี้</div>
+      <div class="lesson-description">
+        เรียนรู้แนวคิดและวิธีการออมเงินที่เหมาะสมกับวัย เริ่มสร้างนิสัยการออมตั้งแต่วันนี้
+      </div>
       <div class="lesson-status" id="status-2">ยังไม่ได้เรียน</div>
-      <a href="lesson-detail2.html" class="start-btn">เริ่มบทเรียน</a>
+      <button class="start-btn">เริ่มบทเรียน</button>
     </div>
 
-    <div class="lesson-item" data-lesson="3">
+     <div class="lesson-item" data-lesson="3" data-xp="80">
       <div class="lesson-header">
         <div class="lesson-number">บทที่ 3</div>
         <div class="lesson-title">ความอยาก vs จำเป็น</div>
       </div>
-      <div class="lesson-description">แยกแยะระหว่างสิ่งที่จำเป็นกับสิ่งที่อยากได้ เพื่อการตัดสินใจใช้เงินที่ชาญฉลาด</div>
+      <div class="lesson-description">
+        แยกแยะระหว่างสิ่งที่จำเป็นกับสิ่งที่อยากได้ เพื่อการตัดสินใจใช้เงินที่ชาญฉลาด
+      </div>
       <div class="lesson-status" id="status-3">ยังไม่ได้เรียน</div>
-      <a href="lesson-detail3.html" class="start-btn">เริ่มบทเรียน</a>
+      <button class="start-btn">เริ่มบทเรียน</button>
     </div>
 
-    <div class="lesson-item" data-lesson="4">
+    <div class="lesson-item" data-lesson="4" data-xp="100">
       <div class="lesson-header">
         <div class="lesson-number">บทที่ 4</div>
         <div class="lesson-title">การวางแผนการเงินส่วนบุคคล</div>
       </div>
-      <div class="lesson-description">วางแผนการใช้เงินให้เหมาะสมกับเป้าหมาย ช่วยให้มีชีวิตที่มั่นคงและไม่ขาดสภาพคล่อง</div>
+      <div class="lesson-description">
+        วางแผนการใช้เงินให้เหมาะสมกับเป้าหมาย ช่วยให้มีชีวิตที่มั่นคงและไม่ขาดสภาพคล่อง
+      </div>
       <div class="lesson-status" id="status-4">ยังไม่ได้เรียน</div>
-      <a href="lesson-detail4.html" class="start-btn">เริ่มบทเรียน</a>
+      <button class="start-btn">เริ่มบทเรียน</button>
     </div>
 
-    <div class="lesson-item" data-lesson="5">
+    <div class="lesson-item" data-lesson="5" data-xp="100">
       <div class="lesson-header">
         <div class="lesson-number">บทที่ 5</div>
         <div class="lesson-title">การสร้างรายได้เสริม</div>
       </div>
-      <div class="lesson-description">รู้จักวิธีหารายได้เพิ่มเติมจากกิจกรรมหรืองานเสริมที่เหมาะกับความถนัดของคุณ</div>
+      <div class="lesson-description">
+        รู้จักวิธีหารายได้เพิ่มเติมจากกิจกรรมหรืองานเสริมที่เหมาะกับความถนัดของคุณ
+      </div>
       <div class="lesson-status" id="status-5">ยังไม่ได้เรียน</div>
-      <a href="lesson-detail5.html" class="start-btn">เริ่มบทเรียน</a>
+      <button class="start-btn">เริ่มบทเรียน</button>
     </div>
 
-    <div class="lesson-item" data-lesson="6">
+    <div class="lesson-item" data-lesson="6" data-xp="120">
       <div class="lesson-header">
         <div class="lesson-number">บทที่ 6</div>
         <div class="lesson-title">การบริหารความเสี่ยงทางการเงิน</div>
       </div>
-      <div class="lesson-description">เรียนรู้การป้องกันความเสี่ยง เช่น การทำประกัน หรือการมีเงินสำรองฉุกเฉิน</div>
+      <div class="lesson-description">
+        เรียนรู้การป้องกันความเสี่ยง เช่น การทำประกัน หรือการมีเงินสำรองฉุกเฉิน
+      </div>
       <div class="lesson-status" id="status-6">ยังไม่ได้เรียน</div>
-      <a href="lesson-detail6.html" class="start-btn">เริ่มบทเรียน</a>
+      <button class="start-btn">เริ่มบทเรียน</button>
     </div>
 
-    <a href="dashboard.html" class="back-btn">กลับหน้าหลัก</a>
+    <a href="./dashboard.html" class="back-btn"> กลับหน้าหลัก</a>
+    <script src="darkmode-toggle.js"></script>
   </div>
 
-  <!-- Firebase XP Update Script -->
+  <!-- ===================================================================== -->
+  <!-- START: FIREBASE INTEGRATION -->
+  <!-- ===================================================================== -->
+  
+  <!-- Import Firebase SDKs -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, increment, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  
+    // Correct Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
       authDomain: "myapplication-bd04c034.firebaseapp.com",
-      projectId: "myapplication-bd04c034"
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
     };
-
+  
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const xpDisplay = document.getElementById('xpDisplay');
-    let totalXP = 0;
+    let currentUser = null;
 
-    for (let i = 1; i <= 6; i++) {
-      const isDone = localStorage.getItem(`MoneySkillz-lesson${i}-done`) === 'yes';
-      if (isDone) totalXP += 80;
-      const statusEl = document.getElementById(`status-${i}`);
-      if (statusEl) {
-        statusEl.textContent = isDone ? 'เรียนจบแล้ว' : 'ยังไม่ได้เรียน';
-        statusEl.className = 'lesson-status ' + (isDone ? 'completed' : 'not-started');
-      }
+    // --- CUSTOM MESSAGE FUNCTION ---
+    function showMessage(text, type = 'success') {
+        const messageDiv = document.getElementById('statusMessage');
+        messageDiv.textContent = text;
+        messageDiv.className = type; // 'success' or 'error'
+        messageDiv.style.display = 'block';
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 3000); // Hide after 3 seconds
     }
-    xpDisplay.textContent = `XP: ${totalXP} / 100`;
 
+    // --- AUTHENTICATION ---
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        const data = userSnap.data();
-        const prevXP = data?.xp || 0;
-        const badgeXP = data?.badges?.xp || 0;
-
-        if (badgeXP < totalXP) {
-          const xpGain = totalXP - badgeXP;
-          await updateDoc(userRef, {
-            xp: prevXP + xpGain,
-            "badges.xp": totalXP
-          });
-          console.log("อัปเดต XP เพิ่ม: +", xpGain);
-        }
+        currentUser = user;
+        console.log("User is signed in:", currentUser.uid);
+        await loadLessonsStatusFromFirestore(currentUser.uid);
+      } else {
+        // Redirect to login page if not authenticated
+        window.location.href = './login.html'; // FIX: Added './' for valid relative path
       }
     });
+
+    // --- UI UPDATE FUNCTIONS ---
+    function updateLessonUI(lessonId, isCompleted) {
+        const lessonItem = document.querySelector(`.lesson-item[data-lesson='${lessonId}']`);
+        if (!lessonItem) return;
+
+        const statusElement = lessonItem.querySelector('.lesson-status');
+        const buttonElement = lessonItem.querySelector('.start-btn');
+
+        if (isCompleted) {
+            statusElement.textContent = "เรียนจบแล้ว";
+            statusElement.className = "lesson-status completed";
+            buttonElement.textContent = "ดูบทเรียน";
+            buttonElement.classList.add('disabled');
+        } else {
+            statusElement.textContent = "ยังไม่ได้เรียน";
+            statusElement.className = "lesson-status not-started";
+            buttonElement.textContent = "เริ่มบทเรียน";
+            buttonElement.classList.remove('disabled');
+        }
+    }
+    
+    // --- FIRESTORE FUNCTIONS ---
+    async function loadLessonsStatusFromFirestore(userId) {
+        const userDocRef = doc(db, "users", userId);
+        try {
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+                const completedLessons = userData.completedLessons || [];
+                document.querySelectorAll('.lesson-item').forEach(item => {
+                    const lessonId = parseInt(item.dataset.lesson);
+                    const isCompleted = completedLessons.includes(lessonId);
+                    updateLessonUI(lessonId, isCompleted);
+                });
+            }
+        } catch (error) {
+            console.error("Error loading lesson status:", error);
+            showMessage("ไม่สามารถโหลดข้อมูลบทเรียนได้", "error");
+        }
+    }
+
+    async function completeLesson(lessonId, xpToAdd) {
+        if (!currentUser) {
+            showMessage("กรุณารอสักครู่ กำลังเชื่อมต่อกับระบบ...", "error");
+            return;
+        }
+
+        const userId = currentUser.uid;
+        const userDocRef = doc(db, "users", userId);
+        
+        try {
+            const userDocSnap = await getDoc(userDocRef);
+            
+            if (userDocSnap.exists()) {
+                 const userData = userDocSnap.data();
+                 const completedLessons = userData.completedLessons || [];
+
+                 if (completedLessons.includes(lessonId)) {
+                     console.log(`Lesson ${lessonId} already completed.`);
+                     return; 
+                 }
+
+                 await updateDoc(userDocRef, {
+                    xp: increment(xpToAdd),
+                    completedLessons: arrayUnion(lessonId)
+                 });
+
+            } else {
+                await setDoc(userDocRef, {
+                    username: currentUser.displayName || "new_user",
+                    email: currentUser.email,
+                    coins: 0,
+                    xp: xpToAdd,
+                    completedLessons: [lessonId],
+                    createdAt: new Date()
+                }, { merge: true });
+            }
+            
+            console.log(`Lesson ${lessonId} completed! +${xpToAdd} XP`);
+            showMessage(`ยินดีด้วย! คุณได้รับ ${xpToAdd} XP`, "success");
+            updateLessonUI(lessonId, true);
+
+        } catch (error) {
+            console.error("Error completing lesson:", error);
+            showMessage("เกิดข้อผิดพลาดในการบันทึกข้อมูล", "error");
+        }
+    }
+
+    // --- EVENT LISTENERS ---
+    document.querySelector('.container').addEventListener('click', async (event) => {
+        if (event.target.matches('.start-btn')) {
+            const lessonItem = event.target.closest('.lesson-item');
+            const lessonId = parseInt(lessonItem.dataset.lesson);
+            const xpValue = parseInt(lessonItem.dataset.xp);
+            const isCompleted = event.target.classList.contains('disabled');
+
+            // If not completed, award XP
+            if (!isCompleted) {
+                await completeLesson(lessonId, xpValue);
+            }
+
+            // --- FIX: Navigate to the correct single detail page with a parameter ---
+            let lessonUrl;
+            if (lessonId === 1) {
+                lessonUrl = `./lesson-detail.html`; // FIX: Added './' for valid relative path
+            } else {
+                lessonUrl = `./lesson-detail${lessonId}.html`; // FIX: Added './' for valid relative path
+            }
+            
+            window.location.href = lessonUrl;
+        }
+    });
+
   </script>
+  <!-- ===================================================================== -->
+  <!-- END: FIREBASE INTEGRATION -->
+  <!-- ===================================================================== -->
+
 </body>
 </html>
