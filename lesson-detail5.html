@@ -16,15 +16,10 @@
     .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
     .back-btn { margin-top:30px; display:inline-block; background:#009688; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
     .back-btn:hover { background:#00796b; }
-    .quiz-label { font-weight:bold; margin-top:1.5em; display:block; margin-bottom: 0.5em;}
-    .quiz-option { margin-bottom: 0.5em; }
     .action-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
     .action-btn:hover { background:#00796b; }
-    .action-btn:disabled { background:#bbb; cursor:not-allowed; }
+    .action-btn:disabled { background:#ccc !important; color:#888; pointer-events:none; }
     .quiz-status { margin-left:16px; font-weight:bold; }
-    .feedback { padding: 4px 8px; border-radius: 4px; color: white; margin-left: 10px; font-size: 0.9em; }
-    .feedback.correct { background-color: #4CAF50; }
-    .feedback.incorrect { background-color: #f44336; }
     ul,ol { margin-bottom:1em; }
     .emph { color:#d84315; font-weight:bold;}
     .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
@@ -33,6 +28,14 @@
     .example { background: #e0f7fa; border-left: 6px solid #00bcd4; padding: 8px 15px; border-radius: 6px; margin: 14px 0; }
     .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 24px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
     .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    
+    /* === QUIZ STYLES FROM PREVIOUS LESSONS === */
+    .end-of-chapter-quiz .question { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #009688; }
+    .end-of-chapter-quiz .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; }
+    .end-of-chapter-quiz .choices { display: flex; flex-direction: column; gap: 10px; }
+    .end-of-chapter-quiz .choice { background-color: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 10px; cursor: pointer; display: block; }
+    #quizResult.correct { color: #388e3c; }
+    #quizResult.incorrect { color: #d32f2f; }
   </style>
 </head>
 <body>
@@ -290,37 +293,13 @@
           <div class="video-container">
             <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/GBg21reFL5c?si=czY9gRj7jJNPjXl_" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
           </div>
-          <form id="quizForm">
-            <!-- Question 1 -->
-            <div id="q1-container">
-                <label class="quiz-label">1. ข้อใดคือความเสี่ยงของ 'งานออนไลน์ปลอม' ที่ควรระวังที่สุด?</label>
-                <div class="quiz-option"><input type="radio" name="q1" value="a"> ก. ได้ค่าตอบแทนน้อยกว่าที่คาดไว้</div>
-                <div class="quiz-option"><input type="radio" name="q1" value="b"> ข. ถูกหลอกให้โอนเงินก่อนเริ่มงาน</div>
-                <div class="quiz-option"><input type="radio" name="q1" value="c"> ค. งานน่าเบื่อและใช้เวลานาน</div>
-                <span id="q1-feedback" class="feedback"></span>
-            </div>
-            <!-- Question 2 -->
-            <div id="q2-container">
-                <label class="quiz-label">2. หากไม่มีเงินทุนเริ่มต้น ควรเลือกหารายได้เสริมด้วยวิธีใด?</label>
-                <div class="quiz-option"><input type="radio" name="q2" value="a"> ก. ลงทุนในหุ้นตามเพื่อน</div>
-                <div class="quiz-option"><input type="radio" name="q2" value="b"> ข. กู้เงินมาเพื่อซื้อของมาขาย</div>
-                <div class="quiz-option"><input type="radio" name="q2" value="c"> ค. ใชทักษะที่มี เช่น รับจ้างสอนพิเศษ หรือออกแบบกราฟิก</div>
-                <span id="q2-feedback" class="feedback"></span>
-            </div>
-            <!-- Question 3 -->
-            <div id="q3-container">
-                <label class="quiz-label">3. สิ่งที่สำคัญที่สุดที่ควรทำก่อนเริ่มหารายได้เสริมคืออะไร?</label>
-                <div class="quiz-option"><input type="radio" name="q3" value="a"> ก. ออกแบบโลโก้ให้สวยงาม</div>
-                <div class="quiz-option"><input type="radio" name="q3" value="b"> ข. แบ่งเวลาให้สมดุลและไม่กระทบการเรียน</div>
-                <div class="quiz-option"><input type="radio" name="q3" value="c"> ค. ซื้อของมาสต็อกไว้เยอะๆ เพื่อรอขาย</div>
-                <span id="q3-feedback" class="feedback"></span>
-            </div>
-            
-            <button type="button" class="action-btn" id="checkBtn">ตรวจคำตอบ</button>
-            <span id="quizOverallStatus" class="quiz-status" style="color:red;"></span>
-          </form>
+
+          <!-- NEW QUIZ STRUCTURE -->
+          <div class="end-of-chapter-quiz" id="end-of-chapter-quiz"></div>
+          <button type="button" class="action-btn" id="checkQuizBtn">ตรวจคำตอบ</button>
+          <span id="quizResult" class="quiz-status"></span>
           <div style="margin-top:16px;">
-            <button id="doneBtn" class="action-btn" style="background:#388e3c;" disabled>เรียนจบบทนี้</button>
+            <button id="doneBtn" class="action-btn disabled" style="background:#388e3c;">เรียนจบบทนี้</button>
             <span id="doneStatus" class="quiz-status" style="color:#388e3c;"></span>
           </div>
         `
@@ -338,92 +317,126 @@
     document.getElementById("pagination").innerHTML = pag;
 
 
-    // --- SCRIPT FOR QUIZ PAGE ---
+    // --- SCRIPT FOR QUIZ PAGE (ADAPTED FROM PREVIOUS LESSONS) ---
     if (page === pages.length) {
-      setTimeout(() => {
-        // --- CONFIGURATION ---
-        const correctAnswers = { q1: 'b', q2: 'c', q3: 'b' };
-        const questionIds = Object.keys(correctAnswers);
+        // --- Delay script to ensure HTML is rendered ---
+        setTimeout(() => {
+            // --- QUIZ CONFIGURATION ---
+            const quizData = [
+                {
+                    question: "1. ข้อใดคือความเสี่ยงของ 'งานออนไลน์ปลอม' ที่ควรระวังที่สุด?",
+                    choices: ["ก. ได้ค่าตอบแทนน้อยกว่าที่คาดไว้", "ข. ถูกหลอกให้โอนเงินก่อนเริ่มงาน", "ค. งานน่าเบื่อและใช้เวลานาน"],
+                    answer: "ข. ถูกหลอกให้โอนเงินก่อนเริ่มงาน"
+                },
+                {
+                    question: "2. หากไม่มีเงินทุนเริ่มต้น ควรเลือกหารายได้เสริมด้วยวิธีใด?",
+                    choices: ["ก. ลงทุนในหุ้นตามเพื่อน", "ข. กู้เงินมาเพื่อซื้อของมาขาย", "ค. ใชทักษะที่มี เช่น รับจ้างสอนพิเศษ หรือออกแบบกราฟิก"],
+                    answer: "ค. ใชทักษะที่มี เช่น รับจ้างสอนพิเศษ หรือออกแบบกราฟิก"
+                },
+                {
+                    question: "3. สิ่งที่สำคัญที่สุดที่ควรทำก่อนเริ่มหารายได้เสริมคืออะไร?",
+                    choices: ["ก. ออกแบบโลโก้ให้สวยงาม", "ข. แบ่งเวลาให้สมดุลและไม่กระทบการเรียน", "ค. ซื้อของมาสต็อกไว้เยอะๆ เพื่อรอขาย"],
+                    answer: "ข. แบ่งเวลาให้สมดุลและไม่กระทบการเรียน"
+                }
+            ];
 
-        // --- GET ELEMENTS ---
-        const checkBtn = document.getElementById("checkBtn");
-        const doneBtn = document.getElementById("doneBtn");
-        const quizOverallStatus = document.getElementById("quizOverallStatus");
-        const doneStatus = document.getElementById("doneStatus");
+            // --- GET ELEMENTS ---
+            const quizContainer = document.getElementById('end-of-chapter-quiz');
+            const checkButton = document.getElementById('checkQuizBtn');
+            const resultContainer = document.getElementById('quizResult');
+            const doneBtn = document.getElementById("doneBtn");
+            const doneStatus = document.getElementById("doneStatus");
 
-        // --- FUNCTION: Check Answers ---
-        function checkAnswers() {
-            let allCorrect = true;
-            quizOverallStatus.textContent = ''; 
+            // --- FUNCTION: Build Quiz HTML ---
+            function buildEndOfChapterQuiz() {
+                quizData.forEach((currentQuestion, questionNumber) => {
+                    const choicesHTML = currentQuestion.choices.map(choice => `
+                        <label class="choice">
+                            <input type="radio" name="chapter_question${questionNumber}" value="${choice}">
+                            ${choice}
+                        </label>
+                    `).join('');
+                    const questionHTML = `
+                        <div class="question">
+                            <div class="question-text">${currentQuestion.question}</div>
+                            <div class="choices">${choicesHTML}</div>
+                        </div>
+                    `;
+                    if(quizContainer) quizContainer.innerHTML += questionHTML;
+                });
+            }
 
-            questionIds.forEach(qid => {
-                const feedbackEl = document.getElementById(`${qid}-feedback`);
-                const selected = document.querySelector(`input[name="${qid}"]:checked`);
-                
-                feedbackEl.textContent = '';
-                feedbackEl.className = 'feedback';
-                
-                if (selected) {
-                    if (selected.value === correctAnswers[qid]) {
-                        feedbackEl.textContent = 'ถูกต้อง';
-                        feedbackEl.classList.add('correct');
-                    } else {
-                        feedbackEl.textContent = 'ยังไม่ถูก';
-                        feedbackEl.classList.add('incorrect');
-                        allCorrect = false;
+            // --- FUNCTION: Check Answers ---
+            function checkQuizAnswers() {
+                if(!quizContainer) return;
+                const answerContainers = quizContainer.querySelectorAll('.choices');
+                let numCorrect = 0;
+                let allAnswered = true;
+
+                quizData.forEach((currentQuestion, questionNumber) => {
+                    const selector = `input[name=chapter_question${questionNumber}]:checked`;
+                    const userAnswerNode = (answerContainers[questionNumber]) ? answerContainers[questionNumber].querySelector(selector) : null;
+                    if (!userAnswerNode) { 
+                        allAnswered = false; 
+                        return; 
                     }
-                } else {
-                    allCorrect = false;
-                }
-            });
-
-            if (allCorrect) {
-                quizOverallStatus.textContent = '';
-                doneBtn.disabled = false;
-                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
-            } else {
-                const allAnswered = questionIds.every(qid => document.querySelector(`input[name="${qid}"]:checked`));
+                    if (userAnswerNode.value === currentQuestion.answer) {
+                        numCorrect++;
+                    }
+                });
+                
                 if (!allAnswered) {
-                     quizOverallStatus.textContent = 'กรุณาตอบให้ครบทุกข้อ';
-                } else {
-                     quizOverallStatus.textContent = 'มีบางข้อยังไม่ถูกต้อง ลองดูอีกครั้งนะ';
+                    resultContainer.textContent = "กรุณาตอบคำถามให้ครบทุกข้อ";
+                    resultContainer.className = "quiz-status incorrect";
+                    return;
                 }
-                doneBtn.disabled = true;
+
+                if (numCorrect === quizData.length) {
+                    resultContainer.textContent = "ยอดเยี่ยม! คุณตอบถูกทุกข้อ";
+                    resultContainer.className = "quiz-status correct";
+                    doneBtn.disabled = false;
+                    doneBtn.classList.remove('disabled');
+                    doneStatus.textContent = "ตอนนี้คุณสามารถกดยืนยันเพื่อจบบทเรียนได้แล้ว!";
+                } else {
+                    resultContainer.textContent = `พยายามอีกนิด! คุณตอบถูก ${numCorrect} จาก ${quizData.length} ข้อ`;
+                    resultContainer.className = "quiz-status incorrect";
+                    doneBtn.disabled = true;
+                    doneBtn.classList.add('disabled');
+                    doneStatus.textContent = "";
+                }
             }
-        }
-        
-        // --- FUNCTION: Handle Finishing Lesson ---
-        function finishLesson() {
-            doneStatus.textContent = "คุณเรียนจบบทนี้แล้ว!";
-            doneBtn.disabled = true;
-            checkBtn.disabled = true;
-            document.querySelectorAll('#quizForm input[type="radio"]').forEach(radio => {
-                radio.disabled = true;
-            });
-        }
-        
-        // --- FUNCTION: Initial State Setup ---
-        function initializeQuiz() {
-            if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
-                finishLesson();
-                checkAnswers(); 
-            } else {
-                doneBtn.disabled = true;
+            
+            // --- FUNCTION: Handle Finishing Lesson ---
+            function finishLesson() {
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                checkInitialDoneStatus();
             }
-        }
 
-        // --- ADD EVENT LISTENERS ---
-        if (checkBtn) {
-            checkBtn.onclick = checkAnswers;
-        }
-        if (doneBtn) {
-            doneBtn.onclick = finishLesson;
-        }
+            // --- FUNCTION: Initial State Setup ---
+            function checkInitialDoneStatus() {
+                if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
+                    doneStatus.textContent = "คุณเรียนจบบทนี้แล้ว!";
+                    if(doneBtn) doneBtn.disabled = true;
+                    if(doneBtn) doneBtn.classList.add('disabled');
+                    if(checkButton) checkButton.style.display = 'none';
+                    if(resultContainer) resultContainer.style.display = 'none';
 
-        // --- INITIALIZE ---
-        initializeQuiz();
+                    // Disable radio buttons after completion
+                    if(quizContainer) {
+                        quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
+                            radio.disabled = true;
+                        });
+                    }
+                }
+            }
 
-      }, 200);
+            // --- INITIALIZE ---
+            buildEndOfChapterQuiz();
+            if(checkButton) checkButton.addEventListener('click', checkQuizAnswers);
+            if(doneBtn) doneBtn.addEventListener('click', finishLesson);
+            checkInitialDoneStatus();
+
+        }, 200);
     }
   </script>
  <script src="darkmode-toggle.js"></script>
