@@ -57,7 +57,7 @@
             color: #00796b;
             box-shadow: 0 1px 8px rgba(0,0,0,0.06);
             border: 1px solid #b2dfdb;
-            transition: transform 0.2s ease-in-out;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
         .leaderboard-item:hover {
             transform: scale(1.03);
@@ -86,6 +86,22 @@
             border-color: #a1887f;
             box-shadow: 0 3px 15px rgba(205,127,50,0.4);
         }
+        /* Style for the current user's score */
+        .leaderboard-item.current-user {
+            background: linear-gradient(90deg, #81d4fa 0%, #4fc3f7 100%);
+            color: #01579b;
+            border-color: #03a9f4;
+            box-shadow: 0 3px 15px rgba(3, 169, 244, 0.4);
+        }
+        .leaderboard-item.current-user .score {
+            color: #01579b;
+        }
+        .leaderboard-item.current-user .name::after {
+            content: " (คุณ)";
+            font-weight: normal;
+            font-style: italic;
+            font-size: 0.9em;
+        }
         .leaderboard-item .rank {
             font-size: 1.2em;
             margin-right: 10px;
@@ -110,10 +126,9 @@
             font-weight: 700;
             margin-right: 5px;
         }
-        /* Color adjustments for top ranks */
-        .leaderboard-item:nth-child(1) .score { color: #8B4513; }
-        .leaderboard-item:nth-child(2) .score { color: #424242; }
-        .leaderboard-item:nth-child(3) .score { color: #5d4037; }
+        .leaderboard-item:nth-child(1) .score, .leaderboard-item:nth-child(1).current-user .score { color: #8B4513; }
+        .leaderboard-item:nth-child(2) .score, .leaderboard-item:nth-child(2).current-user .score { color: #424242; }
+        .leaderboard-item:nth-child(3) .score, .leaderboard-item:nth-child(3).current-user .score { color: #5d4037; }
 
         .back-btn {
             background: linear-gradient(90deg, #ba68c8 70%, #e0b4e0 100%);
@@ -150,12 +165,10 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
-        // Import necessary functions from Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"; // Import Auth functions
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
             authDomain: "myapplication-bd04c034.firebaseapp.com",
@@ -165,33 +178,27 @@
             appId: "1:49782830313:web:c81b5d86a937f22d296c78"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app); // Initialize Auth
+        const auth = getAuth(app);
+        
+        // Variable to hold the current user's ID
+        let currentUserId = null;
 
-        // Fetch and display leaderboard data when the DOM is loaded
-        document.addEventListener('DOMContentLoaded', async () => {
+        async function fetchAndRenderLeaderboard() {
             const leaderboardList = document.getElementById('leaderboardList');
-            
+            leaderboardList.innerHTML = '<p class="loading-text">กำลังโหลดข้อมูล...</p>';
+
             try {
-                // **FIX: Sign in anonymously to get permissions**
-                await signInAnonymously(auth);
-                console.log("Signed in anonymously.");
-
-                leaderboardList.innerHTML = '<p class="loading-text">กำลังโหลดข้อมูล...</p>'; // Show loading message
-
-                // Create a query to get the top 20 players from the 'leaderboard' collection, ordered by score
                 const leaderboardQuery = query(
                     collection(db, "leaderboard"), 
                     orderBy("score", "desc"), 
                     limit(20)
                 );
 
-                // Execute the query
                 const querySnapshot = await getDocs(leaderboardQuery);
                 
-                leaderboardList.innerHTML = ''; // Clear the loading message
+                leaderboardList.innerHTML = ''; 
 
                 if (querySnapshot.empty) {
                     leaderboardList.innerHTML = '<p class="loading-text">ยังไม่มีคะแนนใน Leaderboard</p>';
@@ -205,6 +212,11 @@
 
                     const div = document.createElement('div');
                     div.classList.add('leaderboard-item');
+                    
+                    // --- Check if this entry belongs to the current user ---
+                    if (item.userId && item.userId === currentUserId) {
+                        div.classList.add('current-user');
+                    }
                     
                     div.innerHTML = `
                         <span class="rank">${trophy} ${rank}.</span>
@@ -221,13 +233,32 @@
                 console.error("Error getting leaderboard: ", error);
                 leaderboardList.innerHTML = '<p class="loading-text" style="color: red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
             }
+        }
 
-            function getTrophyIcon(rank) {
-                switch (rank) {
-                    case 1: return '🥇';
-                    case 2: return '🥈';
-                    case 3: return '🥉';
-                    default: return '';
+        function getTrophyIcon(rank) {
+            switch (rank) {
+                case 1: return '🥇';
+                case 2: return '🥈';
+                case 3: return '🥉';
+                default: return '';
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // --- Store the current user's ID ---
+                currentUserId = user.uid;
+                console.log("User is available:", currentUserId);
+                await fetchAndRenderLeaderboard();
+            } else {
+                try {
+                    console.log("No user found, signing in anonymously...");
+                    await signInAnonymously(auth);
+                    // The onAuthStateChanged listener will fire again with the new anonymous user
+                } catch (error) {
+                    console.error("Error signing in anonymously:", error);
+                    const leaderboardList = document.getElementById('leaderboardList');
+                    leaderboardList.innerHTML = '<p class="loading-text" style="color: red;">ไม่สามารถยืนยันตัวตนเพื่อดูข้อมูลได้</p>';
                 }
             }
         });
