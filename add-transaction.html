@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="add-transaction.css">
   <link rel="stylesheet" href="theme-darkmode.css">
   <style>
+    /* สไตล์สำหรับกล่องข้อความแจ้งเตือน (ไม่ใช่ alert() ของบราวเซอร์) */
     .message-box {
       display: none;
       position: fixed;
@@ -96,12 +97,13 @@
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script type="module">
+    // นำเข้า Firebase SDK v9
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+    import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, query, orderBy, addDoc, deleteDoc, serverTimestamp, arrayUnion, increment } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
-  <script>
-    // Firebase Config (เหมือนกับไฟล์อื่น)
+    // Firebase Config (ควรตรงกับไฟล์อื่น ๆ เช่น dashboard.js)
     const firebaseConfig = {
       apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
       authDomain: "myapplication-bd04c034.firebaseapp.com",
@@ -113,28 +115,26 @@
     };
 
     // Initialize Firebase
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // ตั้งค่าวันที่อัตโนมัติ
-    document.addEventListener("DOMContentLoaded", () => {
-      const dateInput = document.getElementById('date');
-      const today = new Date().toISOString().split('T')[0];
-      dateInput.value = today;
-    });
-
-    // กล่องข้อความ
-    function showMessageBox(message, type = "info", onConfirm = null) {
+    // กำหนดฟังก์ชัน showMessageBox ให้เป็น Global
+    window.showMessageBox = function(message, type = "info", onConfirm = null) {
       const box = document.getElementById("messageBox");
       const content = document.getElementById("messageBoxContent");
       const text = document.getElementById("messageText");
       const closeBtn = document.getElementById("messageCloseBtn");
 
+      if (!box || !content || !text || !closeBtn) {
+          console.error("ไม่พบ element ของกล่องข้อความ. แสดงข้อความผ่าน alert แทน.");
+          alert(message);
+          if (onConfirm) onConfirm();
+          return;
+      }
+
       text.textContent = message;
-      content.className = 'message-box-content'; // Reset classes
+      content.className = 'message-box-content';
       content.classList.add(type);
       box.style.display = "flex";
       setTimeout(() => box.classList.add("show"), 10);
@@ -153,64 +153,130 @@
           closeHandler();
         }
       };
-    }
+    };
 
-    // ฟังก์ชันบันทึกรายการ (แก้ไขให้ใช้ v8 compat)
-    function saveTransaction(event) {
+    // ตั้งค่าวันที่อัตโนมัติเป็นวันที่ปัจจุบัน
+    document.addEventListener("DOMContentLoaded", () => {
+      const dateInput = document.getElementById('date');
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+    });
+
+    // กำหนดฟังก์ชัน saveTransaction ให้เป็น Global
+    window.saveTransaction = async function(event) {
         event.preventDefault();
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                const type = document.getElementById('type').value;
-                const amount = parseFloat(document.getElementById('amount').value);
-                const date = document.getElementById('date').value;
-                const description = document.getElementById('description').value.trim();
-                
-                if (!type || !amount || amount <= 0 || !date) {
-                    showMessageBox("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง", "error");
-                    return;
+        const user = auth.currentUser;
+        
+        if (!user) {
+            window.showMessageBox("กรุณาเข้าสู่ระบบก่อนบันทึกรายการ", "info", () => {
+                window.location.href = "login.html";
+            });
+            return;
+        }
+
+        const type = document.getElementById('type').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        const date = document.getElementById('date').value;
+        const description = document.getElementById('description').value.trim();
+        
+        if (!type || !amount || amount <= 0 || !date) {
+            window.showMessageBox("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง", "error");
+            return;
+        }
+
+        const transaction = {
+            type: type,
+            description: description || (type === 'income' ? 'รายรับไม่ระบุ' : 'รายจ่ายไม่ระบุ'),
+            amount: amount,
+            date: date,
+            createdAt: serverTimestamp()
+        };
+
+        try {
+            await addDoc(collection(db, 'users', user.uid, 'transactions'), transaction);
+            
+            // เพิ่ม XP เมื่อบันทึกธุรกรรม
+            const userRef = doc(db, 'users', user.uid);
+            await updateDoc(userRef, {
+                xp: increment(10)
+            });
+
+            // ตรวจสอบและมอบเหรียญตรา 'first_transaction'
+            const allBadges = [
+                { id: 'first_transaction', name: 'นักบันทึกมือใหม่', description: 'บันทึกธุรกรรมแรกของคุณ', icon: '✍️' },
+                { id: 'first_goal', name: 'ผู้ตั้งเป้าหมาย', description: 'สร้างเป้าหมายการออมแรก', icon: '🎯' },
+                { id: 'saving_streak_3', name: 'ออมต่อเนื่อง 3 วัน', description: 'บันทึกรายรับหรือการออม 3 วันติด', icon: '🔥' },
+                { id: 'first_level_up', name: 'ก้าวแรกสู่ความเชี่ยวชาญ', description: 'เลื่อนระดับเป็นครั้งแรก', icon: '🌟' },
+            ];
+
+            async function checkAndAwardBadge(uid, badgeId) {
+                const userDocRef = doc(db, 'users', uid);
+                const userSnap = await getDoc(userDocRef);
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    
+                    let currentBadges = userData.badges;
+                    // Ensure currentBadges is an array. If not, treat it as empty array.
+                    if (!Array.isArray(currentBadges)) {
+                        currentBadges = [];
+                        console.warn("userData.badges was not an array for user:", uid, ". Initializing as empty array.");
+                    }
+
+                    if (!currentBadges.includes(badgeId)) {
+                        try {
+                            await updateDoc(userDocRef, {
+                                badges: arrayUnion(badgeId),
+                                xp: increment(20),
+                                coins: increment(30)
+                            });
+                            const awardedBadge = allBadges.find(b => b.id === badgeId);
+                            if (awardedBadge) {
+                                window.showMessageBox(`ได้รับเหรียญตราใหม่: ${awardedBadge.name}!`, "success");
+                            }
+                        } catch (error) {
+                            console.error(`Error awarding badge ${badgeId}:`, error);
+                        }
+                    }
                 }
-
-                const transaction = {
-                    type: type,
-                    description: description || (type === 'income' ? 'รายรับไม่ระบุ' : 'รายจ่ายไม่ระบุ'),
-                    amount: amount,
-                    date: date,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                db.collection('users').doc(user.uid).collection('transactions').add(transaction)
-                    .then(() => {
-                        showMessageBox("บันทึกรายการสำเร็จ!", "success", () => {
-                            window.location.href = "dashboard.html";
-                        });
-                    })
-                    .catch(error => {
-                        console.error("Error adding document: ", error);
-                        showMessageBox("เกิดข้อผิดพลาดในการบันทึก: " + error.message, "error");
-                    });
-
-            } else {
-                showMessageBox("กรุณาเข้าสู่ระบบก่อนบันทึกรายการ", "info", () => {
-                    window.location.href = "login.html";
-                });
             }
-        });
-    }
-  </script>
-<script src="add-transaction.js"></script>
-<script>
-  if (performance.navigation.type !== 2) {
-    history.replaceState({ from: document.referrer || "dashboard.html" }, '');
-    history.pushState({}, '');
-  }
+            await checkAndAwardBadge(user.uid, 'first_transaction');
 
-  window.addEventListener('popstate', function(event) {
-    if (history.state && history.state.from) {
-      window.location.href = history.state.from;
-    } else {
-      window.location.href = "dashboard.html";
+
+            window.showMessageBox("บันทึกรายการสำเร็จ! ได้รับ 10 XP!", "success", () => {
+                window.location.href = "dashboard.html";
+            });
+
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            window.showMessageBox("เกิดข้อผิดพลาดในการบันทึก: " + error.message, "error");
+        }
+    };
+
+    // ตรวจสอบสถานะการล็อกอินเมื่อโหลดหน้า
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            console.log("ผู้ใช้ยังไม่ได้ล็อกอินใน add-transaction.html");
+            // ไม่ต้อง redirect ทันที ให้ showMessageBox จัดการ
+        }
+    });
+
+  </script>
+  <script>
+    // ส่วนจัดการปุ่มย้อนกลับ (ถ้ามี)
+    if (performance.navigation.type !== 2) {
+      history.replaceState({ from: document.referrer || "dashboard.html" }, '');
+      history.pushState({}, '');
     }
-  });
-</script>
+
+    window.addEventListener('popstate', function(event) {
+      if (history.state && history.state.from) {
+        window.location.href = history.state.from;
+      } else {
+        window.location.href = "dashboard.html";
+      }
+    });
+  </script>
 </body>
+
+</html>
