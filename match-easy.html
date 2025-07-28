@@ -5,7 +5,9 @@
     <title>จับคู่การเงิน – ระดับง่าย</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="match-easy.css"> </head>
+    <link rel="stylesheet" href="match-game-style.css"> 
+    <link rel="stylesheet" href="theme-darkmode.css">
+</head>
 <body>
     <div class="container">
         <a href="game.html" class="back-btn"><span class="arrow">&#8592;</span> กลับหน้าเมนู</a>
@@ -22,7 +24,7 @@
         </div>
         <div class="score-row">
             <div class="score-item">คะแนน: <span id="score">0</span></div>
-            <div class="score-item timer">เวลา: <span id="timer">60</span>s</div>
+            <div class="score-item timer">เวลา: <span id="timer">120</span>s</div>
         </div>
         <div class="card-board" id="gameBoard"></div>
         <div class="result-box" id="resultBox"></div>
@@ -36,5 +38,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-    <script src="match-easy.js"></script> </body>
+    <script src="match-easy.js"></script>
+    <script src="darkmode-toggle.js"></script>
+</body>
 </html>

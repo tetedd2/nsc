@@ -11,14 +11,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// EXP System
-let playerData = {
-    level: 1,
-    exp: 0,
-    totalExp: 0
-};
+let playerData = { level: 1, exp: 0, totalExp: 0 };
 
-// Load player data
 function loadPlayerData() {
     const playerId = getPlayerId();
     database.ref('players/' + playerId).once('value', (snapshot) => {
@@ -38,14 +32,11 @@ function getPlayerId() {
     return playerId;
 }
 
-function getExpToNextLevel(level) {
-    return level * 100;
-}
+function getExpToNextLevel(level) { return level * 100; }
 
 function updateExpDisplay() {
     const expToNext = getExpToNextLevel(playerData.level);
     const expProgress = playerData.exp / expToNext * 100;
-    
     document.getElementById('playerLevel').textContent = playerData.level;
     document.getElementById('playerExp').textContent = playerData.exp;
     document.getElementById('expToNext').textContent = expToNext;
@@ -54,42 +45,29 @@ function updateExpDisplay() {
 
 function addExp(amount) {
     if (amount <= 0) return { gained: 0, levelUp: false };
-    
-    const oldLevel = playerData.level;
     playerData.exp += amount;
     playerData.totalExp += amount;
-    
-    // Check for level up
     let levelUp = false;
     while (playerData.exp >= getExpToNextLevel(playerData.level)) {
         playerData.exp -= getExpToNextLevel(playerData.level);
         playerData.level++;
         levelUp = true;
     }
-    
-    // Save to Firebase
     const playerId = getPlayerId();
     database.ref('players/' + playerId).set(playerData);
-    
     updateExpDisplay();
-    
     return { gained: amount, levelUp: levelUp, newLevel: playerData.level };
 }
 
 const pairs = [
-    {q:"เงินออม", a:"เงินที่เก็บไว้ใช้ในอนาคต"},
-    {q:"รายรับ", a:"เงินที่ได้เข้ามา"},
-    {q:"รายจ่าย", a:"เงินที่ต้องจ่ายออก"},
-    {q:"สินทรัพย์", a:"ของมีค่า/เงินฝาก"},
-    {q:"หนี้สิน", a:"เงินที่ต้องใช้คืน"},
-    {q:"งบประมาณ", a:"แผนการใช้เงิน"},
-    {q:"การลงทุน", a:"นำเงินไปต่อยอด"},
-    {q:"บัตรเครดิต", a:"บัตรใช้จ่ายแทนเงินสด"},
-    {q:"ดอกเบี้ย", a:"เงินเพิ่มที่จ่าย/รับจากการยืม"},
-    {q:"ประกันชีวิต", a:"คุ้มครองเงิน/ชีวิตจากเหตุการณ์ไม่คาดฝัน"},
+    {q:"เงินออม", a:"เงินที่เก็บไว้ใช้ในอนาคต"}, {q:"รายรับ", a:"เงินที่ได้เข้ามา"},
+    {q:"รายจ่าย", a:"เงินที่ต้องจ่ายออก"}, {q:"สินทรัพย์", a:"ของมีค่า/เงินฝาก"},
+    {q:"หนี้สิน", a:"เงินที่ต้องใช้คืน"}, {q:"งบประมาณ", a:"แผนการใช้เงิน"},
+    {q:"การลงทุน", a:"นำเงินไปต่อยอด"}, {q:"บัตรเครดิต", a:"บัตรใช้จ่ายแทนเงินสด"},
+    {q:"ดอกเบี้ย", a:"เงินเพิ่มที่จ่าย/รับจากการยืม"}, {q:"ประกันชีวิต", a:"คุ้มครองเงิน/ชีวิตจากเหตุการณ์ไม่คาดฝัน"},
 ];
 
-let score=0, timeLeft=60, timerInterval=null;
+let score=0, timeLeft=120, timerInterval=null;
 let cards=[], selected=[], matchedCount=0, locked=false, triedWrong={};
 let lastUsedIdxs = [];
 
@@ -111,7 +89,7 @@ function getNewQuestionSet() {
 }
 
 function startGame() {
-    score=0; matchedCount=0; selected=[]; locked=false; timeLeft=60; triedWrong={};
+    score=0; matchedCount=0; selected=[]; locked=false; timeLeft=120; triedWrong={};
     document.getElementById("score").textContent = score;
     document.getElementById("resultBox").textContent = '';
     hideModal();
@@ -136,35 +114,22 @@ function startGame() {
 function renderCards() {
     document.getElementById("gameBoard").innerHTML =
         cards.map((c,idx)=>
-            `<div class="card${c.correct?' correct':''}${isSelected(idx)?' flipped':''}${c.justReleased?' released':''}" onclick="selectCard(${idx})" id="card${idx}">${!c.correct ? c.text : ""}</div>`
+            `<div class="card${c.correct?' correct':''}${isSelected(idx)?' flipped':''}" onclick="selectCard(${idx})">${!c.correct ? c.text : ""}</div>`
         ).join('');
 }
 
-function isSelected(idx) {
-    return selected.includes(idx);
-}
+function isSelected(idx) { return selected.includes(idx); }
 
 window.selectCard = function(idx){
-    if(locked) return;
-    if(cards[idx].correct || selected.includes(idx)) return;
+    if(locked || cards[idx].correct || selected.includes(idx)) return;
     selected.push(idx);
     renderCards();
-    setTimeout(() => {
-        if(document.getElementById("card"+idx)) document.getElementById("card"+idx).classList.add("released");
-        setTimeout(()=>{
-            if(document.getElementById("card"+idx)) document.getElementById("card"+idx).classList.remove("released");
-        }, 190);
-    }, 90);
-
+    
     if(selected.length===2){
         locked=true;
         const [i1,i2]=selected;
         if(cards[i1].id===cards[i2].id && cards[i1].pair!==cards[i2].pair){
-            if(triedWrong[cards[i1].id]) {
-                // ไม่มีคะแนน
-            } else {
-                score+=15;
-            }
+            score+= triedWrong[cards[i1].id] ? 5 : 15;
             cards[i1].correct=true; cards[i2].correct=true;
             matchedCount++;
             setTimeout(()=>{
@@ -174,12 +139,14 @@ window.selectCard = function(idx){
                 locked=false;
                 if(matchedCount===10) endGame(true);
             },410);
-        }else{
-            score-=5;
+        } else {
+            score = Math.max(0, score - 5);
             triedWrong[cards[i1].id]=true;
             triedWrong[cards[i2].id]=true;
-            document.getElementById("card"+i1).classList.add('wrong');
-            document.getElementById("card"+i2).classList.add('wrong');
+            const card1El = document.getElementById("card"+i1);
+            const card2El = document.getElementById("card"+i2);
+            if(card1El) card1El.classList.add('wrong');
+            if(card2El) card2El.classList.add('wrong');
             setTimeout(()=>{
                 selected=[];
                 renderCards();
@@ -192,40 +159,22 @@ window.selectCard = function(idx){
 
 function endGame(win){
     clearInterval(timerInterval);
-    
-    // Calculate EXP
-    let expGained = 0;
-    if (win) {
-        // Perfect score calculation
-        const perfectScore = 10 * 15; // 10 pairs * 15 points each
-        const expPercentage = Math.min(score / perfectScore, 1);
-        expGained = Math.floor(100 * expPercentage); // Max 100 EXP for easy level
-    } else {
-        // Partial EXP based on score
-        expGained = Math.floor(score * 0.5);
-    }
-    
-    expGained = Math.max(expGained, 0);
-    
-    // Add EXP and check for level up
+    let expGained = Math.max(0, win ? Math.floor(100 * (score / (10 * 15))) : Math.floor(score * 0.5));
     const expResult = addExp(expGained);
     
     let message = win
         ? `🎉 เก่งมาก!<br>จับคู่ครบ <br><span style='color:#159988;font-size:1.3em;font-weight:700;'>${score} คะแนน</span><br>`
         : `หมดเวลา! <br><span style='color:#b71c1c;font-size:1.2em;font-weight:700;'>${score} คะแนน</span><br>`;
     
-    if (expResult.gained > 0) {
-        message += `<div class="exp-gain">+${expResult.gained} EXP</div>`;
-    }
-    
-    if (expResult.levelUp) {
-        message += `<div class="level-up">🎊 Level Up! Level ${expResult.newLevel}</div>`;
-    }
+    if (expResult.gained > 0) message += `<div class="exp-gain">+${expResult.gained} EXP</div>`;
+    if (expResult.levelUp) message += `<div class="level-up">🎊 Level Up! Level ${expResult.newLevel}</div>`;
     
     showModal(
         message,
-        `<button class="modal-btn" onclick="nextQuestionSet()">ข้อถัดไป</button>
-         <button class="modal-btn" onclick="startGame()">เล่นใหม่</button>`
+        `<div class="modal-btn-container">
+            <button class="modal-btn" onclick="nextQuestionSet()">ด่านต่อไป (กลาง)</button>
+            <button class="modal-btn" onclick="startGame()">เล่นใหม่</button>
+         </div>`
     );
 }
 
@@ -239,10 +188,8 @@ function hideModal() {
 }
 
 function nextQuestionSet() {
-    // Redirect to match-medium.html
     window.location.href = 'match-medium.html'; 
 }
 
-// Initialize
 loadPlayerData();
 startGame();

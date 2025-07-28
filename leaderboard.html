@@ -2,15 +2,16 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Arcade Combo - Leaderboard</title>
+    <title>🏆 Leaderboard - MoneySkillz</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme-darkmode.css">
     <style>
         body {
             background: linear-gradient(135deg, #e0f7fa 80%, #b2ebf2 100%);
             font-family: 'Kanit', sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px 0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -56,10 +57,14 @@
             color: #00796b;
             box-shadow: 0 1px 8px rgba(0,0,0,0.06);
             border: 1px solid #b2dfdb;
+            transition: transform 0.2s ease-in-out;
+        }
+        .leaderboard-item:hover {
+            transform: scale(1.03);
         }
         .leaderboard-item:nth-child(1) {
             background: linear-gradient(90deg, #ffd700 0%, #ffeb3b 100%); /* Gold */
-            color: #8B4513; /* Dark brown for text */
+            color: #8B4513;
             font-size: 1.3em;
             font-weight: 700;
             border-color: #ffc107;
@@ -81,21 +86,23 @@
             border-color: #a1887f;
             box-shadow: 0 3px 15px rgba(205,127,50,0.4);
         }
-
         .leaderboard-item .rank {
             font-size: 1.2em;
             margin-right: 10px;
-            min-width: 25px; /* Ensure space for ranks */
+            min-width: 25px;
             text-align: center;
         }
         .leaderboard-item .name {
             flex-grow: 1;
             text-align: left;
             padding-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .leaderboard-item .score-combo {
             text-align: right;
-            white-space: nowrap; /* Prevent wrapping */
+            white-space: nowrap;
         }
         .leaderboard-item .score {
             font-size: 1.1em;
@@ -103,18 +110,10 @@
             font-weight: 700;
             margin-right: 5px;
         }
-        .leaderboard-item .combo {
-            font-size: 0.9em;
-            color: #ba68c8;
-            font-weight: 600;
-        }
+        /* Color adjustments for top ranks */
         .leaderboard-item:nth-child(1) .score { color: #8B4513; }
-        .leaderboard-item:nth-child(1) .combo { color: #A0522D; }
         .leaderboard-item:nth-child(2) .score { color: #424242; }
-        .leaderboard-item:nth-child(2) .combo { color: #616161; }
         .leaderboard-item:nth-child(3) .score { color: #5d4037; }
-        .leaderboard-item:nth-child(3) .combo { color: #8d6e63; }
-
 
         .back-btn {
             background: linear-gradient(90deg, #ba68c8 70%, #e0b4e0 100%);
@@ -127,16 +126,16 @@
             cursor: pointer;
             margin-top: 30px;
             box-shadow: 0 3px 16px #ba68c825;
-            transition: background 0.16s, transform 0.13s, box-shadow 0.14s;
-            outline: none;
-            will-change: transform;
+            transition: all 0.2s;
             text-decoration: none;
             display: inline-block;
         }
         .back-btn:active {
-            background: linear-gradient(90deg, #9c27b0 60%, #ba68c8 100%);
             transform: scale(0.97);
             box-shadow: 0 1px 7px #ba68c81a;
+        }
+        .loading-text {
+            text-align: center; color: #555; margin-top: 20px; font-size: 1.1em;
         }
     </style>
 </head>
@@ -144,43 +143,83 @@
     <div class="container">
         <h1>🏆 Leaderboard 🏆</h1>
         <div class="leaderboard-list" id="leaderboardList">
-            </div>
+            <p class="loading-text">กำลังโหลดข้อมูล...</p>
+        </div>
         <a href="game.html" class="back-btn">กลับหน้าเมนู</a>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import necessary functions from Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"; // Import Auth functions
+        import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+            authDomain: "myapplication-bd04c034.firebaseapp.com",
+            projectId: "myapplication-bd04c034",
+            storageBucket: "myapplication-bd04c034.appspot.com",
+            messagingSenderId: "49782830313",
+            appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app); // Initialize Auth
+
+        // Fetch and display leaderboard data when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', async () => {
             const leaderboardList = document.getElementById('leaderboardList');
-            let highScores = JSON.parse(localStorage.getItem('arcadeLeaderboard')) || [];
+            
+            try {
+                // **FIX: Sign in anonymously to get permissions**
+                await signInAnonymously(auth);
+                console.log("Signed in anonymously.");
 
-            // Sort scores from highest to lowest
-            highScores.sort((a, b) => b.score - a.score);
+                leaderboardList.innerHTML = '<p class="loading-text">กำลังโหลดข้อมูล...</p>'; // Show loading message
 
-            // Display top 10 scores
-            for (let i = 0; i < Math.min(highScores.length, 10); i++) {
-                const item = highScores[i];
-                const rank = i + 1;
-                const trophy = getTrophyIcon(rank);
+                // Create a query to get the top 20 players from the 'leaderboard' collection, ordered by score
+                const leaderboardQuery = query(
+                    collection(db, "leaderboard"), 
+                    orderBy("score", "desc"), 
+                    limit(20)
+                );
 
-                const div = document.createElement('div');
-                div.classList.add('leaderboard-item');
-                if (rank <= 3) { // Highlight top 3
-                    div.classList.add(`rank-${rank}`); // Add specific class for 1st, 2nd, 3rd
-                }
+                // Execute the query
+                const querySnapshot = await getDocs(leaderboardQuery);
                 
-                div.innerHTML = `
-                    <span class="rank">${trophy} ${rank}.</span>
-                    <span class="name">${item.name || 'ผู้เล่น'}</span>
-                    <span class="score-combo">
-                        <span class="score">${item.score}</span> คะแนน |
-                        <span class="combo">${item.combo}</span> คอมโบ
-                    </span>
-                `;
-                leaderboardList.appendChild(div);
-            }
+                leaderboardList.innerHTML = ''; // Clear the loading message
 
-            if (highScores.length === 0) {
-                leaderboardList.innerHTML = '<div style="text-align: center; color: #555; margin-top: 20px;">ยังไม่มีคะแนนใน Leaderboard</div>';
+                if (querySnapshot.empty) {
+                    leaderboardList.innerHTML = '<p class="loading-text">ยังไม่มีคะแนนใน Leaderboard</p>';
+                    return;
+                }
+
+                let rank = 1;
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const trophy = getTrophyIcon(rank);
+
+                    const div = document.createElement('div');
+                    div.classList.add('leaderboard-item');
+                    
+                    div.innerHTML = `
+                        <span class="rank">${trophy} ${rank}.</span>
+                        <span class="name">${item.username || 'ผู้เล่นนิรนาม'}</span>
+                        <span class="score-combo">
+                            <span class="score">${item.score}</span> คะแนน
+                        </span>
+                    `;
+                    leaderboardList.appendChild(div);
+                    rank++;
+                });
+
+            } catch (error) {
+                console.error("Error getting leaderboard: ", error);
+                leaderboardList.innerHTML = '<p class="loading-text" style="color: red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
             }
 
             function getTrophyIcon(rank) {
@@ -193,5 +232,6 @@
             }
         });
     </script>
+    <script src="darkmode-toggle.js"></script>
 </body>
 </html>

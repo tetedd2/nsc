@@ -183,59 +183,37 @@
       box-shadow: 0 1px 7px #ff98001a;
     }
     .result-box {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #f4f8ff;
-      color: #5329b4;
-      border-radius: 21px;
-      font-size: 1.18em;
-      font-weight: 600;
-      box-shadow: 0 1px 18px #6a1b9a13;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border: 2.3px dashed #e1bfff;
-      padding: 22px 0 18px 0;
-      letter-spacing: 0.5px;
-      animation: resultpop 0.6s;
-      z-index: 999;
-      width: 90%;
-      max-width: 360px;
+        display: none; /* Hide by default */
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: #f4f8ff;
+        color: #5329b4;
+        border-radius: 21px;
+        font-size: 1.18em;
+        font-weight: 600;
+        box-shadow: 0 1px 18px #6a1b9a13;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 2.3px dashed #e1bfff;
+        padding: 22px 0 18px 0;
+        letter-spacing: 0.5px;
+        animation: resultpop 0.6s;
+        z-index: 999;
+        width: 90%;
+        max-width: 360px;
     }
     @keyframes resultpop {
       0% { transform: translate(-50%, -50%) scale(0.82); opacity: 0; }
       75% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
       100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
-    .emoji-grade {
-      font-size: 1.4em;
-      color: #512da8;
-      margin-bottom: 6px;
-    }
-    .score-lg {
-      font-size: 2.4em;
-      color: #2e7d32;
-      font-weight: 700;
-      margin: 10px 0;
-    }
-    .result-line strong {
-      font-size: 1em;
-    }
-    .combo-lg {
-      color: #d500f9;
-      font-weight: 700;
-      font-size: 1.5em;
-    }
-    .high-lg {
-      color: #2196f3;
-      font-weight: 700;
-      font-size: 1.2em;
-    }
-    
-    /* สไตล์สำหรับการแสดงคะแนนสูงสุดตอนเล่น */
+    .emoji-grade { font-size: 1.4em; color: #512da8; margin-bottom: 6px; }
+    .score-lg { font-size: 2.4em; color: #2e7d32; font-weight: 700; margin: 10px 0; }
+    .result-line strong { font-size: 1em; }
+    .combo-lg { color: #d500f9; font-weight: 700; font-size: 1.5em; }
+    .high-lg { color: #2196f3; font-weight: 700; font-size: 1.2em; }
     .personal-best {
       background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
       color: #d84315;
@@ -248,8 +226,6 @@
       box-shadow: 0 3px 12px #ffd70033;
       border: 2px solid #fff8;
     }
-    
-    /* ปรับปรุงสีของคะแนนสูงสุด */
     .status-item.high-score {
       background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
       color: #fff;
@@ -270,56 +246,91 @@
     <div class="combo combo-normal" id="comboBox">COMBO: <span id="combo">0</span></div>
   </div>
   
-  <!-- แสดงคะแนนสูงสุดส่วนตัว -->
   <div class="personal-best" id="personalBest" style="display:none;">
     🏆 สถิติส่วนตัว: <span id="personalBestScore">0</span> คะแนน
   </div>
   
   <div class="board" id="gameBoard"></div>
   <div class="result-box" id="resultBox"></div>
-  <button class="main-btn" onclick="startArcade()">เริ่มเล่นใหม่</button>
-  <button class="main-btn home-btn" onclick="goToHome()">🏠 กลับหน้าหลัก</button>
+  <button class="main-btn" onclick="window.startArcade()">เริ่มเล่นใหม่</button>
+  <button class="main-btn home-btn" onclick="window.goToHome()">🏠 กลับหน้าหลัก</button>
 </div>
 
-<script>
-  // ปุ่มกลับหน้าหลัก
-  function goToHome() {
-    window.location.href = 'game.html';
-  }
+<script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-  // ข้อมูลคำศัพท์
-  const easyMidPairs = [
-    {q:"เงินออม", a:"เงินที่เก็บไว้ใช้ในอนาคต"},
-    {q:"รายรับ", a:"เงินที่ได้เข้ามา"},
-    {q:"รายจ่าย", a:"เงินที่ต้องจ่ายออก"},
-    {q:"สินทรัพย์", a:"ของมีค่า/เงินฝาก"},
-    {q:"หนี้สิน", a:"เงินที่ต้องใช้คืน"},
-    {q:"งบประมาณ", a:"แผนการใช้เงิน"},
-    {q:"การลงทุน", a:"นำเงินไปต่อยอด"},
-    {q:"บัตรเครดิต", a:"บัตรใช้จ่ายแทนเงินสด"},
-    {q:"ดอกเบี้ย", a:"เงินเพิ่มที่จ่าย/รับจากการยืม"},
-    {q:"ประกันชีวิต", a:"คุ้มครองเงิน/ชีวิตจากเหตุการณ์ไม่คาดฝัน"},
-    {q:"ดอกเบี้ยทบต้น", a:"ดอกเบี้ยคำนวณบนเงินต้นและสะสม"},
-    {q:"งบกระแสเงินสด", a:"บันทึกการรับจ่ายเงินสดของธุรกิจ"},
-    {q:"ลงทุนกองทุนรวม", a:"ฝากเงินรวมกระจายความเสี่ยง"},
-    {q:"หนี้ดี", a:"หนี้ที่ใช้เพิ่มรายได้ เช่น กู้เพื่อการศึกษา"},
-    {q:"บัตรกดเงินสด", a:"บัตรเบิกถอนเงินสดได้"},
-    {q:"กองทุนสำรองเลี้ยงชีพ", a:"เงินสะสมหลังเกษียณ"},
-    {q:"เงินฉุกเฉิน", a:"เงินสำรองกรณีฉุกเฉิน"},
-    {q:"สัญญากู้ยืม", a:"เอกสารยืนยันการยืมเงิน"},
-    {q:"ประกันสุขภาพ", a:"คุ้มครองค่ารักษาพยาบาล"},
-    {q:"ค่าใช้จ่ายประจำ", a:"ค่าใช้จ่ายทุกเดือน เช่น อินเทอร์เน็ต"},
-    {q:"รายได้ประจำ", a:"เงินทุกเดือนจากการทำงาน"}
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    let currentUser = null;
+
+    // Listen for auth state changes to get user info
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            // Set a default/fallback display name immediately
+            currentUser.displayName = user.displayName || 'ผู้เล่นนิรนาม';
+
+            // Attempt to fetch a more specific username from the 'users' collection
+            try {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    // **FIX**: Prioritize 'username', then 'displayName' from Firestore, then fallback
+                    currentUser.displayName = userData.username || userData.displayName || currentUser.displayName;
+                }
+            } catch (error) {
+                console.error("Error fetching username:", error);
+            }
+        } else {
+            try {
+                // If no user, sign in anonymously to get a UID
+                const userCredential = await signInAnonymously(auth);
+                currentUser = userCredential.user;
+                currentUser.displayName = 'ผู้เล่นนิรนาม'; // Set default name for anonymous users
+            } catch (error) {
+                console.error("Anonymous sign-in failed:", error);
+            }
+        }
+
+        // Start the game for the first time only after authentication is handled
+        if (!gameInitialized) {
+            startArcade();
+            gameInitialized = true;
+        }
+    });
+
+  // --- GAME LOGIC ---
+  const allPairs = [
+    {q:"เงินออม", a:"เงินที่เก็บไว้ใช้ในอนาคต"}, {q:"รายรับ", a:"เงินที่ได้เข้ามา"}, {q:"รายจ่าย", a:"เงินที่ต้องจ่ายออก"},
+    {q:"สินทรัพย์", a:"ของมีค่า/เงินฝาก"}, {q:"หนี้สิน", a:"เงินที่ต้องใช้คืน"}, {q:"งบประมาณ", a:"แผนการใช้เงิน"},
+    {q:"การลงทุน", a:"นำเงินไปต่อยอด"}, {q:"บัตรเครดิต", a:"บัตรใช้จ่ายแทนเงินสด"}, {q:"ดอกเบี้ย", a:"เงินเพิ่มที่จ่าย/รับจากการยืม"},
+    {q:"ประกันชีวิต", a:"คุ้มครองเงิน/ชีวิต"}, {q:"ดอกเบี้ยทบต้น", a:"ดอกเบี้ยคำนวณบนเงินต้นและสะสม"},
+    {q:"งบกระแสเงินสด", a:"บันทึกการรับจ่ายเงินสด"}, {q:"ลงทุนกองทุนรวม", a:"ฝากเงินรวมกระจายความเสี่ยง"},
+    {q:"หนี้ดี", a:"หนี้ที่ใช้เพิ่มรายได้"}, {q:"บัตรกดเงินสด", a:"บัตรเบิกถอนเงินสด"}, {q:"กองทุนสำรองเลี้ยงชีพ", a:"เงินสะสมหลังเกษียณ"},
+    {q:"เงินฉุกเฉิน", a:"เงินสำรองกรณีฉุกเฉิน"}, {q:"สัญญากู้ยืม", a:"เอกสารยืนยันการยืมเงิน"}, {q:"ประกันสุขภาพ", a:"คุ้มครองค่ารักษาพยาบาล"},
+    {q:"ค่าใช้จ่ายประจำ", a:"ค่าใช้จ่ายทุกเดือน"}, {q:"รายได้ประจำ", a:"เงินทุกเดือนจากการทำงาน"},
+    {q:"ภาษีมูลค่าเพิ่ม (VAT)", a:"ภาษีซื้อขายสินค้า/บริการ"}, {q:"เงินเฟ้อ", a:"ราคาสินค้าปรับสูงขึ้น"}
   ];
-  const hardPairs = [
-    {q:"ภาษีมูลค่าเพิ่ม (VAT)", a:"ภาษีซื้อขายสินค้า/บริการ"},
-    {q:"เงินเฟ้อ", a:"ราคาสินค้าปรับสูงขึ้น"}
-  ];
-  const allPairs = [...easyMidPairs, ...hardPairs];
+  
   let arcadeScore = 0, arcadeTime = 60, timerInterval = null, combo = 0, maxCombo = 0, highScore = 0, personalBest = 0;
-  let cards = [], selected = [], matchedCount = 0, locked = false, correctStreak = 0;
+  let cards = [], selected = [], locked = false, correctStreak = 0;
   let boardPairs = [];
-  const BOARD_PAIR_COUNT = 11;
+  let gameInitialized = false;
 
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
@@ -331,9 +342,7 @@
 
   function randomBoardPairs() {
     let idxs = shuffle([...Array(allPairs.length).keys()]);
-    let easyMidIdx = idxs.filter(i => i < easyMidPairs.length).slice(0, 9);
-    let hardIdx = idxs.filter(i => i >= easyMidPairs.length).slice(0, 2);
-    return shuffle([...easyMidIdx, ...hardIdx]);
+    return idxs.slice(0, 11);
   }
 
   function loadPersonalBest() {
@@ -349,21 +358,14 @@
   }
 
   function startArcade() {
-    arcadeScore = 0;
-    arcadeTime = 60;
-    combo = 0;
-    maxCombo = 0;
-    correctStreak = 0;
+    arcadeScore = 0; arcadeTime = 60; combo = 0; maxCombo = 0; correctStreak = 0;
     document.getElementById("score").textContent = arcadeScore;
     document.getElementById("timer").textContent = arcadeTime;
-    document.getElementById("combo").textContent = combo;
     updateComboBox();
     document.getElementById("resultBox").style.display = "none";
     document.getElementById("resultBox").innerHTML = "";
     highScore = Number(localStorage.getItem("arcadeHighScore") || 0);
     document.getElementById("highScore").textContent = highScore;
-    
-    // โหลดคะแนนสูงสุดส่วนตัว
     loadPersonalBest();
     
     boardPairs = randomBoardPairs();
@@ -379,20 +381,19 @@
   function prepareBoard() {
     cards = [];
     boardPairs.forEach(i => {
-      cards.push({ id: i, text: allPairs[i].q, pair: "q", correct: false, appear: false });
-      cards.push({ id: i, text: allPairs[i].a, pair: "a", correct: false, appear: false });
+      cards.push({ id: i, text: allPairs[i].q, pair: "q", correct: false });
+      cards.push({ id: i, text: allPairs[i].a, pair: "a", correct: false });
     });
     cards = shuffle(cards);
-    matchedCount = 0;
     selected = [];
     locked = false;
     renderCards();
   }
 
   function renderCards() {
-    document.getElementById("gameBoard").innerHTML =
-      cards.map((c, idx) =>
-        `<div class="card${c.correct ? ' correct' : ''}${selected.includes(idx) ? ' flipped' : ''}${c.appear ? ' appear' : ''}" onclick="selectCard(${idx})" id="card${idx}">${!c.correct ? c.text : ""}</div>`
+    const board = document.getElementById("gameBoard");
+    board.innerHTML = cards.map((c, idx) =>
+        `<div class="card${c.correct ? ' correct' : ''}${selected.includes(idx) ? ' flipped' : ''}" onclick="window.selectCard(${idx})" id="card${idx}">${!c.correct ? c.text : ""}</div>`
       ).join('');
   }
 
@@ -400,7 +401,7 @@
     const toast = document.getElementById("comboToast");
     toast.className = "combo-toast" + (num >= 5 ? " super" : "");
     toast.textContent = num >= 5 ? `SUPER COMBO ${num}!` : `COMBO ${num}!`;
-    toast.style.display = "";
+    toast.style.display = "block";
     toast.style.animation = "none";
     void toast.offsetWidth;
     toast.style.animation = "";
@@ -412,21 +413,18 @@
     if (combo >= 5) {
       box.className = "combo combo-purple";
       box.innerHTML = `🔥 SUPER COMBO: <span id="combo">${combo}</span> 🔥`;
-      document.body.className = "comboing super";
     } else if (combo >= 2) {
       box.className = "combo combo-yellow";
       box.innerHTML = `🔥 COMBO: <span id="combo">${combo}</span> 🔥`;
-      document.body.className = "comboing";
     } else {
       box.className = "combo combo-normal";
       box.innerHTML = `COMBO: <span id="combo">${combo}</span>`;
-      document.body.className = "";
     }
+     document.body.className = combo >= 2 ? (combo >= 5 ? "comboing super" : "comboing") : "";
   }
 
-  window.selectCard = function (idx) {
-    if (locked) return;
-    if (cards[idx].correct || selected.includes(idx)) return;
+  function selectCard(idx) {
+    if (locked || cards[idx].correct || selected.includes(idx)) return;
     selected.push(idx);
     renderCards();
     if (selected.length === 2) {
@@ -437,32 +435,29 @@
         cards[i2].correct = true;
         arcadeScore += 15;
         correctStreak++;
-        matchedCount++;
         if (correctStreak >= 2) {
           combo++;
           if (combo > maxCombo) maxCombo = combo;
-          arcadeScore += 25;
+          arcadeScore += (10 + (combo * 5));
           showComboToast(combo);
-        } else {
-          combo = 0;
         }
         updateComboBox();
         document.getElementById("score").textContent = arcadeScore;
-        document.getElementById("combo").textContent = combo;
         setTimeout(() => {
           selected = [];
           renderCards();
-          setTimeout(generateNewBoard, 1000);
+          setTimeout(generateNewBoard, 800);
         }, 430);
       } else {
-        arcadeScore -= 8;
+        arcadeScore = Math.max(0, arcadeScore - 8);
         combo = 0;
         correctStreak = 0;
         updateComboBox();
-        document.getElementById("combo").textContent = combo;
         document.getElementById("score").textContent = arcadeScore;
-        document.getElementById("card" + i1).classList.add('wrong');
-        document.getElementById("card" + i2).classList.add('wrong');
+        const card1El = document.getElementById("card" + i1);
+        const card2El = document.getElementById("card" + i2);
+        if(card1El) card1El.classList.add('wrong');
+        if(card2El) card2El.classList.add('wrong');
         setTimeout(() => {
           selected = [];
           renderCards();
@@ -481,55 +476,67 @@
     });
     cards = shuffle(cards);
     selected = [];
-    matchedCount = 0;
     renderCards();
     setTimeout(() => {
-      cards.forEach(c => { if (c.appear) c.appear = false; });
+      cards.forEach(c => c.appear = false);
       renderCards();
       locked = false;
     }, 1110);
   }
 
-  function endArcade() {
+  async function endArcade() {
     clearInterval(timerInterval);
     document.body.className = "";
     document.getElementById("comboToast").style.display = "none";
     
-    // อัพเดทคะแนนสูงสุด
     if (arcadeScore > highScore) {
       localStorage.setItem("arcadeHighScore", arcadeScore);
       highScore = arcadeScore;
     }
     
-    // อัพเดทคะแนนสูงสุดส่วนตัว
     if (arcadeScore > personalBest) {
       personalBest = arcadeScore;
       savePersonalBest();
     }
     
-    // บันทึกคะแนนโหมดจับเวลา (สำหรับหน้า game.html)
     localStorage.setItem("money_score_timed", arcadeScore);
-    
+
+    if (currentUser && arcadeScore > 0) {
+        try {
+            await addDoc(collection(db, "leaderboard"), {
+                userId: currentUser.uid,
+                username: currentUser.displayName, // This is now guaranteed to have a value
+                score: arcadeScore,
+                combo: maxCombo,
+                createdAt: serverTimestamp()
+            });
+            console.log("Score saved to leaderboard!");
+        } catch (error) {
+            console.error("Error writing score to leaderboard: ", error);
+        }
+    }
+
     document.getElementById("highScore").textContent = highScore;
     document.getElementById("resultBox").style.display = "flex";
     const levelText = arcadeScore >= 300 ? "สุดยอด! คุณคือเซียนการเงิน!" :
                      arcadeScore >= 180 ? "เยี่ยมมาก! คุณทำได้ดี!" :
-                     arcadeScore >= 90 ? "พยายามดีมาก!" :
-                                          "ฝึกอีกนิดนะ!";
+                     arcadeScore >= 90 ? "พยายามดีมาก!" : "ฝึกอีกนิดนะ!";
     document.getElementById("resultBox").innerHTML = `
       <div class="emoji-grade">${levelText}</div>
       <div class="score-lg">+${arcadeScore}</div>
       <div class="result-line"><strong>คอมโบสูงสุด:</strong> <span class="combo-lg">${maxCombo}</span></div>
       <div class="result-line"><strong>คะแนนสูงสุด:</strong> <span class="high-lg">${highScore}</span></div>
       <div class="result-line"><strong>สถิติส่วนตัว:</strong> <span class="high-lg">${personalBest}</span></div>
-      <button class="main-btn" onclick="startArcade()" style="margin-top:16px;">เล่นอีกครั้ง</button>
-      <button class="main-btn home-btn" onclick="goToHome()" style="margin-top:8px;">กลับหน้าเมนู</button>
+      <button class="main-btn" onclick="window.startArcade()" style="margin-top:16px;">เล่นอีกครั้ง</button>
+      <button class="main-btn home-btn" onclick="window.goToHome()" style="margin-top:8px;">กลับหน้าเมนู</button>
     `;
     document.getElementById("gameBoard").innerHTML = "";
   }
+  
+  window.startArcade = startArcade;
+  window.goToHome = function() { window.location.href = 'game.html'; };
+  window.selectCard = selectCard;
 
-  // เริ่มเกมเมื่อโหลดหน้า
-  startArcade();
 </script>
 <script src="darkmode-toggle.js"></script>
 </body>
