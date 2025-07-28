@@ -16,11 +16,15 @@
     .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
     .back-btn { margin-top:30px; display:inline-block; background:#009688; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
     .back-btn:hover { background:#00796b; }
-    .quiz-label { font-weight:bold; margin-top:1.5em; display:block;}
-    .quiz-input { width:100%; padding:9px; border-radius:6px; border:1px solid #bbb; margin-bottom:7px;}
-    .save-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
-    .save-btn:hover { background:#00796b; }
-    .quiz-status { margin-left:16px; color:#388e3c; font-weight:bold; }
+    .quiz-label { font-weight:bold; margin-top:1.5em; display:block; margin-bottom: 0.5em;}
+    .quiz-option { margin-bottom: 0.5em; }
+    .action-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .action-btn:hover { background:#00796b; }
+    .action-btn:disabled { background:#bbb; cursor:not-allowed; }
+    .quiz-status { margin-left:16px; font-weight:bold; }
+    .feedback { padding: 4px 8px; border-radius: 4px; color: white; margin-left: 10px; font-size: 0.9em; }
+    .feedback.correct { background-color: #4CAF50; }
+    .feedback.incorrect { background-color: #f44336; }
     table { border-collapse:collapse; width:100%; margin:18px 0;}
     th,td { border:1px solid #bbb; padding:10px; }
     th { background:#eee; }
@@ -28,6 +32,8 @@
     .emph { color:#d84315; font-weight:bold;}
     .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
     .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 24px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
   </style>
 </head>
 <body>
@@ -180,7 +186,7 @@
         `
       },
       {
-        title: "บทที่ 6: แบบฝึกหัดท้ายบท & ข้อคิด (หน้า 7/7)",
+        title: "บทที่ 6: สรุปและแบบทดสอบท้ายบท (หน้า 7/7)",
         content: `
           <div class="takeaway">
             <ul>
@@ -189,19 +195,41 @@
               <li>อย่ากลัวประกันหรือกลัวการวางแผน มันคือเกราะป้องกันอนาคต</li>
             </ul>
           </div>
+          <div class="video-container">
+            <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/593PQ36nxKw?si=FaBy7xU-8hwEt654" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
           <form id="quizForm">
-            <label class="quiz-label">1. คุณคิดว่าความเสี่ยงทางการเงินที่สำคัญในชีวิตคุณคืออะไร?</label>
-            <textarea class="quiz-input" id="q1" rows="2"></textarea>
-            <label class="quiz-label">2. หากต้องเจอเหตุฉุกเฉินทางการเงิน คุณจะวางแผนรับมืออย่างไร?</label>
-            <textarea class="quiz-input" id="q2" rows="2"></textarea>
-            <label class="quiz-label">3. ลองเล่าเหตุการณ์ที่มีคนรอบตัวต้องแก้ปัญหาความเสี่ยงทางการเงิน</label>
-            <textarea class="quiz-input" id="q3" rows="2"></textarea>
-            <button type="button" class="save-btn" id="saveBtn">บันทึกคำตอบ</button>
-            <span id="quizStatus" class="quiz-status" style="display:none;">บันทึกแล้ว!</span>
+            <!-- Question 1 -->
+            <div id="q1-container">
+                <label class="quiz-label">1. ข้อใดคือเป้าหมายหลักของการมี 'เงินสำรองฉุกเฉิน'?</label>
+                <div class="quiz-option"><input type="radio" name="q1" value="a"> ก. เพื่อนำไปลงทุนให้ได้กำไรสูงสุด</div>
+                <div class="quiz-option"><input type="radio" name="q1" value="b"> ข. เพื่อใช้จ่ายในเหตุการณ์ไม่คาดฝันโดยไม่กระทบเงินออมหลัก</div>
+                <div class="quiz-option"><input type="radio" name="q1" value="c"> ค. เพื่อเก็บไว้ซื้อของที่อยากได้ในอนาคต</div>
+                <span id="q1-feedback" class="feedback"></span>
+            </div>
+            <!-- Question 2 -->
+            <div id="q2-container">
+                <label class="quiz-label">2. หลักการ “อย่าใส่ไข่ทุกฟองไว้ในตะกร้าเดียว” หมายถึงอะไร?</label>
+                <div class="quiz-option"><input type="radio" name="q2" value="a"> ก. การเก็บเงินสดทั้งหมดไว้ที่บ้าน</div>
+                <div class="quiz-option"><input type="radio" name="q2" value="b"> ข. การลงทุนทุกอย่างในหุ้นตัวเดียวที่มั่นใจ</div>
+                <div class="quiz-option"><input type="radio" name="q2" value="c"> ค. การกระจายการลงทุนในหลายสินทรัพย์เพื่อลดความเสี่ยง</div>
+                <span id="q2-feedback" class="feedback"></span>
+            </div>
+            <!-- Question 3 -->
+            <div id="q3-container">
+                <label class="quiz-label">3. การกระทำใดที่ช่วยลดความเสี่ยงจากการเจ็บป่วยกะทันหันได้ดีที่สุด?</label>
+                <div class="quiz-option"><input type="radio" name="q3" value="a"> ก. การทำประกันสุขภาพ</div>
+                <div class="quiz-option"><input type="radio" name="q3" value="b"> ข. การออกกำลังกายอย่างสม่ำเสมอ</div>
+                <div class="quiz-option"><input type="radio" name="q3" value="c"> ค. ทั้งข้อ ก และ ข ถูกต้อง</div>
+                <span id="q3-feedback" class="feedback"></span>
+            </div>
+            
+            <button type="button" class="action-btn" id="checkBtn">ตรวจคำตอบ</button>
+            <span id="quizOverallStatus" class="quiz-status" style="color:red;"></span>
           </form>
           <div style="margin-top:16px;">
-            <button id="doneBtn" class="save-btn" style="background:#388e3c;">เรียนจบบทนี้</button>
-            <span id="doneStatus" class="quiz-status"></span>
+            <button id="doneBtn" class="action-btn" style="background:#388e3c;" disabled>เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status" style="color:#388e3c;"></span>
           </div>
         `
       }
@@ -217,58 +245,95 @@
     if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail6.html?page=${page+1}">หน้าถัดไป</a>`;
     document.getElementById("pagination").innerHTML = pag;
 
-    // quiz + ตรวจสอบเรียนจบ
+
+    // --- SCRIPT FOR QUIZ PAGE ---
     if (page === pages.length) {
       setTimeout(() => {
-        ["q1","q2","q3"].forEach(qid=>{
-          let v = localStorage.getItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`)||"";
-          let el = document.getElementById(qid);
-          if(el) el.value = v;
-        });
-        const saveBtn = document.getElementById("saveBtn");
-        const quizStatus = document.getElementById("quizStatus");
-        if(saveBtn){
-          saveBtn.onclick = ()=>{
-            ["q1","q2","q3"].forEach(qid=>{
-              let el = document.getElementById(qid);
-              if(el) localStorage.setItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`, el.value.trim());
-            });
-            quizStatus.style.display = "inline";
-            setTimeout(()=>{ quizStatus.style.display = "none"; }, 1500);
-            checkDoneStatus();
-          }
-        }
-        const doneBtn = document.getElementById("doneBtn");
-        const doneStatus = document.getElementById("doneStatus");
-        function checkDoneStatus(){
-          let ready = ["q1","q2","q3"].every(qid=>{
-            let el = document.getElementById(qid);
-            return el && el.value.trim();
-          });
-          if(localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`)==="yes"){
-            doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
-            doneBtn.disabled = true;
-            doneBtn.style.background="#ccc";
-          }else{
-            doneStatus.innerHTML = "";
-            doneBtn.disabled = !ready;
-            doneBtn.style.background = ready ? "#388e3c" : "#bbb";
-          }
-        }
-        ["q1","q2","q3"].forEach(qid=>{
-          let el = document.getElementById(qid);
-          if(el) el.oninput = checkDoneStatus;
-        });
-        checkDoneStatus();
+        // --- CONFIGURATION ---
+        const correctAnswers = { q1: 'b', q2: 'c', q3: 'c' };
+        const questionIds = Object.keys(correctAnswers);
 
-        doneBtn.onclick = ()=>{
-          localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
-          checkDoneStatus();
+        // --- GET ELEMENTS ---
+        const checkBtn = document.getElementById("checkBtn");
+        const doneBtn = document.getElementById("doneBtn");
+        const quizOverallStatus = document.getElementById("quizOverallStatus");
+        const doneStatus = document.getElementById("doneStatus");
+
+        // --- FUNCTION: Check Answers ---
+        function checkAnswers() {
+            let allCorrect = true;
+            quizOverallStatus.textContent = ''; 
+
+            questionIds.forEach(qid => {
+                const feedbackEl = document.getElementById(`${qid}-feedback`);
+                const selected = document.querySelector(`input[name="${qid}"]:checked`);
+                
+                feedbackEl.textContent = '';
+                feedbackEl.className = 'feedback';
+                
+                if (selected) {
+                    if (selected.value === correctAnswers[qid]) {
+                        feedbackEl.textContent = 'ถูกต้อง';
+                        feedbackEl.classList.add('correct');
+                    } else {
+                        feedbackEl.textContent = 'ยังไม่ถูก';
+                        feedbackEl.classList.add('incorrect');
+                        allCorrect = false;
+                    }
+                } else {
+                    allCorrect = false;
+                }
+            });
+
+            if (allCorrect) {
+                quizOverallStatus.textContent = '';
+                doneBtn.disabled = false;
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+            } else {
+                const allAnswered = questionIds.every(qid => document.querySelector(`input[name="${qid}"]:checked`));
+                if (!allAnswered) {
+                     quizOverallStatus.textContent = 'กรุณาตอบให้ครบทุกข้อ';
+                } else {
+                     quizOverallStatus.textContent = 'มีบางข้อยังไม่ถูกต้อง ลองดูอีกครั้งนะ';
+                }
+                doneBtn.disabled = true;
+            }
         }
+        
+        // --- FUNCTION: Handle Finishing Lesson ---
+        function finishLesson() {
+            doneStatus.textContent = "คุณเรียนจบบทนี้แล้ว!";
+            doneBtn.disabled = true;
+            checkBtn.disabled = true;
+            document.querySelectorAll('#quizForm input[type="radio"]').forEach(radio => {
+                radio.disabled = true;
+            });
+        }
+        
+        // --- FUNCTION: Initial State Setup ---
+        function initializeQuiz() {
+            if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
+                finishLesson();
+                checkAnswers(); 
+            } else {
+                doneBtn.disabled = true;
+            }
+        }
+
+        // --- ADD EVENT LISTENERS ---
+        if (checkBtn) {
+            checkBtn.onclick = checkAnswers;
+        }
+        if (doneBtn) {
+            doneBtn.onclick = finishLesson;
+        }
+
+        // --- INITIALIZE ---
+        initializeQuiz();
+
       }, 200);
     }
   </script>
-  <script src="darkmode-toggle.js"></script>
-
+ <script src="darkmode-toggle.js"></script>
 </body>
 </html>

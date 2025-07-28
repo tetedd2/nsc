@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 ผลการทดสอบ - MoneySkillz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="test.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .score-comparison {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .score-card {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px;
+            display: inline-block;
+            min-width: 150px;
+            border: 1px solid #eee;
+        }
+        .score-card h3 {
+            margin: 0 0 5px 0;
+            color: #00796b;
+        }
+        .score-card .score {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+        #improvement-message {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        body.dark-mode .score-card {
+            background: #2a2a2a;
+            border-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 ผลการทดสอบ</h1>
+            <p>นี่คือการเปรียบเทียบคะแนนของคุณ</p>
+        </header>
+
+        <div class="score-comparison">
+            <div class="score-card">
+                <h3>ก่อนเรียน</h3>
+                <p class="score" id="pre-test-score">0%</p>
+            </div>
+            <div class="score-card">
+                <h3>หลังเรียน</h3>
+                <p class="score" id="post-test-score">0%</p>
+            </div>
+            <div id="improvement-message"></div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="scoreChart"></canvas>
+        </div>
+
+        <a href="lesson.html" class="back-btn">กลับไปหน้าบทเรียน</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const preTestScore = localStorage.getItem('preTestScore') || 0;
+            const postTestScore = localStorage.getItem('postTestScore') || 0;
+
+            document.getElementById('pre-test-score').textContent = `${preTestScore}%`;
+            document.getElementById('post-test-score').textContent = `${postTestScore}%`;
+
+            const improvement = postTestScore - preTestScore;
+            const messageEl = document.getElementById('improvement-message');
+
+            if (improvement > 0) {
+                messageEl.textContent = `เยี่ยมมาก! คุณมีความรู้เพิ่มขึ้น ${improvement}% 👍`;
+                messageEl.style.color = '#4CAF50';
+            } else if (improvement === 0) {
+                messageEl.textContent = 'คะแนนของคุณเท่าเดิม ลองทบทวนบทเรียนอีกครั้งนะ 😊';
+                messageEl.style.color = '#FFC107';
+            } else {
+                messageEl.textContent = `คะแนนของคุณลดลง ${Math.abs(improvement)}% ไม่เป็นไร ลองทบทวนดูใหม่นะ ✌️`;
+                messageEl.style.color = '#F44336';
+            }
+
+            // Chart.js
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            const scoreChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['ก่อนเรียน', 'หลังเรียน'],
+                    datasets: [{
+                        label: 'คะแนน (%)',
+                        data: [preTestScore, postTestScore],
+                        backgroundColor: [
+                            'rgba(255, 159, 64, 0.5)',
+                            'rgba(75, 192, 192, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

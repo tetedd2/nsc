@@ -14,7 +14,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 import {
     getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot,
-    query, orderBy, addDoc, deleteDoc, serverTimestamp, arrayUnion, increment
+    query, orderBy, addDoc, deleteDoc, serverTimestamp, arrayUnion, increment, runTransaction
 } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { getStorage } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
@@ -23,6 +23,88 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+// ================== Game Mechanics (XP & Levels) ==================
+
+// Configuration for levels, names, and XP requirements
+const LEVEL_CONFIG = [
+    { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+    { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+    { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+    { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+    { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity }, // Max level
+];
+
+/**
+ * Adds XP to the user and checks for level-ups using a transaction.
+ * This function handles single and multiple level-ups correctly.
+ * @param {string} uid - The user's ID.
+ * @param {number} amount - The amount of XP to add.
+ */
+async function addXP(uid, amount) {
+    if (!uid || !amount || amount <= 0) return;
+    
+    const userRef = doc(db, 'users', uid);
+    try {
+        await runTransaction(db, async (transaction) => {
+            const userSnap = await transaction.get(userRef);
+            if (!userSnap.exists()) {
+                throw "Document does not exist!";
+            }
+
+            // Get current user data from the transaction
+            const userData = userSnap.data();
+            let xp = userData.xp || 0;
+            let level = userData.level || 1;
+            let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+            
+            let totalCoinReward = 0;
+            
+            // Add new XP
+            xp += amount;
+
+            // Loop to handle potential multiple level-ups
+            while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
+                const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
+                
+                if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
+                    const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                    const rewardForThisLevel = 100 + (nextLevelInfo.level * 25);
+                    
+                    totalCoinReward += rewardForThisLevel;
+                    xp -= nextLevelXP; // Carry over remaining XP to the next level
+                    level = nextLevelInfo.level;
+                    nextLevelXP = nextLevelInfo.xpToNext;
+
+                    // Show level up alert (outside the transaction logic)
+                    setTimeout(() => {
+                       alert(`🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${nextLevelInfo.level} – ${nextLevelInfo.name}!\nได้รับ ${rewardForThisLevel} เหรียญ!`);
+                    }, 100);
+                } else {
+                    // Reached max level, break the loop
+                    break;
+                }
+            }
+            
+            // Prepare the final data object for a single atomic update
+            const finalUpdateData = {
+                xp: xp,
+                level: level,
+                nextLevelXP: nextLevelXP,
+            };
+            if (totalCoinReward > 0) {
+                finalUpdateData.coins = increment(totalCoinReward);
+            }
+            
+            // Perform a single, combined update at the end of the transaction
+            transaction.update(userRef, finalUpdateData);
+        });
+    } catch (error) {
+        console.error("Error adding XP and leveling up: ", error);
+        alert("เกิดข้อผิดพลาดในการเพิ่ม XP และอัปเดตเลเวล");
+    }
+}
+
 
 // ================== Global State ==================
 let transactions = [];
@@ -33,7 +115,6 @@ const allBadges = [ // Define all available badges for the application
     { id: 'first_transaction', name: 'นักบันทึกมือใหม่', description: 'บันทึกธุรกรรมแรกของคุณ', icon: '✍️' },
     { id: 'first_goal', name: 'ผู้ตั้งเป้าหมาย', description: 'สร้างเป้าหมายการออมแรก', icon: '🎯' },
     { id: 'saving_streak_3', name: 'ออมต่อเนื่อง 3 วัน', description: 'บันทึกรายรับหรือการออม 3 วันติด', icon: '🔥' },
-    // Add other badges here
 ];
 
 
@@ -55,21 +136,21 @@ onAuthStateChanged(auth, (user) => {
 
 // ================== Real-time Data Listeners ==================
 function attachRealtimeListeners(uid) {
-    detachRealtimeListeners(); // Ensure no lingering listeners
+    detachRealtimeListeners(); 
 
     // --- Profile Listener ---
     const userProfileListener = onSnapshot(doc(db, 'users', uid), (docSnapshot) => {
         if (docSnapshot.exists()) {
             const userData = docSnapshot.data();
             updateProfileUI(userData, auth.currentUser);
-            renderShop(userData); // Update shop based on user data
+            renderShop(userData); 
         } else {
             // Create a new user profile if it doesn't exist
             const newUserProfile = {
                 displayName: auth.currentUser.displayName || "ผู้ใช้ใหม่",
-                level: "Level 1 – ผู้เริ่มต้น",
+                level: 1, // Store level number instead of string
                 xp: 0,
-                nextLevelXP: 100,
+                nextLevelXP: LEVEL_CONFIG[0].xpToNext, // Get initial XP requirement from config
                 quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
                 badges: [],
                 coins: 0,
@@ -112,41 +193,79 @@ const shopItems = [
     { id: 'planner', name: 'เหรียญวางแผน', price: 110, icon: '📝' },
     { id: 'debt', name: 'เหรียญปลอดหนี้', price: 90, icon: '💸' },
     { id: 'income', name: 'เหรียญรายรับหลายทาง', price: 80, icon: '🌐' },
-    { id: 'entrepreneur', name: 'เหรียญผู้ประกอบการ', price: 150, icon: '💡' }
+    { id: 'entrepreneur', name: 'เหรียญผู้ประกอบการ', price: 150, icon: '💡' },
+    { id: 'dreamer', name: 'เหรียญนักฝัน', price: 70, icon: '💭' },
+    { id: 'superstar', name: 'เหรียญดาวรุ่ง', price: 200, icon: '🌟' },
+    { id: 'gold', name: 'เหรียญทองคำ', price: 300, icon: '🪙' }
 ];
 
+/**
+ * Renders the shop and purchased items into two separate containers.
+ * @param {object} user - The user data object from Firestore.
+ */
 function renderShop(user) {
     const shopContainer = document.getElementById('shopItemsRow');
-    if (!shopContainer) return;
+    const purchasedContainer = document.getElementById('purchasedItemsContainer');
+    const userCoinsEl = document.getElementById('userCoins');
 
-    document.getElementById('userCoins').textContent = user.coins || 0;
+    if (!purchasedContainer || !userCoinsEl) {
+        console.warn("Could not find 'purchasedItemsContainer' or 'userCoins'. Shop rendering skipped.");
+        return;
+    }
+    
+    userCoinsEl.textContent = user.coins || 0;
     const inventory = user.inventory || [];
-    shopContainer.innerHTML = '';
 
-    // This version shows ALL items, but purchased ones are disabled
+    purchasedContainer.innerHTML = '';
+    if (shopContainer) {
+        shopContainer.innerHTML = '';
+    }
+
+    let hasPurchasedItems = false;
+    let hasShopItems = false;
+    const userCoins = user.coins || 0;
+
     shopItems.forEach(item => {
         const isPurchased = inventory.includes(item.id);
-        const userCoins = user.coins || 0;
-        const canAfford = userCoins >= item.price;
 
-        const el = document.createElement('div');
-        el.className = `shop-item ${isPurchased ? 'unlocked' : ''}`;
-        el.innerHTML = `
-            <div class="item-icon">${item.icon}</div>
-            <div class="item-name">${item.name}</div>
-            <div class="item-price">${item.price} 🪙</div>
-            <button
-                onclick="buyItem('${user.uid}', '${item.id}', ${item.price})"
-                ${isPurchased ? 'disabled' : ''}
-                ${!isPurchased && !canAfford ? 'disabled' : ''}
-                class="${!isPurchased && !canAfford ? 'cannot-afford' : ''}"
-            >
-                ${isPurchased ? 'ซื้อแล้ว' : 'ซื้อ'}
-            </button>
-        `;
-        shopContainer.appendChild(el);
+        if (isPurchased) {
+            hasPurchasedItems = true;
+            const purchasedEl = document.createElement('div');
+            purchasedEl.className = 'purchased-item';
+            purchasedEl.innerHTML = `
+                <span class="purchased-icon">${item.icon}</span>
+                <span class="purchased-name">${item.name}</span>
+            `;
+            purchasedContainer.appendChild(purchasedEl);
+        } else if (shopContainer) { 
+            hasShopItems = true;
+            const canAfford = userCoins >= item.price;
+            const shopEl = document.createElement('div');
+            shopEl.className = 'shop-item';
+            shopEl.innerHTML = `
+                <div class="item-icon">${item.icon}</div>
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">${item.price} 🪙</div>
+                <button
+                    onclick="buyItem('${auth.currentUser.uid}', '${item.id}', ${item.price})"
+                    ${!canAfford ? 'disabled' : ''}
+                    class="${!canAfford ? 'cannot-afford' : ''}"
+                >
+                    ซื้อ
+                </button>
+            `;
+            shopContainer.appendChild(shopEl);
+        }
     });
+
+    if (!hasPurchasedItems) {
+        purchasedContainer.innerHTML = '<p class="placeholder-message">ยังไม่มีเหรียญรางวัล</p>';
+    }
+    if (shopContainer && !hasShopItems) {
+        shopContainer.innerHTML = '<p class="placeholder-message">คุณซื้อเหรียญรางวัลทั้งหมดแล้ว!</p>';
+    }
 }
+
 
 async function buyItem(uid, itemId, price) {
     const userRef = doc(db, 'users', uid);
@@ -183,10 +302,10 @@ async function giveDailyLoginReward(uid) {
     if (user.lastLoginReward !== todayStr) {
         try {
             await updateDoc(userRef, {
-                coins: increment(25),
                 lastLoginReward: todayStr
             });
-            alert('รับเหรียญล็อกอินประจำวัน +25 เหรียญ!');
+            await addXP(uid, 15); // Grant 15 XP for daily login
+            alert('รับรางวัลล็อกอินประจำวัน +15 XP!');
         } catch (error) {
             console.error("Error giving daily reward:", error);
         }
@@ -196,7 +315,7 @@ async function giveDailyLoginReward(uid) {
 // ================== UI Update Functions ==================
 function resetUIToLoggedOutState() {
     updateProfileUI({}, null);
-    updateFinancialSummary(); // Will clear summaries as transactions array is empty
+    updateFinancialSummary(); 
     document.getElementById('transactionsContainer').innerHTML = '<p class="no-transactions-message">กรุณาเข้าสู่ระบบเพื่อดูรายการธุรกรรม</p>';
     document.getElementById('goalTitle').textContent = "- กรุณาเข้าสู่ระบบ -";
     document.getElementById('goalAmount').textContent = "เป้าหมาย: 0.00 ฿";
@@ -206,9 +325,12 @@ function resetUIToLoggedOutState() {
     document.getElementById('goalDueDate').textContent = "กำหนด: -";
     document.getElementById('prevGoal').style.display = 'none';
     document.getElementById('nextGoal').style.display = 'none';
-    // Clear shop as well
+
+    // Clear shop and purchased items on logout
     const shopContainer = document.getElementById('shopItemsRow');
-    if (shopContainer) shopContainer.innerHTML = '<p class="no-transactions-message">กรุณาเข้าสู่ระบบเพื่อดูร้านค้า</p>';
+    const purchasedContainer = document.getElementById('purchasedItemsContainer');
+    if (shopContainer) shopContainer.innerHTML = '<p class="placeholder-message">กรุณาเข้าสู่ระบบเพื่อดูร้านค้า</p>';
+    if (purchasedContainer) purchasedContainer.innerHTML = '<p class="placeholder-message">กรุณาเข้าสู่ระบบเพื่อดูเหรียญรางวัล</p>';
     document.getElementById('userCoins').textContent = '0';
 }
 
@@ -216,33 +338,39 @@ function updateProfileUI(userData, user) {
     const defaultAvatar = 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png';
     document.getElementById('profilePicture').src = user?.photoURL || defaultAvatar;
     document.getElementById('usernameDisplay').textContent = userData?.displayName || user?.displayName || 'ผู้ใช้ใหม่';
-    document.getElementById('userLevel').textContent = userData?.level || "Level 1 – ผู้เริ่มต้น";
     document.getElementById('userQuote').textContent = `"${userData?.quote || 'เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!'}"`;
+    
+    const userLevelNum = userData?.level || 1;
+    const levelInfo = LEVEL_CONFIG.find(l => l.level === userLevelNum) || LEVEL_CONFIG[0];
+    document.getElementById('userLevel').textContent = `Level ${levelInfo.level} – ${levelInfo.name}`;
 
     const currentXP = userData?.xp || 0;
-    const nextLevelXP = userData?.nextLevelXP || 100;
-    const progressPercent = nextLevelXP > 0 ? (currentXP / nextLevelXP) * 100 : 0;
+    const nextLevelXP = userData?.nextLevelXP === Infinity ? 'MAX' : (userData?.nextLevelXP || levelInfo.xpToNext);
+    const progressPercent = nextLevelXP !== 'MAX' && nextLevelXP > 0 ? (currentXP / nextLevelXP) * 100 : 100;
+    
     document.getElementById('userProgress').style.width = `${progressPercent}%`;
     document.getElementById('progressValue').textContent = `${Math.round(progressPercent)}%`;
     document.getElementById('currentXP').textContent = currentXP;
     document.getElementById('nextLevelXP').textContent = nextLevelXP;
 
     const badgesContainer = document.getElementById('userBadges');
-    badgesContainer.innerHTML = '';
-    const userUnlockedBadgeIds = userData?.badges || [];
-    if (allBadges.length > 0) {
-        allBadges.forEach(badgeData => {
-            const badgeDiv = document.createElement('div');
-            badgeDiv.classList.add('badge');
-            const isUnlocked = userUnlockedBadgeIds.includes(badgeData.id);
-            badgeDiv.classList.toggle('unlocked', isUnlocked);
-            badgeDiv.classList.toggle('locked', !isUnlocked);
-            badgeDiv.setAttribute('title', `${isUnlocked ? '' : 'ล็อค - '}${badgeData.name}: ${badgeData.description}`);
-            badgeDiv.textContent = badgeData.icon;
-            badgesContainer.appendChild(badgeDiv);
-        });
-    } else {
-        badgesContainer.innerHTML = '<div class="badge placeholder" title="ยังไม่มีเหรียญตรา">❓</div>';
+    if (badgesContainer) {
+        badgesContainer.innerHTML = '';
+        const userUnlockedBadgeIds = userData?.badges || [];
+        if (allBadges.length > 0) {
+            allBadges.forEach(badgeData => {
+                const badgeDiv = document.createElement('div');
+                badgeDiv.classList.add('badge');
+                const isUnlocked = userUnlockedBadgeIds.includes(badgeData.id);
+                badgeDiv.classList.toggle('unlocked', isUnlocked);
+                badgeDiv.classList.toggle('locked', !isUnlocked);
+                badgeDiv.setAttribute('title', `${isUnlocked ? '' : 'ล็อค - '}${badgeData.name}: ${badgeData.description}`);
+                badgeDiv.textContent = badgeData.icon;
+                badgesContainer.appendChild(badgeDiv);
+            });
+        } else {
+            badgesContainer.innerHTML = '<div class="badge placeholder" title="ยังไม่มีเหรียญตรา">❓</div>';
+        }
     }
 }
 
@@ -285,17 +413,23 @@ function displayGoals() {
     const nextBtn = document.getElementById('nextGoal');
 
     if (goals.length === 0) {
-        document.getElementById('goalTitle').textContent = "- ยังไม่มีเป้าหมายที่ตั้งไว้ -";
-        document.getElementById('goalAmount').textContent = "เป้าหมาย: 0.00 ฿";
-        document.getElementById('goalSavings').textContent = "ออมแล้ว: 0.00 ฿";
-        document.getElementById('goalProgressBar').style.width = '0%';
-        document.getElementById('goalProgressBar').textContent = '0%';
-        document.getElementById('goalDueDate').textContent = "กำหนด: -";
+        document.getElementById('goalTitle').style.display = 'none';
+        document.getElementById('goalAmount').style.display = 'none';
+        document.getElementById('goalSavings').style.display = 'none';
+        document.getElementById('goalProgressBar').parentElement.style.display = 'none';
+        document.getElementById('goalDueDate').style.display = 'none';
+        document.getElementById('noGoalMsg').style.display = 'block';
         prevBtn.style.display = 'none';
         nextBtn.style.display = 'none';
         return;
     }
-
+    
+    document.getElementById('noGoalMsg').style.display = 'none';
+    document.getElementById('goalTitle').style.display = 'block';
+    document.getElementById('goalAmount').style.display = 'block';
+    document.getElementById('goalSavings').style.display = 'block';
+    document.getElementById('goalProgressBar').parentElement.style.display = 'flex';
+    document.getElementById('goalDueDate').style.display = 'block';
     prevBtn.style.display = goals.length > 1 ? 'block' : 'none';
     nextBtn.style.display = goals.length > 1 ? 'block' : 'none';
 
@@ -303,7 +437,9 @@ function displayGoals() {
     if (currentGoalIndex >= goals.length) currentGoalIndex = 0;
 
     const goal = goals[currentGoalIndex];
-    const target = parseFloat(goal.targetAmount || 0);
+    
+    // ✅✅✅ This is the corrected part. It checks for 'targetAmount' first, then falls back to 'target'.
+    const target = parseFloat(goal.targetAmount || goal.target || 0);
     const saved = parseFloat(goal.savings || 0);
     const progress = target > 0 ? (saved / target) * 100 : 0;
 
@@ -355,10 +491,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     name, targetAmount, savings, dueDate,
                     createdAt: serverTimestamp()
                 });
-                messageDiv.textContent = "สร้างเป้าหมายสำเร็จ!";
+                
+                await addXP(user.uid, 50); 
+                
+                messageDiv.textContent = "สร้างเป้าหมายสำเร็จ! (+50 XP)";
                 messageDiv.style.color = "green";
                 goalForm.reset();
-                setTimeout(closeGoalModal, 1000);
+                setTimeout(closeGoalModal, 1500);
             } catch (error) {
                 messageDiv.textContent = "เกิดข้อผิดพลาด: " + error.message;
                 messageDiv.style.color = "red";
@@ -367,11 +506,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Goal Navigation
     document.getElementById('prevGoal')?.addEventListener('click', () => { currentGoalIndex--; displayGoals(); });
     document.getElementById('nextGoal')?.addEventListener('click', () => { currentGoalIndex++; displayGoals(); });
 
-    // AI Chat Form
     const aiChatForm = document.getElementById('aiChatForm');
     if (aiChatForm) {
         aiChatForm.addEventListener('submit', async (e) => {
@@ -389,20 +526,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ================== Modal Control Functions ==================
-function openTransactionModal() { document.getElementById('transactionModal').style.display = 'flex'; }
-function closeTransactionModal() {
-    document.getElementById('transactionModal').style.display = 'none';
-    document.getElementById('transactionMessage').textContent = '';
-    document.getElementById('transactionForm').reset();
-}
 function openGoalModal() { document.getElementById('goalModal').style.display = 'flex'; }
-function closeGoalModal() {
+window.closeGoalModal = function() {
     document.getElementById('goalModal').style.display = 'none';
     document.getElementById('goalMessage').textContent = '';
     document.getElementById('goalForm').reset();
 }
 
-// ================== AI Chatbot Logic (Unchanged) ==================
+// ================== AI Chatbot Logic ==================
 function appendMsg(sender, msg) {
     const historyBox = document.getElementById('aiChatHistory');
     const msgDiv = document.createElement('div');
@@ -421,15 +552,42 @@ async function getAiResponse(message) {
             if (txt.match(/(สวัสดี|hello|hi|หวัดดี|ทัก|ดี)/)) {
                 responses = ["สวัสดีครับ! ผมคือ AI ผู้ช่วยด้านการเงิน มีอะไรให้ช่วยไหมครับ 😊", "ยินดีต้อนรับ! อยากคุยเรื่องการออมหรือการลงทุนไหมครับ"];
             } else if (txt.match(/(ออม|วิธีออม|เก็บเงิน)/)) {
-                responses = ["เริ่มต้นด้วยการตั้งเป้าหมายเล็กๆ แล้วบันทึกรายจ่ายทุกวันครับ", "ลองใช้สูตร 50/30/20 ดูสิครับ: 50% ใช้จ่ายจำเป็น, 30% ส่วนตัว, 20% ออม/ลงทุน"];
-            } else if (txt.match(/(เกม|เควส|เหรียญ|ร้านค้า|level|แต้ม)/)) {
-                responses = ["สะสมเหรียญจากการล็อกอินและทำภารกิจเพื่อแลกไอเทมในร้านค้าได้เลยครับ!", "การทำธุรกรรมและการตั้งเป้าหมายจะช่วยเพิ่ม XP ให้อัพเลเวลได้ครับ"];
+                responses = [
+                    "เริ่มต้นด้วยการตั้งเป้าหมายเล็กๆ แล้วบันทึกรายจ่ายทุกวันครับ การเห็นภาพรวมจะช่วยให้วางแผนง่ายขึ้น", 
+                    "ลองใช้สูตร 50/30/20 ดูสิครับ: 50% สำหรับรายจ่ายจำเป็น, 30% สำหรับความต้องการส่วนตัว, และ 20% สำหรับการออมและการลงทุนครับ",
+                    "เทคนิค 'ออมก่อนใช้' คือวิธีที่ได้ผลดีมากครับ เมื่อมีรายรับเข้ามา ให้รีบโอนเงินส่วนหนึ่งไปเก็บในบัญชีเงินออมทันที"
+                ];
+            } else if (txt.match(/(เกม|เควส|เหรียญ|ร้านค้า|level|แต้ม|xp)/)) {
+                responses = [
+                    "คุณจะได้รับ XP และเหรียญจากการทำกิจกรรมต่างๆ เช่น ล็อกอินรายวัน, บันทึกรายรับ-รายจ่าย, และสร้างเป้าหมายการออมครับ",
+                    "XP ใช้สำหรับเพิ่มเลเวล ส่วนเหรียญสามารถนำไปซื้อไอเทมตกแต่งโปรไฟล์ในร้านค้าได้ครับ ลองเข้าไปดูสิ!",
+                    "ยิ่งเลเวลสูงขึ้น ก็จะปลดล็อครางวัลและคำคมใหม่ๆ ด้วยนะครับ พยายามเข้า!"
+                ];
             } else if (txt.match(/(ลงทุน|หุ้น|กองทุน)/)) {
-                responses = ["การลงทุนมีความเสี่ยง ควรเริ่มศึกษาจากกองทุนรวมก่อนนะครับ", "อย่าลืมกระจายความเสี่ยงโดยลงทุนในสินทรัพย์หลากหลายประเภทครับ"];
-            } else if (txt.match(/(เทคนิค|trick|เคล็ดลับ)/)) {
-                responses = ["วิธีออมที่ง่ายที่สุดคือ 'ออมก่อนใช้' ครับ เมื่อมีรายรับเข้ามา ให้หักส่วนหนึ่งไปออมทันที", "ลองท้าทายตัวเองด้วยการ 'งดใช้จ่ายฟุ่มเฟือย' หนึ่งวันในสัปดาห์ดูสิครับ"];
+                responses = [
+                    "การลงทุนมีความเสี่ยง แต่ก็เป็นหนทางสร้างความมั่งคั่งในระยะยาวครับ สำหรับมือใหม่ แนะนำให้เริ่มศึกษาจาก 'กองทุนรวมดัชนี' (Index Fund) เพราะมีความเสี่ยงต่ำและกระจายการลงทุนที่ดี",
+                    "อย่าลืมหลักการ 'DCA' (Dollar-Cost Averaging) นะครับ คือการทยอยลงทุนเป็นงวดๆ ด้วยจำนวนเงินเท่าๆ กัน จะช่วยลดความเสี่ยงจากความผันผวนของตลาดได้ดี",
+                    "ก่อนลงทุน ควรมี 'เงินสำรองฉุกเฉิน' ประมาณ 3-6 เท่าของค่าใช้จ่ายต่อเดือนก่อนนะครับ จะได้อุ่นใจ"
+                ];
+            } else if (txt.match(/(หนี้|บัตรเครดิต|ผ่อน)/)) {
+                responses = [
+                    "การจัดการหนี้ที่ดีคือหัวใจของสุขภาพการเงินครับ ควรลิสต์รายการหนี้ทั้งหมดแล้วเริ่มชำระจากตัวที่มีดอกเบี้ยสูงสุดก่อน",
+                    "บัตรเครดิตมีประโยชน์ถ้าใช้อย่างชาญฉลาด พยายามชำระเต็มจำนวนทุกเดือนเพื่อหลีกเลี่ยงดอกเบี้ยนะครับ",
+                    "หากมีหนี้หลายก้อน ลองพิจารณา 'การรวมหนี้' (Debt Consolidation) เพื่อให้จัดการง่ายขึ้นและอาจได้ดอกเบี้ยที่ถูกลง"
+                ];
+            } else if (txt.match(/(งบประมาณ|วางแผน|budget)/)) {
+                 responses = [
+                    "การทำงบประมาณไม่ยากเลยครับ แค่ลองจดบันทึกรายรับและรายจ่ายทั้งหมดใน 1 เดือน คุณจะเห็นเลยว่าเงินของคุณหายไปไหนบ้าง",
+                    "แอปของเราช่วยคุณได้! แค่บันทึกทุกรายการในหน้า 'บันทึกรายจ่าย' แล้วไปดูสรุปในหน้า 'กราฟการเงิน' ได้เลยครับ",
+                    "เมื่อรู้พฤติกรรมการใช้เงินแล้ว ลองตั้งงบในแต่ละหมวดหมู่ดูสิครับ เช่น ค่าอาหาร, ค่าเดินทาง แล้วพยายามใช้ไม่ให้เกินงบ"
+                 ];
+            } else if (txt.match(/(ขอบคุณ|thank)/)) {
+                responses = ["ยินดีเสมอครับ! มีอะไรให้ช่วยอีกไหมครับ 😊", "ด้วยความยินดีครับ! ขอให้สนุกกับการออมนะครับ"];
             } else {
-                responses = ["ขออภัยครับ ผมยังไม่เข้าใจ ลองถามเกี่ยวกับการออมเงิน การลงทุน หรือการใช้งานแอปได้เลยครับ", "ผมพร้อมให้คำแนะนำด้านการเงิน ลองถามคำถามอื่นดูนะครับ"];
+                responses = [
+                    "ขออภัยครับ ผมยังไม่เข้าใจคำถามนี้ ลองถามเกี่ยวกับการออมเงิน, การลงทุน, หนี้สิน, หรือการใช้งานแอปดูนะครับ", 
+                    "ผมกำลังเรียนรู้เพิ่มเติมครับ ลองถามคำถามอื่นเกี่ยวกับการเงินดูได้เลย"
+                ];
             }
 
             const reply = responses[Math.floor(Math.random() * responses.length)];

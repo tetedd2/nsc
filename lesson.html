@@ -28,21 +28,20 @@
       margin-bottom: 30px;
     }
     
-    /* Message Box for notifications */
     #statusMessage {
         padding: 12px;
         margin-bottom: 20px;
         border-radius: 8px;
         text-align: center;
         font-weight: bold;
-        display: none; /* Hidden by default */
+        display: none;
         transition: opacity 0.3s ease;
     }
     #statusMessage.success { background-color: #d4edda; color: #155724; }
     #statusMessage.error { background-color: #f8d7da; color: #721c24; }
 
 
-    .lesson-item {
+    .lesson-item, .test-item {
       background-color: #ffffff;
       border-left: 6px solid #009688;
       border-radius: 12px;
@@ -53,8 +52,12 @@
       display: flex;
       flex-direction: column;
     }
+    
+    .test-item {
+        border-left-color: #FFC107; /* Different color for tests */
+    }
 
-    .lesson-item:hover {
+    .lesson-item:hover, .test-item:hover {
       transform: scale(1.02);
     }
 
@@ -68,6 +71,10 @@
       font-size: 1.5rem;
       color: #009688;
       font-weight: bold;
+    }
+    
+    .test-item .lesson-number {
+        color: #FFA000;
     }
 
     .lesson-title {
@@ -107,12 +114,20 @@
       border-radius: 8px;
       text-decoration: none;
       transition: background-color 0.2s ease;
-      cursor: pointer; /* เพิ่ม cursor pointer เพื่อให้รู้ว่ากดได้ */
-      border: none; /* เอาเส้นขอบออก */
+      cursor: pointer;
+      border: none;
+    }
+    
+    .test-item .start-btn {
+        background-color: #FFA000;
     }
 
     .start-btn:hover {
       background-color: #00796b;
+    }
+    
+    .test-item .start-btn:hover {
+        background-color: #FF8F00;
     }
     
     .start-btn.disabled {
@@ -136,14 +151,44 @@
     .back-btn:hover {
       background-color: #00796b;
     }
+
+    /* Dark Mode Styles */
+    body.dark-mode .lesson-item, body.dark-mode .test-item {
+        background-color: #1e1e1e;
+        border-left-color: #4db6ac;
+    }
+    body.dark-mode .test-item {
+        border-left-color: #FFCA28;
+    }
+    body.dark-mode .lesson-title {
+        color: #b2dfdb;
+    }
+    body.dark-mode .lesson-description {
+        color: #aaa;
+    }
+
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>บทเรียน<br>การเงินของคุณ</h1>
+    <h1>บทเรียนและการทดสอบ</h1>
     
     <div id="statusMessage"></div>
 
+    <!-- Pre-test section -->
+    <div class="test-item" id="pre-test-item">
+        <div class="lesson-header">
+          <div class="lesson-number">Test</div>
+          <div class="lesson-title">แบบทดสอบก่อนเรียน</div>
+        </div>
+        <div class="lesson-description">
+          ทำแบบทดสอบเพื่อวัดความรู้พื้นฐานของคุณก่อนเริ่มบทเรียน
+        </div>
+        <div class="lesson-status" id="status-pre-test">ยังไม่ได้ทำ</div>
+        <a href="pre-test.html" class="start-btn" id="pre-test-btn">เริ่มทำแบบทดสอบ</a>
+    </div>
+
+    <!-- Lesson items -->
     <div class="lesson-item" data-lesson="1" data-xp="80">
       <div class="lesson-header">
         <div class="lesson-number">บทที่ 1</div>
@@ -215,23 +260,30 @@
       <div class="lesson-status" id="status-6">ยังไม่ได้เรียน</div>
       <button class="start-btn">เริ่มบทเรียน</button>
     </div>
+    
+     <!-- Post-test section -->
+    <div class="test-item" id="post-test-item">
+        <div class="lesson-header">
+            <div class="lesson-number">Test</div>
+            <div class="lesson-title">แบบทดสอบหลังเรียน</div>
+        </div>
+        <div class="lesson-description">
+            หลังจากเรียนจบแล้ว มาทดสอบความรู้ของคุณอีกครั้งเพื่อดูการพัฒนา
+        </div>
+        <div class="lesson-status" id="status-post-test">ยังไม่สามารถทำได้</div>
+        <a href="post-test.html" class="start-btn disabled" id="post-test-btn">ทำแบบทดสอบ</a>
+    </div>
+
 
     <a href="./dashboard.html" class="back-btn"> กลับหน้าหลัก</a>
     <script src="darkmode-toggle.js"></script>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- START: FIREBASE INTEGRATION -->
-  <!-- ===================================================================== -->
-  
-  <!-- Import Firebase SDKs -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, updateDoc, increment, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
   
-    // Correct Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
       authDomain: "myapplication-bd04c034.firebaseapp.com",
@@ -241,37 +293,61 @@
       appId: "1:49782830313:web:c81b5d86a937f22d296c78"
     };
   
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     let currentUser = null;
 
-    // --- CUSTOM MESSAGE FUNCTION ---
     function showMessage(text, type = 'success') {
         const messageDiv = document.getElementById('statusMessage');
         messageDiv.textContent = text;
-        messageDiv.className = type; // 'success' or 'error'
+        messageDiv.className = type;
         messageDiv.style.display = 'block';
         setTimeout(() => {
             messageDiv.style.display = 'none';
-        }, 3000); // Hide after 3 seconds
+        }, 3000);
     }
 
-    // --- AUTHENTICATION ---
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        console.log("User is signed in:", currentUser.uid);
         await loadLessonsStatusFromFirestore(currentUser.uid);
+        checkTestStatus(); // Check status of pre/post tests
       } else {
-        // Redirect to login page if not authenticated
-        window.location.href = './login.html'; // FIX: Added './' for valid relative path
+        window.location.href = './login.html';
       }
     });
 
-    // --- UI UPDATE FUNCTIONS ---
+    function checkTestStatus() {
+        // Pre-test status
+        const preTestScore = localStorage.getItem('preTestScore');
+        const preTestStatusEl = document.getElementById('status-pre-test');
+        const preTestBtn = document.getElementById('pre-test-btn');
+        if (preTestScore) {
+            preTestStatusEl.textContent = `ทำแล้ว (คะแนน: ${preTestScore}%)`;
+            preTestStatusEl.className = "lesson-status completed";
+            preTestBtn.textContent = 'ทำอีกครั้ง';
+        }
+
+        // Post-test status
+        const postTestStatusEl = document.getElementById('status-post-test');
+        const postTestBtn = document.getElementById('post-test-btn');
+        const lessonsDone = localStorage.getItem('MoneySkillz-lesson6-done') === 'yes'; // Check if last lesson is done
+
+        if (preTestScore && lessonsDone) {
+            postTestStatusEl.textContent = "พร้อมทำแบบทดสอบ";
+            postTestStatusEl.className = "lesson-status not-started";
+            postTestBtn.classList.remove('disabled');
+        } else {
+            postTestStatusEl.textContent = "กรุณาทำแบบทดสอบก่อนเรียนและเรียนให้จบทุกบทก่อน";
+            postTestStatusEl.className = "lesson-status";
+            postTestBtn.classList.add('disabled');
+            postTestBtn.href = '#'; // Prevent clicking
+        }
+    }
+
+
     function updateLessonUI(lessonId, isCompleted) {
         const lessonItem = document.querySelector(`.lesson-item[data-lesson='${lessonId}']`);
         if (!lessonItem) return;
@@ -283,16 +359,13 @@
             statusElement.textContent = "เรียนจบแล้ว";
             statusElement.className = "lesson-status completed";
             buttonElement.textContent = "ดูบทเรียน";
-            buttonElement.classList.add('disabled');
         } else {
             statusElement.textContent = "ยังไม่ได้เรียน";
             statusElement.className = "lesson-status not-started";
             buttonElement.textContent = "เริ่มบทเรียน";
-            buttonElement.classList.remove('disabled');
         }
     }
     
-    // --- FIRESTORE FUNCTIONS ---
     async function loadLessonsStatusFromFirestore(userId) {
         const userDocRef = doc(db, "users", userId);
         try {
@@ -302,7 +375,9 @@
                 const completedLessons = userData.completedLessons || [];
                 document.querySelectorAll('.lesson-item').forEach(item => {
                     const lessonId = parseInt(item.dataset.lesson);
-                    const isCompleted = completedLessons.includes(lessonId);
+                    // Also update from localStorage for immediate feedback after finishing a lesson
+                    const isCompletedByStorage = localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes";
+                    const isCompleted = completedLessons.includes(lessonId) || isCompletedByStorage;
                     updateLessonUI(lessonId, isCompleted);
                 });
             }
@@ -352,6 +427,7 @@
             console.log(`Lesson ${lessonId} completed! +${xpToAdd} XP`);
             showMessage(`ยินดีด้วย! คุณได้รับ ${xpToAdd} XP`, "success");
             updateLessonUI(lessonId, true);
+            checkTestStatus(); // Re-check if post-test can be unlocked
 
         } catch (error) {
             console.error("Error completing lesson:", error);
@@ -359,35 +435,32 @@
         }
     }
 
-    // --- EVENT LISTENERS ---
     document.querySelector('.container').addEventListener('click', async (event) => {
-        if (event.target.matches('.start-btn')) {
+        if (event.target.matches('.start-btn') && !event.target.closest('.test-item')) {
             const lessonItem = event.target.closest('.lesson-item');
             const lessonId = parseInt(lessonItem.dataset.lesson);
             const xpValue = parseInt(lessonItem.dataset.xp);
-            const isCompleted = event.target.classList.contains('disabled');
-
-            // If not completed, award XP
-            if (!isCompleted) {
-                await completeLesson(lessonId, xpValue);
-            }
-
-            // --- FIX: Navigate to the correct single detail page with a parameter ---
-            let lessonUrl;
-            if (lessonId === 1) {
-                lessonUrl = `./lesson-detail.html`; // FIX: Added './' for valid relative path
-            } else {
-                lessonUrl = `./lesson-detail${lessonId}.html`; // FIX: Added './' for valid relative path
-            }
             
+            // Navigate to the lesson page
+            let lessonUrl = `./lesson-detail.html`;
+            if (lessonId > 1) {
+                lessonUrl = `./lesson-detail${lessonId}.html`;
+            }
             window.location.href = lessonUrl;
+
+            // This part is tricky because completion happens ON the detail page.
+            // Let's assume completion status is checked via localStorage when returning to this page.
         }
     });
 
-  </script>
-  <!-- ===================================================================== -->
-  <!-- END: FIREBASE INTEGRATION -->
-  <!-- ===================================================================== -->
+    // Check for completed lessons from localStorage on page focus/return
+    window.addEventListener('focus', () => {
+        if (currentUser) {
+            loadLessonsStatusFromFirestore(currentUser.uid);
+        }
+        checkTestStatus();
+    });
 
+  </script>
 </body>
 </html>

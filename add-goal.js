@@ -80,9 +80,9 @@ function saveGoal(event) {
     if (user) {
       const goal = {
         name: goalName,
-        target: goalAmount,
+        targetAmount: goalAmount, // ✅✅✅ Changed 'target' to 'targetAmount' to match dashboard
         savings: 0, // Initial savings is 0
-        date: goalDate,
+        dueDate: goalDate, // Changed 'date' to 'dueDate' to match dashboard
         planType: planType,
         plan: savingPlan,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -113,9 +113,11 @@ function updateGoalList() {
         snapshot.forEach(doc => {
           const goal = doc.data();
           goal.id = doc.id;
-          // Calculate total savings from the plan
+          
+          const targetAmount = goal.targetAmount || goal.target || 0; // Handle old and new field names
+          
           goal.savings = goal.plan ? goal.plan.reduce((sum, p) => sum + (parseFloat(p.saved) || 0), 0) : 0;
-          const percent = goal.target > 0 ? ((goal.savings / goal.target) * 100).toFixed(0) : 0;
+          const percent = targetAmount > 0 ? ((goal.savings / targetAmount) * 100).toFixed(0) : 0;
           
           const goalBlock = document.createElement('div');
           goalBlock.classList.add('goal-block');
@@ -124,7 +126,7 @@ function updateGoalList() {
             <div class="goal-title"><span class="goal-name">📌 ${goal.name}</span></div>
             <div class="goal-money">
               💰 ฿<span class="current-savings">${goal.savings.toFixed(2)}</span>
-              / ฿<span class="total-amount">${goal.target.toFixed(2)}</span>
+              / ฿<span class="total-amount">${targetAmount.toFixed(2)}</span>
               <span class="progress-text">(${percent}%)</span>
             </div>
             <div class="progress-bar-bg">
@@ -168,9 +170,8 @@ function addSavingToPlan(goalId, planIdx, buttonElement) { // รับ buttonEl
   firebase.auth().onAuthStateChanged(function (user) {
     if (!user) return;
     
-    // หา input ที่อยู่ใกล้ปุ่มที่กด
     const savingInput = buttonElement.parentNode.querySelector('.saving-input');
-    let saveAmount = parseFloat(savingInput.value); // ดึงค่าจาก input field
+    let saveAmount = parseFloat(savingInput.value); 
 
     if (isNaN(saveAmount) || saveAmount <= 0) {
       alert("กรุณาใส่จำนวนเงินที่ถูกต้องและมากกว่า 0");
@@ -191,20 +192,15 @@ function addSavingToPlan(goalId, planIdx, buttonElement) { // รับ buttonEl
             return;
         }
         
-        // ตรวจสอบและแปลงค่า saved เป็นตัวเลข
         plan[planIdx].saved = parseFloat(plan[planIdx].saved || 0); 
         const currentAmount = parseFloat(plan[planIdx].amount);
-
-        // เพิ่มเงินออม
         plan[planIdx].saved += saveAmount;
         
-        // ไม่ให้เกินยอดเป้าหมายของงวดนั้น
         if (plan[planIdx].saved > currentAmount) {
             plan[planIdx].saved = currentAmount;
             alert("คุณออมเงินเกินเป้าหมายงวดนี้แล้ว ส่วนที่เกินจะไม่ถูกนับรวมในงวดนี้");
         }
 
-        // คำนวณยอดรวมที่ออมได้ของเป้าหมายทั้งหมด
         goal.savings = plan.reduce((sum, p) => sum + (parseFloat(p.saved) || 0), 0);
 
         db.collection("users").doc(user.uid).collection("goals").doc(goalId).update({
@@ -212,8 +208,8 @@ function addSavingToPlan(goalId, planIdx, buttonElement) { // รับ buttonEl
           savings: goal.savings
         }).then(() => {
             alert("ออมเงินสำหรับงวดนี้สำเร็จ!");
-            savingInput.value = ''; // ล้างค่าในช่อง input หลังจากบันทึก
-            updateGoalList(); // รีเฟรชรายการเป้าหมายเพื่อแสดงความคืบหน้า
+            savingInput.value = ''; 
+            updateGoalList(); 
         }).catch((error) => {
             console.error("Error updating goal: ", error);
             alert("เกิดข้อผิดพลาดในการบันทึกเงินออม: " + error.message);
@@ -234,5 +230,4 @@ function deleteGoal(goalId) {
   });
 }
 
-// โหลดเป้าหมายเมื่อเปิดหน้า
 document.addEventListener('DOMContentLoaded', updateGoalList);

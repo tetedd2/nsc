@@ -21,7 +21,7 @@
     .quiz-input { width:100%; padding:9px; border-radius:6px; border:1px solid #bbb; margin-bottom:7px;}
     .save-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
     .save-btn:hover { background:#00796b; }
-    .quiz-status { margin-left:16px; color:#388e3c; font-weight:bold; }
+    .quiz-status { margin-left:16px; font-weight:bold; }
     table { border-collapse:collapse; width:100%; margin:18px 0;}
     th,td { border:1px solid #bbb; padding:10px; }
     th { background:#eee; }
@@ -30,6 +30,15 @@
     .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
     .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
     .video-container { margin: 24px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    /* Styles for new quiz */
+    .end-of-chapter-quiz .question { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #009688; }
+    .end-of-chapter-quiz .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; }
+    .end-of-chapter-quiz .choices { display: flex; flex-direction: column; gap: 10px; }
+    .end-of-chapter-quiz .choice { background-color: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 10px; cursor: pointer; display: block; }
+    .end-of-chapter-quiz .choice:hover { background-color: #e0f2f1; }
+    .end-of-chapter-quiz .choice input[type="radio"] { margin-right: 10px; }
+    #quizResult.correct { color: #388e3c; }
+    #quizResult.incorrect { color: #d32f2f; }
   </style>
 </head>
 <body>
@@ -172,20 +181,16 @@
         `
       },
       {
-        title: "บทที่ 1: แบบฝึกหัดท้ายบท (หน้า 6/6)",
+        title: "บทที่ 1: แบบทดสอบท้ายบท (หน้า 6/6)",
         content: `
-          <form id="quizForm">
-            <label class="quiz-label">1. คุณคิดว่า “เงิน” สำคัญกับชีวิตคุณอย่างไรบ้าง?</label>
-            <textarea class="quiz-input" id="q1" rows="2"></textarea>
-            <label class="quiz-label">2. คุณคิดว่าเทคโนโลยีจะเปลี่ยนแปลงการใช้เงินในอนาคตอย่างไร?</label>
-            <textarea class="quiz-input" id="q2" rows="2"></textarea>
-            <label class="quiz-label">3. เล่าประสบการณ์ที่คุณเคยได้รับผลกระทบจากการใช้เงิน (ดีหรือไม่ดีก็ได้)</label>
-            <textarea class="quiz-input" id="q3" rows="2"></textarea>
-            <button type="button" class="save-btn" id="saveBtn">บันทึกคำตอบ</button>
-            <span id="quizStatus" class="quiz-status" style="display:none;">บันทึกแล้ว!</span>
-          </form>
+          <div class="end-of-chapter-quiz" id="end-of-chapter-quiz">
+            <!-- Quiz questions will be built here -->
+          </div>
+          <button type="button" class="save-btn" id="checkQuizBtn">ตรวจคำตอบ</button>
+          <span id="quizResult" class="quiz-status"></span>
+          
           <div style="margin-top:16px;">
-            <button id="doneBtn" class="save-btn" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <button id="doneBtn" class="save-btn disabled" style="background:#388e3c;">เรียนจบบทนี้</button>
             <span id="doneStatus" class="quiz-status"></span>
           </div>
         `
@@ -218,54 +223,113 @@
     }
 
     if (page === pages.length) {
-      setTimeout(() => {
-        ["q1","q2","q3"].forEach(qid=>{
-          let v = localStorage.getItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`)||"";
-          let el = document.getElementById(qid);
-          if(el) el.value = v;
-        });
-        const saveBtn = document.getElementById("saveBtn");
-        const quizStatus = document.getElementById("quizStatus");
-        if(saveBtn){
-          saveBtn.onclick = ()=>{
-            ["q1","q2","q3"].forEach(qid=>{
-              let el = document.getElementById(qid);
-              if(el) localStorage.setItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`, el.value.trim());
-            });
-            quizStatus.style.display = "inline";
-            setTimeout(()=>{ quizStatus.style.display = "none"; }, 1500);
-            checkDoneStatus();
+      const quizData = [
+          {
+              question: "หน้าที่หลักที่สำคัญที่สุดของเงินคืออะไร?",
+              choices: ["ใช้เป็นเครื่องประดับ", "เป็นสื่อกลางในการแลกเปลี่ยน", "ใช้แสดงฐานะทางสังคม", "ใช้เป็นเชื้อเพลิง"],
+              answer: "เป็นสื่อกลางในการแลกเปลี่ยน"
+          },
+          {
+              question: "ข้อใดคือคุณสมบัติของเงินที่ดี?",
+              choices: ["เน่าเสียง่าย", "หาได้ง่ายทั่วไป", "พกพาสะดวกและทนทาน", "มีน้ำหนักมาก"],
+              answer: "พกพาสะดวกและทนทาน"
+          },
+          {
+              question: "ภาวะ 'เงินเฟ้อ' (Inflation) หมายถึงอะไร?",
+              choices: ["ราคาสินค้าถูกลง", "เงินมีค่ามากขึ้น", "ราคาสินค้าแพงขึ้น และค่าของเงินลดลง", "คนมีเงินเก็บมากขึ้น"],
+              answer: "ราคาสินค้าแพงขึ้น และค่าของเงินลดลง"
           }
-        }
-        const doneBtn = document.getElementById("doneBtn");
-        const doneStatus = document.getElementById("doneStatus");
-        function checkDoneStatus(){
-          let ready = ["q1","q2","q3"].every(qid=>{
-            let el = document.getElementById(qid);
-            return el && el.value.trim();
-          });
-          if(localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`)==="yes"){
-            doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
-            doneBtn.disabled = true;
-            doneBtn.style.background="#ccc";
-          }else{
-            doneStatus.innerHTML = "";
-            doneBtn.disabled = !ready;
-            doneBtn.style.background = ready ? "#388e3c" : "#bbb";
-          }
-        }
-        ["q1","q2","q3"].forEach(qid=>{
-          let el = document.getElementById(qid);
-          if(el) el.oninput = checkDoneStatus;
-        });
-        checkDoneStatus();
+      ];
 
-        doneBtn.onclick = ()=>{
+      const quizContainer = document.getElementById('end-of-chapter-quiz');
+      const checkButton = document.getElementById('checkQuizBtn');
+      const resultContainer = document.getElementById('quizResult');
+      const doneBtn = document.getElementById("doneBtn");
+      const doneStatus = document.getElementById("doneStatus");
+
+      function buildEndOfChapterQuiz() {
+          quizData.forEach((currentQuestion, questionNumber) => {
+              const choices = [];
+              for (let i = 0; i < currentQuestion.choices.length; i++) {
+                  choices.push(
+                      `<label class="choice">
+                          <input type="radio" name="chapter_question${questionNumber}" value="${currentQuestion.choices[i]}">
+                          ${currentQuestion.choices[i]}
+                      </label>`
+                  );
+              }
+              const questionHTML = `
+                  <div class="question">
+                      <div class="question-text">${questionNumber + 1}. ${currentQuestion.question}</div>
+                      <div class="choices">${choices.join('')}</div>
+                  </div>
+              `;
+              quizContainer.innerHTML += questionHTML;
+          });
+      }
+
+      function checkQuizAnswers() {
+          const answerContainers = quizContainer.querySelectorAll('.choices');
+          let numCorrect = 0;
+          let allAnswered = true;
+
+          quizData.forEach((currentQuestion, questionNumber) => {
+              const answerContainer = answerContainers[questionNumber];
+              const selector = `input[name=chapter_question${questionNumber}]:checked`;
+              const userAnswerNode = answerContainer.querySelector(selector);
+              
+              if (!userAnswerNode) {
+                  allAnswered = false;
+                  return;
+              }
+
+              const userAnswer = userAnswerNode.value;
+              if (userAnswer === currentQuestion.answer) {
+                  numCorrect++;
+              }
+          });
+
+          if (!allAnswered) {
+              resultContainer.textContent = "กรุณาตอบคำถามให้ครบทุกข้อ";
+              resultContainer.className = "quiz-status incorrect";
+              return;
+          }
+
+          if (numCorrect === quizData.length) {
+              resultContainer.textContent = "เก่งมาก! คุณตอบถูกทุกข้อ";
+              resultContainer.className = "quiz-status correct";
+              doneBtn.disabled = false;
+              doneBtn.classList.remove('disabled');
+              doneStatus.textContent = "ตอนนี้คุณสามารถกดยืนยันเพื่อจบบทเรียนได้แล้ว!";
+          } else {
+              resultContainer.textContent = `พยายามอีกนิด! คุณตอบถูก ${numCorrect} จาก ${quizData.length} ข้อ ลองทบทวนแล้วตอบใหม่อีกครั้ง`;
+              resultContainer.className = "quiz-status incorrect";
+              doneBtn.disabled = true;
+              doneBtn.classList.add('disabled');
+              doneStatus.textContent = "";
+          }
+      }
+      
+      function checkInitialDoneStatus() {
+          if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
+              doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
+              doneBtn.disabled = true;
+              doneBtn.classList.add('disabled');
+              checkButton.style.display = 'none'; // ซ่อนปุ่มตรวจคำตอบถ้าเรียนจบแล้ว
+              resultContainer.style.display = 'none';
+          }
+      }
+
+      buildEndOfChapterQuiz();
+      checkButton.addEventListener('click', checkQuizAnswers);
+      doneBtn.addEventListener('click', () => {
           localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
-          checkDoneStatus();
-        }
-      }, 200);
+          checkInitialDoneStatus(); // อัปเดตสถานะ UI
+      });
+      
+      checkInitialDoneStatus(); // ตรวจสอบสถานะเมื่อโหลดหน้า
     }
+
   </script>
  <script src="darkmode-toggle.js"></script>
 </body>

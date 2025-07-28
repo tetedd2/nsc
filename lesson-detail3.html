@@ -17,11 +17,16 @@
     .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
     .back-btn { margin-top:30px; display:inline-block; background:#009688; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
     .back-btn:hover { background:#00796b; }
-    .quiz-label { font-weight:bold; margin-top:1.5em; display:block;}
+    .quiz-label { font-weight:bold; margin-top:1.5em; display:block; margin-bottom: 0.5em;}
+    .quiz-option { margin-bottom: 0.5em; }
     .quiz-input { width:100%; padding:9px; border-radius:6px; border:1px solid #bbb; margin-bottom:7px;}
-    .save-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
-    .save-btn:hover { background:#00796b; }
-    .quiz-status { margin-left:16px; color:#388e3c; font-weight:bold; }
+    .action-btn { background:#009688; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .action-btn:hover { background:#00796b; }
+    .action-btn:disabled { background:#bbb; cursor:not-allowed; }
+    .quiz-status { margin-left:16px; font-weight:bold; }
+    .feedback { padding: 4px 8px; border-radius: 4px; color: white; margin-left: 10px; font-size: 0.9em; }
+    .feedback.correct { background-color: #4CAF50; }
+    .feedback.incorrect { background-color: #f44336; }
     table { border-collapse:collapse; width:100%; margin:18px 0;}
     th,td { border:1px solid #bbb; padding:10px; }
     th { background:#eee; }
@@ -47,7 +52,8 @@
     const pageNow = Number(urlParams.get("page")||1);
 
     const pages = [
-      {
+      // ... เนื้อหาหน้า 1-5 เหมือนเดิม ...
+       {
         title: "บทที่ 3: นิยามของ 'ความจำเป็น' และ 'ความอยากได้' (หน้า 1/6)",
         content: `
           <div>
@@ -185,7 +191,7 @@
         `
       },
       {
-        title: "บทที่ 3: สรุปและแบบฝึกหัดท้ายบท (หน้า 6/6)",
+        title: "บทที่ 3: สรุปและแบบทดสอบท้ายบท (หน้า 6/6)",
         content: `
           <div class="takeaway">
             สรุป: การแยกแยะระหว่างสิ่งที่ "จำเป็น" และสิ่งที่ "อยากได้" คือทักษะพื้นฐานที่สำคัญที่สุดของการบริหารเงินส่วนบุคคล มันช่วยให้เราควบคุมการใช้จ่าย, หลีกเลี่ยงหนี้สินที่ไม่จำเป็น, และมีเงินเหลือพอที่จะสร้างอนาคตที่มั่นคงได้
@@ -194,18 +200,37 @@
             <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/vxr9F4fZSyo?si=agMxRZMaFjUDJeNj" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
           </div>
           <form id="quizForm">
-            <label class="quiz-label">1. ลองยกตัวอย่าง 'สิ่งที่จำเป็น' และ 'สิ่งที่อยากได้' ของคุณมาอย่างละ 3 ข้อ</label>
-            <textarea class="quiz-input" id="q1" rows="3" placeholder="สิ่งที่จำเป็น:...\nสิ่งที่อยากได้:..."></textarea>
-            <label class="quiz-label">2. คุณมีวิธีจัดการกับ 'ความอยากได้' ที่เกิดขึ้นกะทันหันอย่างไร? (อ้างอิงจากเทคนิคที่เรียนไป)</label>
-            <textarea class="quiz-input" id="q2" rows="2"></textarea>
-            <label class="quiz-label">3. การแยกแยะเรื่องนี้ จะช่วยให้คุณบรรลุเป้าหมายทางการเงินในอนาคต (เช่น เก็บเงินเที่ยว, ซื้อของชิ้นใหญ่) ได้อย่างไร?</label>
-            <textarea class="quiz-input" id="q3" rows="2"></textarea>
-            <button type="button" class="save-btn" id="saveBtn">บันทึกคำตอบ</button>
-            <span id="quizStatus" class="quiz-status" style="display:none;">บันทึกแล้ว!</span>
+            <!-- Question 1 -->
+            <div id="q1-container">
+                <label class="quiz-label">1. ข้อใดต่อไปนี้จัดเป็น 'ความจำเป็น' (Needs)?</label>
+                <div class="quiz-option"><input type="radio" name="q1" value="a"> ก. สมาร์ทโฟนรุ่นใหม่ล่าสุด</div>
+                <div class="quiz-option"><input type="radio" name="q1" value="b"> ข. ค่าเดินทางไปทำงาน</div>
+                <div class="quiz-option"><input type="radio" name="q1" value="c"> ค. ดินเนอร์บุฟเฟต์กับเพื่อน</div>
+                <span id="q1-feedback" class="feedback"></span>
+            </div>
+            <!-- Question 2 -->
+            <div id="q2-container">
+                <label class="quiz-label">2. เทคนิคใดที่แนะนำให้ใช้เมื่อเกิดความอยากซื้อของกะทันหัน?</label>
+                <div class="quiz-option"><input type="radio" name="q2" value="a"> ก. รีบซื้อทันทีเพราะมีโปรโมชั่น</div>
+                <div class="quiz-option"><input type="radio" name="q2" value="b"> ข. ถามความเห็นเพื่อนในโซเชียล</div>
+                <div class="quiz-option"><input type="radio" name="q2" value="c"> ค. รอ 24 ชั่วโมงก่อนตัดสินใจ</div>
+                <span id="q2-feedback" class="feedback"></span>
+            </div>
+            <!-- Question 3 -->
+            <div id="q3-container">
+                <label class="quiz-label">3. ตามกฎ 50/30/20 ควรจัดสรรเงินสำหรับ 'ความอยากได้' (Wants) กี่เปอร์เซ็นต์?</label>
+                <div class="quiz-option"><input type="radio" name="q3" value="a"> ก. 50%</div>
+                <div class="quiz-option"><input type="radio" name="q3" value="b"> ข. 20%</div>
+                <div class="quiz-option"><input type="radio" name="q3" value="c"> ค. 30%</div>
+                <span id="q3-feedback" class="feedback"></span>
+            </div>
+            
+            <button type="button" class="action-btn" id="checkBtn">ตรวจคำตอบ</button>
+            <span id="quizOverallStatus" class="quiz-status" style="color:red;"></span>
           </form>
           <div style="margin-top:16px;">
-            <button id="doneBtn" class="save-btn" style="background:#388e3c;">เรียนจบบทนี้</button>
-            <span id="doneStatus" class="quiz-status"></span>
+            <button id="doneBtn" class="action-btn" style="background:#388e3c;" disabled>เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status" style="color:#388e3c;"></span>
           </div>
         `
       }
@@ -222,53 +247,98 @@
     document.getElementById("pagination").innerHTML = pag;
 
 
+    // --- SCRIPT FOR QUIZ PAGE ---
     if (page === pages.length) {
       setTimeout(() => {
-        ["q1","q2","q3"].forEach(qid=>{
-          let v = localStorage.getItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`)||"";
-          let el = document.getElementById(qid);
-          if(el) el.value = v;
-        });
-        const saveBtn = document.getElementById("saveBtn");
-        const quizStatus = document.getElementById("quizStatus");
-        if(saveBtn){
-          saveBtn.onclick = ()=>{
-            ["q1","q2","q3"].forEach(qid=>{
-              let el = document.getElementById(qid);
-              if(el) localStorage.setItem(`MoneySkillz-lesson${lessonId}-quiz-${qid}`, el.value.trim());
-            });
-            quizStatus.style.display = "inline";
-            setTimeout(()=>{ quizStatus.style.display = "none"; }, 1500);
-            checkDoneStatus();
-          }
-        }
-        const doneBtn = document.getElementById("doneBtn");
-        const doneStatus = document.getElementById("doneStatus");
-        function checkDoneStatus(){
-          let ready = ["q1","q2","q3"].every(qid=>{
-            let el = document.getElementById(qid);
-            return el && el.value.trim();
-          });
-          if(localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`)==="yes"){
-            doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
-            doneBtn.disabled = true;
-            doneBtn.style.background="#ccc";
-          }else{
-            doneStatus.innerHTML = "";
-            doneBtn.disabled = !ready;
-            doneBtn.style.background = ready ? "#388e3c" : "#bbb";
-          }
-        }
-        ["q1","q2","q3"].forEach(qid=>{
-          let el = document.getElementById(qid);
-          if(el) el.oninput = checkDoneStatus;
-        });
-        checkDoneStatus();
+        // --- CONFIGURATION ---
+        const correctAnswers = { q1: 'b', q2: 'c', q3: 'c' };
+        const questionIds = Object.keys(correctAnswers);
 
-        doneBtn.onclick = ()=>{
-          localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
-          checkDoneStatus();
+        // --- GET ELEMENTS ---
+        const checkBtn = document.getElementById("checkBtn");
+        const doneBtn = document.getElementById("doneBtn");
+        const quizOverallStatus = document.getElementById("quizOverallStatus");
+        const doneStatus = document.getElementById("doneStatus");
+
+        // --- FUNCTION: Check Answers ---
+        function checkAnswers() {
+            let allCorrect = true;
+            quizOverallStatus.textContent = ''; // Reset status message
+
+            questionIds.forEach(qid => {
+                const feedbackEl = document.getElementById(`${qid}-feedback`);
+                const selected = document.querySelector(`input[name="${qid}"]:checked`);
+                
+                // Clear previous feedback
+                feedbackEl.textContent = '';
+                feedbackEl.className = 'feedback';
+                
+                if (selected) {
+                    if (selected.value === correctAnswers[qid]) {
+                        feedbackEl.textContent = 'ถูกต้อง';
+                        feedbackEl.classList.add('correct');
+                    } else {
+                        feedbackEl.textContent = 'ยังไม่ถูก';
+                        feedbackEl.classList.add('incorrect');
+                        allCorrect = false;
+                    }
+                } else {
+                    // If a question is not answered
+                    allCorrect = false;
+                }
+            });
+
+            if (allCorrect) {
+                quizOverallStatus.textContent = '';
+                doneBtn.disabled = false;
+                 // Save progress to localStorage upon passing
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+            } else {
+                // Check if all questions are answered
+                const allAnswered = questionIds.every(qid => document.querySelector(`input[name="${qid}"]:checked`));
+                if (!allAnswered) {
+                     quizOverallStatus.textContent = 'กรุณาตอบให้ครบทุกข้อ';
+                } else {
+                     quizOverall_status.textContent = 'มีบางข้อยังไม่ถูกต้อง ลองดูอีกครั้งนะ';
+                }
+                doneBtn.disabled = true;
+            }
         }
+        
+        // --- FUNCTION: Handle Finishing Lesson ---
+        function finishLesson() {
+            doneStatus.textContent = "คุณเรียนจบบทนี้แล้ว!";
+            doneBtn.disabled = true;
+            checkBtn.disabled = true;
+            // Lock radio buttons to prevent changes after completion
+            document.querySelectorAll('#quizForm input[type="radio"]').forEach(radio => {
+                radio.disabled = true;
+            });
+        }
+        
+        // --- FUNCTION: Initial State Setup ---
+        function initializeQuiz() {
+            // Check if lesson was already completed
+            if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
+                finishLesson();
+                // Optionally show correct answers from the start if already passed
+                checkAnswers(); 
+            } else {
+                doneBtn.disabled = true;
+            }
+        }
+
+        // --- ADD EVENT LISTENERS ---
+        if (checkBtn) {
+            checkBtn.onclick = checkAnswers;
+        }
+        if (doneBtn) {
+            doneBtn.onclick = finishLesson;
+        }
+
+        // --- INITIALIZE ---
+        initializeQuiz();
+
       }, 200);
     }
   </script>
