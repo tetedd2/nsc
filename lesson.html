@@ -374,6 +374,7 @@
 
 
     <a href="./dashboard.html" class="back-btn"> กลับหน้าหลัก</a>
+
     <script src="darkmode-toggle.js"></script>
   </div>
 
@@ -432,6 +433,7 @@
     const db = getFirestore(app);
 
     let currentUser = null;
+    // Removed previousUserId as it's no longer needed for "reset on account switch" logic
 
     // Configuration for levels, names, and XP requirements (Copied from dashboard.js)
     const LEVEL_CONFIG = [
@@ -528,13 +530,58 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (!userDocSnap.exists()) {
+          // นี่คือบัญชีใหม่ที่ไม่มีข้อมูลใน Firestore
+          console.log("New user detected or user document does not exist. Creating initial profile.");
+          const newUserProfile = {
+              displayName: user.displayName || "ผู้ใช้ใหม่",
+              level: 1,
+              xp: 0,
+              nextLevelXP: LEVEL_CONFIG[0].xpToNext,
+              quote: LEVEL_CONFIG[0].quote,
+              badges: [],
+              coins: 0,
+              inventory: [],
+              lastLoginReward: '' // เพิ่ม field นี้เพื่อใช้ในอนาคต (เช่น daily reward)
+          };
+          try {
+              await setDoc(userDocRef, newUserProfile);
+              console.log("New user profile created successfully in Firestore.");
+              // หลังจากสร้างโปรไฟล์แล้ว ให้รีเซ็ต LocalStorage เพื่อให้สอดคล้องกัน
+              resetLocalStorageForNewUser();
+              window.showNotificationModal("ยินดีต้อนรับ!", "บัญชีของคุณถูกตั้งค่าเรียบร้อยแล้ว เริ่มเรียนรู้ได้เลย!");
+          } catch (error) {
+              console.error("Error creating new user profile:", error);
+              window.showNotificationModal("เกิดข้อผิดพลาด", "ไม่สามารถสร้างโปรไฟล์ผู้ใช้ได้: " + error.message);
+          }
+        } else {
+            // ผู้ใช้เก่า, โหลดสถานะปกติ
+            console.log("Existing user logged in. Loading lessons status.");
+        }
+        
         await loadLessonsStatusFromFirestore(currentUser.uid);
         checkTestStatus(); // Check status of pre/post tests
       } else {
-        // Corrected path for login.html
+        currentUser = null;
+        // Navigate to login.html using a relative path
         window.location.href = 'login.html'; 
       }
     });
+
+    // Function to reset all relevant localStorage items for a new user
+    function resetLocalStorageForNewUser() {
+        for (let i = 1; i <= 6; i++) { // Assuming lessons are 1 to 6
+            localStorage.removeItem(`MoneySkillz-lesson${i}-done`);
+        }
+        localStorage.removeItem('preTestScore');
+        localStorage.removeItem('lastViewedLessonId');
+        localStorage.removeItem('lastViewedLessonXp');
+        console.log("LocalStorage cleared for new user.");
+    }
+
 
     function checkTestStatus() {
         // Pre-test status
@@ -545,7 +592,12 @@
             preTestStatusEl.textContent = `ทำแล้ว (คะแนน: ${preTestScore}%)`;
             preTestStatusEl.className = "lesson-status completed";
             preTestBtn.textContent = 'ทำอีกครั้ง';
+        } else { // Reset if pre-test score is not present
+            preTestStatusEl.textContent = "ยังไม่ได้ทำ";
+            preTestStatusEl.className = "lesson-status not-started";
+            preTestBtn.textContent = 'เริ่มทำแบบทดสอบ';
         }
+
 
         // Post-test status
         const postTestStatusEl = document.getElementById('status-post-test');
@@ -596,6 +648,12 @@
                     const isCompletedByStorage = localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes";
                     const isCompleted = completedLessons.includes(lessonId) || isCompletedByStorage;
                     updateLessonUI(lessonId, isCompleted);
+                });
+            } else {
+                // If user document doesn't exist, all lessons are not started.
+                document.querySelectorAll('.lesson-item').forEach(item => {
+                    const lessonId = parseInt(item.dataset.lesson);
+                    updateLessonUI(lessonId, false); // Set all lessons to not started
                 });
             }
         } catch (error) {
@@ -720,6 +778,9 @@
         }
     }
 
+    // Removed resetLessonsStatus and autoResetLessonsStatus functions
+    // as they are no longer needed for the desired behavior.
+
     document.querySelector('.container').addEventListener('click', async (event) => {
         if (event.target.matches('.start-btn') && !event.target.closest('.test-item')) {
             const lessonItem = event.target.closest('.lesson-item');
@@ -733,11 +794,9 @@
             }
             window.location.href = lessonUrl;
 
-            // Important: Call completeLesson when the user returns from the lesson-detail page,
-            // or ensure the lesson-detail page itself calls this function upon completion.
-            // For demonstration, let's add a simulated completion when returning.
-            // In a real app, 'lesson-detailX.html' would call `completeLesson(lessonId, xpValue)`
-            // after the user finishes the content on that page.
+            // When navigating to a lesson detail page, store the lesson ID and XP to process on return
+            localStorage.setItem('lastViewedLessonId', lessonId);
+            localStorage.setItem('lastViewedLessonXp', xpValue);
         }
     });
 
@@ -761,18 +820,6 @@
         }
         checkTestStatus();
     });
-
-    // When navigating to a lesson detail page, store the lesson ID and XP to process on return
-    document.querySelectorAll('.lesson-item .start-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const lessonItem = button.closest('.lesson-item');
-            const lessonId = lessonItem.dataset.lesson;
-            const xpValue = lessonItem.dataset.xp;
-            localStorage.setItem('lastViewedLessonId', lessonId);
-            localStorage.setItem('lastViewedLessonXp', xpValue);
-        });
-    });
-
   </script>
 </body>
 </html>
