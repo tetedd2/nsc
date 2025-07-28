@@ -207,7 +207,6 @@
     if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail.html?page=${page+1}">หน้าถัดไป</a>`;
     document.getElementById("pagination").innerHTML = pag;
 
-    // เฉพาะหน้า 1 เท่านั้นที่แสดงคลิป TikTok
     if (page === 1) {
       document.getElementById("tiktokVideo").innerHTML = `
         <div class="video-container">
@@ -224,21 +223,9 @@
 
     if (page === pages.length) {
       const quizData = [
-          {
-              question: "หน้าที่หลักที่สำคัญที่สุดของเงินคืออะไร?",
-              choices: ["ใช้เป็นเครื่องประดับ", "เป็นสื่อกลางในการแลกเปลี่ยน", "ใช้แสดงฐานะทางสังคม", "ใช้เป็นเชื้อเพลิง"],
-              answer: "เป็นสื่อกลางในการแลกเปลี่ยน"
-          },
-          {
-              question: "ข้อใดคือคุณสมบัติของเงินที่ดี?",
-              choices: ["เน่าเสียง่าย", "หาได้ง่ายทั่วไป", "พกพาสะดวกและทนทาน", "มีน้ำหนักมาก"],
-              answer: "พกพาสะดวกและทนทาน"
-          },
-          {
-              question: "ภาวะ 'เงินเฟ้อ' (Inflation) หมายถึงอะไร?",
-              choices: ["ราคาสินค้าถูกลง", "เงินมีค่ามากขึ้น", "ราคาสินค้าแพงขึ้น และค่าของเงินลดลง", "คนมีเงินเก็บมากขึ้น"],
-              answer: "ราคาสินค้าแพงขึ้น และค่าของเงินลดลง"
-          }
+          { question: "หน้าที่หลักที่สำคัญที่สุดของเงินคืออะไร?", choices: ["ใช้เป็นเครื่องประดับ", "เป็นสื่อกลางในการแลกเปลี่ยน", "ใช้แสดงฐานะทางสังคม", "ใช้เป็นเชื้อเพลิง"], answer: "เป็นสื่อกลางในการแลกเปลี่ยน" },
+          { question: "ข้อใดคือคุณสมบัติของเงินที่ดี?", choices: ["เน่าเสียง่าย", "หาได้ง่ายทั่วไป", "พกพาสะดวกและทนทาน", "มีน้ำหนักมาก"], answer: "พกพาสะดวกและทนทาน" },
+          { question: "ภาวะ 'เงินเฟ้อ' (Inflation) หมายถึงอะไร?", choices: ["ราคาสินค้าถูกลง", "เงินมีค่ามากขึ้น", "ราคาสินค้าแพงขึ้น และค่าของเงินลดลง", "คนมีเงินเก็บมากขึ้น"], answer: "ราคาสินค้าแพงขึ้น และค่าของเงินลดลง" }
       ];
 
       const quizContainer = document.getElementById('end-of-chapter-quiz');
@@ -249,21 +236,8 @@
 
       function buildEndOfChapterQuiz() {
           quizData.forEach((currentQuestion, questionNumber) => {
-              const choices = [];
-              for (let i = 0; i < currentQuestion.choices.length; i++) {
-                  choices.push(
-                      `<label class="choice">
-                          <input type="radio" name="chapter_question${questionNumber}" value="${currentQuestion.choices[i]}">
-                          ${currentQuestion.choices[i]}
-                      </label>`
-                  );
-              }
-              const questionHTML = `
-                  <div class="question">
-                      <div class="question-text">${questionNumber + 1}. ${currentQuestion.question}</div>
-                      <div class="choices">${choices.join('')}</div>
-                  </div>
-              `;
+              const choices = currentQuestion.choices.map(choice => `<label class="choice"><input type="radio" name="chapter_question${questionNumber}" value="${choice}">${choice}</label>`).join('');
+              const questionHTML = `<div class="question"><div class="question-text">${questionNumber + 1}. ${currentQuestion.question}</div><div class="choices">${choices}</div></div>`;
               quizContainer.innerHTML += questionHTML;
           });
       }
@@ -272,21 +246,11 @@
           const answerContainers = quizContainer.querySelectorAll('.choices');
           let numCorrect = 0;
           let allAnswered = true;
-
           quizData.forEach((currentQuestion, questionNumber) => {
-              const answerContainer = answerContainers[questionNumber];
               const selector = `input[name=chapter_question${questionNumber}]:checked`;
-              const userAnswerNode = answerContainer.querySelector(selector);
-              
-              if (!userAnswerNode) {
-                  allAnswered = false;
-                  return;
-              }
-
-              const userAnswer = userAnswerNode.value;
-              if (userAnswer === currentQuestion.answer) {
-                  numCorrect++;
-              }
+              const userAnswerNode = answerContainers[questionNumber].querySelector(selector);
+              if (!userAnswerNode) { allAnswered = false; return; }
+              if (userAnswerNode.value === currentQuestion.answer) numCorrect++;
           });
 
           if (!allAnswered) {
@@ -310,27 +274,171 @@
           }
       }
       
-      function checkInitialDoneStatus() {
+      function finishLesson() {
+        if (window.completeLessonInFirestore) {
+            window.completeLessonInFirestore(lessonId, 80);
+        } else {
+            console.error("Firebase script not loaded. Saving to localStorage only.");
+            localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+            window.checkInitialDoneStatus();
+        }
+      }
+
+      window.checkInitialDoneStatus = function() {
           if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
               doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
               doneBtn.disabled = true;
               doneBtn.classList.add('disabled');
-              checkButton.style.display = 'none'; // ซ่อนปุ่มตรวจคำตอบถ้าเรียนจบแล้ว
-              resultContainer.style.display = 'none';
+              if (checkButton) checkButton.style.display = 'none';
+              if (resultContainer) resultContainer.style.display = 'none';
           }
       }
 
       buildEndOfChapterQuiz();
       checkButton.addEventListener('click', checkQuizAnswers);
-      doneBtn.addEventListener('click', () => {
-          localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
-          checkInitialDoneStatus(); // อัปเดตสถานะ UI
-      });
-      
-      checkInitialDoneStatus(); // ตรวจสอบสถานะเมื่อโหลดหน้า
+      doneBtn.addEventListener('click', finishLesson);
+      window.checkInitialDoneStatus();
+    }
+  </script>
+
+  <!-- =============================================================== -->
+  <!-- ===== NEW SCRIPT FOR FIREBASE XP & LEVEL UP SYSTEM ===== -->
+  <!-- =============================================================== -->
+  <script type="module">
+    // Firebase SDK Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, runTransaction, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // XP & Leveling System Configuration (from dashboard.js)
+    const LEVEL_CONFIG = [
+        { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+        { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+        { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+        { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+        { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity },
+    ];
+
+    async function grantXpAndLevelUp(uid, amount, lessonId) {
+        if (!uid || !amount || amount <= 0) return { success: false, message: "Invalid input." };
+        
+        const userRef = doc(db, 'users', uid);
+        let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userSnap = await transaction.get(userRef);
+                if (!userSnap.exists()) throw new Error("User document not found.");
+
+                const userData = userSnap.data();
+                const completedLessons = userData.completedLessons || [];
+                if (completedLessons.includes(lessonId)) {
+                    console.log(`Lesson ${lessonId} already completed. No XP awarded.`);
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว";
+                    return; 
+                }
+
+                let xp = userData.xp || 0;
+                let level = userData.level || 1;
+                let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+                let totalCoinReward = 0;
+                
+                xp += amount;
+                
+                while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
+                    const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
+                    if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
+                        const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                        const rewardForThisLevel = 100 + (nextLevelInfo.level * 25);
+                        totalCoinReward += rewardForThisLevel;
+                        xp -= nextLevelXP;
+                        level = nextLevelInfo.level;
+                        nextLevelXP = nextLevelInfo.xpToNext;
+                        finalMessage += `\n🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${nextLevelInfo.name}!`;
+                    } else {
+                        break;
+                    }
+                }
+                
+                const finalUpdateData = {
+                    xp: xp,
+                    level: level,
+                    nextLevelXP: nextLevelXP,
+                    completedLessons: arrayUnion(lessonId)
+                };
+
+                if (totalCoinReward > 0) {
+                    finalUpdateData.coins = increment(totalCoinReward);
+                    finalMessage += `\nได้รับ ${totalCoinReward} เหรียญ!`;
+                }
+                
+                transaction.update(userRef, finalUpdateData);
+            });
+            
+            return { success: true, message: finalMessage };
+        } catch (error) {
+            console.error("Error in transaction: ", error);
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล" };
+        }
     }
 
+    window.completeLessonInFirestore = async (lessonId, xpToAdd) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        
+        if (doneBtn.disabled) return;
+        doneBtn.disabled = true;
+        doneStatus.textContent = "กำลังบันทึก...";
+        
+        const user = auth.currentUser;
+        if (user) {
+            const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
+            
+            alert(result.message);
+            doneStatus.textContent = result.message.split('\n')[0];
+
+            if(result.success) {
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus();
+                }
+            } else {
+                doneBtn.disabled = false;
+            }
+        } else {
+            alert("กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP");
+            doneBtn.disabled = false;
+            doneStatus.textContent = "โปรดเข้าสู่ระบบ";
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            console.log("User is not logged in.");
+            const doneBtn = document.getElementById("doneBtn");
+            if (doneBtn) {
+                 doneBtn.disabled = true;
+                 doneBtn.closest('.action-btn').textContent = "กรุณาเข้าสู่ระบบ";
+            }
+        }
+    });
   </script>
- <script src="darkmode-toggle.js"></script>
+
+  <script src="darkmode-toggle.js"></script>
 </body>
 </html>
