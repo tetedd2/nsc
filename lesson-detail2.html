@@ -27,6 +27,70 @@
     .end-of-chapter-quiz .choice { background-color: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 10px; cursor: pointer; display: block; }
     #quizResult.correct { color: #388e3c; }
     #quizResult.incorrect { color: #d32f2f; }
+
+    /* Custom Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+    .modal-content h3 {
+        color: #004d40;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    .modal-content p {
+        color: #333;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        white-space: pre-wrap; /* Preserve newlines from message */
+    }
+    .modal-content button {
+        background-color: #009688;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .modal-content button:hover {
+        background-color: #00796b;
+        transform: translateY(-1px);
+    }
+    /* Specific styles for success/error messages */
+    .modal-content.success h3 { color: #388e3c; }
+    .modal-content.error h3 { color: #d32f2f; }
   </style>
 </head>
 <body>
@@ -36,8 +100,18 @@
     <div class="pagination" id="pagination"></div>
     <a href="lesson.html" class="back-btn">⬅ กลับสู่รายการบทเรียน</a>
   </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="customAlertModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <button id="modalCloseBtn">ตกลง</button>
+    </div>
+  </div>
+
   <script>
-    const lessonId = 2;
+    const lessonId = 2; // This should be dynamically set for each lesson page
     const urlParams = new URLSearchParams(window.location.search);
     const pageNow = Number(urlParams.get("page")||1);
 
@@ -130,6 +204,27 @@
     if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail2.html?page=${page+1}">หน้าถัดไป</a>`;
     document.getElementById("pagination").innerHTML = pag;
 
+    // --- Custom Modal Functions ---
+    const customAlertModal = document.getElementById('customAlertModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalContent = customAlertModal.querySelector('.modal-content');
+
+    function showCustomAlert(title, message, isSuccess = true) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message; // Use textContent to handle newlines naturally
+        modalContent.className = 'modal-content ' + (isSuccess ? 'success' : 'error');
+        customAlertModal.classList.add('show');
+    }
+
+    function hideCustomAlert() {
+        customAlertModal.classList.remove('show');
+    }
+
+    modalCloseBtn.addEventListener('click', hideCustomAlert);
+    // --- End Custom Modal Functions ---
+
     if (page === pages.length) {
       const quizData = [
           {
@@ -187,6 +282,8 @@
           if (!allAnswered) {
               resultContainer.textContent = "กรุณาตอบคำถามให้ครบทุกข้อ";
               resultContainer.className = "quiz-status incorrect";
+              doneBtn.disabled = true; // Keep done button disabled if not all questions are answered
+              doneBtn.classList.add('disabled');
               return;
           }
           if (numCorrect === quizData.length) {
@@ -206,11 +303,12 @@
       
       function finishLesson() {
         if (window.completeLessonInFirestore) {
-            window.completeLessonInFirestore(lessonId, 80);
+            window.completeLessonInFirestore(lessonId, 80); // Award 80 XP
         } else {
             console.error("Firebase script not loaded. Saving to localStorage only.");
             localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
             window.checkInitialDoneStatus();
+            showCustomAlert("บันทึกความคืบหน้า", "บทเรียนนี้ถูกบันทึกเป็นเสร็จสิ้นแล้ว!");
         }
       }
 
@@ -232,11 +330,12 @@
   </script>
 
   <script type="module">
+    // Firebase SDK Imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, runTransaction, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // YOUR FIREBASE CONFIGURATION
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
       authDomain: "myapplication-bd04c034.firebaseapp.com",
@@ -246,11 +345,12 @@
       appId: "1:49782830313:web:c81b5d86a937f22d296c78"
     };
   
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // LEVEL CONFIGURATION: กำหนดค่า XP สำหรับแต่ละเลเวล
+    // XP & Leveling System Configuration
     const LEVEL_CONFIG = [
         { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
         { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
@@ -260,28 +360,31 @@
     ];
 
     /**
-     * ฟังก์ชันหลักในการเพิ่ม XP, ตรวจสอบการเลเวลอัพ และบันทึกข้อมูลลง Firestore
-     * @param {string} uid - User ID ของ Firebase
-     * @param {number} amount - จำนวน XP ที่จะเพิ่ม
-     * @param {number} lessonId - ID ของบทเรียนที่เพิ่งเรียนจบ
-     * @returns {Promise<{success: boolean, message: string}>} - ผลลัพธ์และข้อความที่จะแสดง
+     * Main function to grant XP, check for level-ups, and save data to Firestore.
+     * @param {string} uid - Firebase User ID.
+     * @param {number} amount - Amount of XP to add.
+     * @param {number} lessonId - ID of the recently completed lesson.
+     * @returns {Promise<{success: boolean, message: string, isSuccessStatus: boolean}>} - Result and message to display.
      */
     async function grantXpAndLevelUp(uid, amount, lessonId) {
-        if (!uid || !amount || amount <= 0) return { success: false, message: "ข้อมูลไม่ถูกต้อง" };
+        if (!uid || !amount || amount <= 0) return { success: false, message: "Invalid input.", isSuccessStatus: false };
+        
         const userRef = doc(db, 'users', uid);
         let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+        let isSuccessStatus = true; // To determine modal style
+
         try {
             await runTransaction(db, async (transaction) => {
                 const userSnap = await transaction.get(userRef);
-                if (!userSnap.exists()) throw new Error("ไม่พบข้อมูลผู้ใช้");
-                
+                if (!userSnap.exists()) throw new Error("User document not found.");
+
                 const userData = userSnap.data();
                 const completedLessons = userData.completedLessons || [];
-
-                // ตรวจสอบว่าเคยจบบทเรียนนี้หรือยัง
                 if (completedLessons.includes(lessonId)) {
-                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว";
-                    return; // ออกจากการทำงานโดยไม่ให้ XP ซ้ำ
+                    console.log(`Lesson ${lessonId} already completed. No XP awarded.`);
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว ได้รับ XP ไปแล้ว";
+                    isSuccessStatus = false; // Not a new success
+                    return; 
                 }
 
                 let xp = userData.xp || 0;
@@ -290,25 +393,29 @@
                 let totalCoinReward = 0;
                 
                 xp += amount;
-
-                // วนลูปเพื่อตรวจสอบการเลเวลอัพ (เผื่อกรณีได้ XP เยอะจนเลเวลอัพหลายขั้น)
+                
                 while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
                     const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
                     if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
                         const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
-                        const rewardForThisLevel = 100 + (nextLevelInfo.level * 25); // คำนวณรางวัล
+                        const rewardForThisLevel = 100 + (nextLevelInfo.level * 25); // Calculate reward
                         totalCoinReward += rewardForThisLevel;
-                        
-                        xp -= nextLevelXP; // หัก XP ที่ใช้เลเวลอัพ
-                        level = nextLevelInfo.level; // อัปเดตเลเวลใหม่
-                        nextLevelXP = nextLevelInfo.xpToNext; // ตั้งค่า XP สำหรับเลเวลถัดไป
+                        xp -= nextLevelXP; // Deduct XP used for level up
+                        level = nextLevelInfo.level; // Update new level
+                        nextLevelXP = nextLevelInfo.xpToNext; // Set XP for next level
                         finalMessage += `\n🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${nextLevelInfo.name}!`;
                     } else {
-                        break; // เลเวลสูงสุดแล้ว
+                        break; // Max level reached
                     }
                 }
+                
+                const finalUpdateData = {
+                    xp: xp,
+                    level: level,
+                    nextLevelXP: nextLevelXP,
+                    completedLessons: arrayUnion(lessonId)
+                };
 
-                const finalUpdateData = { xp, level, nextLevelXP, completedLessons: arrayUnion(lessonId) };
                 if (totalCoinReward > 0) {
                     finalUpdateData.coins = increment(totalCoinReward);
                     finalMessage += `\nได้รับ ${totalCoinReward} เหรียญ!`;
@@ -316,55 +423,71 @@
                 
                 transaction.update(userRef, finalUpdateData);
             });
-            return { success: true, message: finalMessage };
+            
+            return { success: true, message: finalMessage, isSuccessStatus: isSuccessStatus };
         } catch (error) {
             console.error("Error in transaction: ", error);
-            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล" };
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล", isSuccessStatus: false };
         }
     }
-    
+
     /**
-     * ฟังก์ชันที่ถูกเรียกจากปุ่ม "เรียนจบบทนี้" เพื่อเริ่มกระบวนการให้ XP
-     * @param {number} lessonId - ID บทเรียน
-     * @param {number} xpToAdd - XP ที่จะให้
+     * Function called from the "Finish Lesson" button to start the XP granting process.
+     * @param {number} lessonId - Lesson ID.
+     * @param {number} xpToAdd - XP to grant.
      */
     window.completeLessonInFirestore = async (lessonId, xpToAdd) => {
         const doneBtn = document.getElementById("doneBtn");
         const doneStatus = document.getElementById("doneStatus");
+        
         if (doneBtn.disabled) return;
-
         doneBtn.disabled = true;
         doneStatus.textContent = "กำลังบันทึก...";
         
         const user = auth.currentUser;
         if (user) {
-            // เรียกใช้ฟังก์ชัน grantXpAndLevelUp
             const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
             
-            // แสดงหน้าต่างแจ้งเตือนด้วยข้อความที่ได้รับกลับมา
-            alert(result.message); 
-            
-            doneStatus.textContent = result.message.split('\n')[0]; // แสดงข้อความแรกที่บรรทัดสถานะ
+            // Use custom alert instead of browser alert
+            showCustomAlert(result.success ? "สำเร็จ!" : "เกิดข้อผิดพลาด", result.message, result.isSuccessStatus);
+            doneStatus.textContent = result.message.split('\n')[0]; // Show only the first line on status
+
             if(result.success) {
                 localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
-                if (window.checkInitialDoneStatus) window.checkInitialDoneStatus();
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus();
+                }
             } else {
-                doneBtn.disabled = false; // หากไม่สำเร็จ ให้กดปุ่มได้อีกครั้ง
+                doneBtn.disabled = false;
             }
         } else {
-            alert("กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP");
+            showCustomAlert("แจ้งเตือน", "กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP", false);
             doneBtn.disabled = false;
             doneStatus.textContent = "โปรดเข้าสู่ระบบ";
         }
     };
 
     onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            const doneBtn = document.getElementById("doneBtn");
-            if (doneBtn) {
-                 // หากผู้ใช้ไม่ได้ login ให้ปิดการใช้งานปุ่มจบบทเรียน
-                 doneBtn.disabled = true;
-                 doneBtn.closest('.action-btn').textContent = "กรุณาเข้าสู่ระบบ";
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+
+        if (doneBtn) {
+            if (!user) {
+                console.log("User is not logged in.");
+                doneBtn.disabled = true;
+                doneBtn.classList.add('disabled');
+                doneBtn.textContent = "กรุณาเข้าสู่ระบบ"; // Set button text directly
+                doneStatus.textContent = ""; // Clear status if logged out
+            } else {
+                console.log("User is logged in.", user.uid);
+                // Re-enable if conditions are met, otherwise check status via checkInitialDoneStatus
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus(); // This will enable/disable based on local storage
+                }
+                // If the button is not disabled by checkInitialDoneStatus, set its text back
+                if (!doneBtn.disabled) {
+                    doneBtn.textContent = "เรียนจบบทนี้";
+                }
             }
         }
     });

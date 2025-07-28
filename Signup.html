@@ -178,10 +178,20 @@
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
         await user.updateProfile({ displayName: username });
+        // --- ส่วนที่เพิ่ม/แก้ไข: ตั้งค่า User Document เริ่มต้นใน Firestore ให้ครบถ้วน ---
         await db.collection("users").doc(user.uid).set({
-          username,
-          email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          displayName: username, // ใช้ displayName ที่ผู้ใช้กรอก
+          email: email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          level: 1, // ระดับเริ่มต้น
+          xp: 0, // ค่า XP เริ่มต้น
+          nextLevelXP: 100, // XP ที่ต้องใช้เพื่อขึ้น Level 2 (ตาม LEVEL_CONFIG ของ Level 1)
+          quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!", // คำคมเริ่มต้นของ Level 1
+          badges: [], // เหรียญตราที่ปลดล็อคแล้ว (เริ่มต้นไม่มี)
+          coins: 0, // เหรียญสะสม (เริ่มต้นไม่มี)
+          inventory: [], // ไอเทมที่ซื้อจากร้านค้า (เริ่มต้นไม่มี)
+          lastLoginReward: '', // สำหรับระบบรางวัลรายวัน
+          completedLessons: [] // *** สำคัญมาก: เพื่อรีเซ็ตสถานะบทเรียน ***
         });
         messageDiv.textContent = 'สมัครสมาชิกสำเร็จ! กำลังไปยังหน้าเข้าสู่ระบบ...';
         messageDiv.style.color = '#43cea2';

@@ -39,6 +39,70 @@
     .end-of-chapter-quiz .choice input[type="radio"] { margin-right: 10px; }
     #quizResult.correct { color: #388e3c; }
     #quizResult.incorrect { color: #d32f2f; }
+
+    /* Custom Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+    .modal-content h3 {
+        color: #004d40;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    .modal-content p {
+        color: #333;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        white-space: pre-wrap; /* Preserve newlines from message */
+    }
+    .modal-content button {
+        background-color: #009688;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .modal-content button:hover {
+        background-color: #00796b;
+        transform: translateY(-1px);
+    }
+    /* Specific styles for success/error messages */
+    .modal-content.success h3 { color: #388e3c; }
+    .modal-content.error h3 { color: #d32f2f; }
   </style>
 </head>
 <body>
@@ -49,8 +113,18 @@
     <div class="pagination" id="pagination"></div>
     <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
   </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="customAlertModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <button id="modalCloseBtn">ตกลง</button>
+    </div>
+  </div>
+
   <script>
-    const lessonId = 1;
+    const lessonId = 1; // This should be dynamically set for each lesson page
     const urlParams = new URLSearchParams(window.location.search);
     const pageNow = Number(urlParams.get("page")||1);
 
@@ -221,6 +295,28 @@
       `;
     }
 
+    // --- Custom Modal Functions ---
+    const customAlertModal = document.getElementById('customAlertModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalContent = customAlertModal.querySelector('.modal-content');
+
+    function showCustomAlert(title, message, isSuccess = true) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message; // Use textContent to handle newlines naturally
+        modalContent.className = 'modal-content ' + (isSuccess ? 'success' : 'error');
+        customAlertModal.classList.add('show');
+    }
+
+    function hideCustomAlert() {
+        customAlertModal.classList.remove('show');
+    }
+
+    modalCloseBtn.addEventListener('click', hideCustomAlert);
+    // --- End Custom Modal Functions ---
+
+
     if (page === pages.length) {
       const quizData = [
           { question: "หน้าที่หลักที่สำคัญที่สุดของเงินคืออะไร?", choices: ["ใช้เป็นเครื่องประดับ", "เป็นสื่อกลางในการแลกเปลี่ยน", "ใช้แสดงฐานะทางสังคม", "ใช้เป็นเชื้อเพลิง"], answer: "เป็นสื่อกลางในการแลกเปลี่ยน" },
@@ -256,6 +352,8 @@
           if (!allAnswered) {
               resultContainer.textContent = "กรุณาตอบคำถามให้ครบทุกข้อ";
               resultContainer.className = "quiz-status incorrect";
+              doneBtn.disabled = true; // Keep done button disabled if not all questions are answered
+              doneBtn.classList.add('disabled');
               return;
           }
 
@@ -276,11 +374,12 @@
       
       function finishLesson() {
         if (window.completeLessonInFirestore) {
-            window.completeLessonInFirestore(lessonId, 80);
+            window.completeLessonInFirestore(lessonId, 80); // Award 80 XP
         } else {
             console.error("Firebase script not loaded. Saving to localStorage only.");
             localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
             window.checkInitialDoneStatus();
+            showCustomAlert("บันทึกความคืบหน้า", "บทเรียนนี้ถูกบันทึกเป็นเสร็จสิ้นแล้ว!");
         }
       }
 
@@ -339,6 +438,7 @@
         
         const userRef = doc(db, 'users', uid);
         let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+        let isSuccessStatus = true; // To determine modal style
 
         try {
             await runTransaction(db, async (transaction) => {
@@ -349,7 +449,8 @@
                 const completedLessons = userData.completedLessons || [];
                 if (completedLessons.includes(lessonId)) {
                     console.log(`Lesson ${lessonId} already completed. No XP awarded.`);
-                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว";
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว ได้รับ XP ไปแล้ว";
+                    isSuccessStatus = false; // Not a new success
                     return; 
                 }
 
@@ -390,10 +491,10 @@
                 transaction.update(userRef, finalUpdateData);
             });
             
-            return { success: true, message: finalMessage };
+            return { success: true, message: finalMessage, isSuccessStatus: isSuccessStatus };
         } catch (error) {
             console.error("Error in transaction: ", error);
-            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล" };
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล", isSuccessStatus: false };
         }
     }
 
@@ -409,8 +510,9 @@
         if (user) {
             const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
             
-            alert(result.message);
-            doneStatus.textContent = result.message.split('\n')[0];
+            // Use custom alert instead of browser alert
+            showCustomAlert(result.success ? "สำเร็จ!" : "เกิดข้อผิดพลาด", result.message, result.isSuccessStatus);
+            doneStatus.textContent = result.message.split('\n')[0]; // Show only the first line on status
 
             if(result.success) {
                 localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
@@ -421,19 +523,33 @@
                 doneBtn.disabled = false;
             }
         } else {
-            alert("กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP");
+            showCustomAlert("แจ้งเตือน", "กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP", false);
             doneBtn.disabled = false;
             doneStatus.textContent = "โปรดเข้าสู่ระบบ";
         }
     };
 
     onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            console.log("User is not logged in.");
-            const doneBtn = document.getElementById("doneBtn");
-            if (doneBtn) {
-                 doneBtn.disabled = true;
-                 doneBtn.closest('.action-btn').textContent = "กรุณาเข้าสู่ระบบ";
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+
+        if (doneBtn) {
+            if (!user) {
+                console.log("User is not logged in.");
+                doneBtn.disabled = true;
+                doneBtn.classList.add('disabled');
+                doneBtn.textContent = "กรุณาเข้าสู่ระบบ"; // Set button text directly
+                doneStatus.textContent = ""; // Clear status if logged out
+            } else {
+                console.log("User is logged in.", user.uid);
+                // Re-enable if conditions are met, otherwise check status via checkInitialDoneStatus
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus(); // This will enable/disable based on local storage
+                }
+                // If the button is not disabled by checkInitialDoneStatus, set its text back
+                if (!doneBtn.disabled) {
+                    doneBtn.textContent = "เรียนจบบทนี้";
+                }
             }
         }
     });

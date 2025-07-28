@@ -433,7 +433,6 @@
     const db = getFirestore(app);
 
     let currentUser = null;
-    // Removed previousUserId as it's no longer needed for "reset on account switch" logic
 
     // Configuration for levels, names, and XP requirements (Copied from dashboard.js)
     const LEVEL_CONFIG = [
@@ -510,7 +509,7 @@
         const modal = document.getElementById('levelUpModal');
         const modalLevel = document.getElementById('levelUpModalLevel');
         const modalName = document.getElementById('levelUpModalName');
-        const modalReward = document.getElementById('levelUpModalReward');
+        const modalReward = document.getElementById('levelUpModalReward'); /* Corrected ID here */
         if (!modal || !modalLevel || !modalName || !modalReward) {
             console.error("Level-up modal elements not found.");
             alert(`🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${name}!\nได้รับ ${reward} เหรียญ!`); // Fallback
@@ -533,9 +532,12 @@
         const userDocRef = doc(db, 'users', user.uid);
         const userDocSnap = await getDoc(userDocRef);
 
+        console.log(`[onAuthStateChanged] User logged in: ${user.uid}`);
+        console.log(`[onAuthStateChanged] Checking user document for ${user.uid}...`);
+
         if (!userDocSnap.exists()) {
-          // นี่คือบัญชีใหม่ที่ไม่มีข้อมูลใน Firestore
-          console.log("New user detected or user document does not exist. Creating initial profile.");
+          // New user detected (no user document in Firestore).
+          console.log("[onAuthStateChanged] User document NOT found. This is a new user or incomplete signup. Creating initial profile and resetting localStorage.");
           const newUserProfile = {
               displayName: user.displayName || "ผู้ใช้ใหม่",
               level: 1,
@@ -545,41 +547,45 @@
               badges: [],
               coins: 0,
               inventory: [],
-              lastLoginReward: '' // เพิ่ม field นี้เพื่อใช้ในอนาคต (เช่น daily reward)
+              lastLoginReward: '',
+              completedLessons: [] // Ensure this is initialized for new users
           };
           try {
               await setDoc(userDocRef, newUserProfile);
-              console.log("New user profile created successfully in Firestore.");
-              // หลังจากสร้างโปรไฟล์แล้ว ให้รีเซ็ต LocalStorage เพื่อให้สอดคล้องกัน
-              resetLocalStorageForNewUser();
-              window.showNotificationModal("ยินดีต้อนรับ!", "บัญชีของคุณถูกตั้งค่าเรียบร้อยแล้ว เริ่มเรียนรู้ได้เลย!");
+              console.log("[onAuthStateChanged] New user profile created successfully in Firestore.");
+              // Always reset localStorage for a truly new user to ensure UI reflects starting state
+              resetLocalStorageForNewUser(); 
+              window.showNotificationModal("ยินดีต้อนรับ!", "บัญชีของคุณถูกตั้งค่าเรียบร้อยแล้ว! เริ่มเรียนรู้ได้เลย!");
           } catch (error) {
-              console.error("Error creating new user profile:", error);
-              window.showNotificationModal("เกิดข้อผิดพลาด", "ไม่สามารถสร้างโปรไฟล์ผู้ใช้ได้: " + error.message);
+              console.error("[onAuthStateChanged] Error creating new user profile:", error);
+              window.showNotificationModal("เกิดข้อผิดพลาด", "ไม่สามารถตั้งค่าบัญชีผู้ใช้ได้: " + error.message);
           }
         } else {
-            // ผู้ใช้เก่า, โหลดสถานะปกติ
-            console.log("Existing user logged in. Loading lessons status.");
+            // Existing user, just load their data. No reset needed.
+            console.log("[onAuthStateChanged] User document found. This is an existing user. Loading lessons status from Firestore.");
         }
         
         await loadLessonsStatusFromFirestore(currentUser.uid);
         checkTestStatus(); // Check status of pre/post tests
       } else {
         currentUser = null;
-        // Navigate to login.html using a relative path
-        window.location.href = 'login.html'; 
+        console.log("[onAuthStateChanged] User logged out or not authenticated. Redirecting to login.");
+        // Redirect to login page if user logs out
+        window.location.replace('/login.html'); /* Changed to root-relative path */
       }
     });
 
     // Function to reset all relevant localStorage items for a new user
+    // This is called ONLY when a new user document is created in Firestore.
     function resetLocalStorageForNewUser() {
+        console.log("[resetLocalStorageForNewUser] Clearing localStorage related to lessons and tests.");
         for (let i = 1; i <= 6; i++) { // Assuming lessons are 1 to 6
             localStorage.removeItem(`MoneySkillz-lesson${i}-done`);
         }
         localStorage.removeItem('preTestScore');
         localStorage.removeItem('lastViewedLessonId');
         localStorage.removeItem('lastViewedLessonXp');
-        console.log("LocalStorage cleared for new user.");
+        console.log("[resetLocalStorageForNewUser] LocalStorage cleared.");
     }
 
 
@@ -614,12 +620,16 @@
             postTestBtn.classList.add('disabled');
             postTestBtn.href = '#'; // Prevent clicking
         }
+        console.log(`[checkTestStatus] Pre-test score: ${preTestScore}, Lesson 6 done: ${lessonsDone}`);
     }
 
 
     function updateLessonUI(lessonId, isCompleted) {
         const lessonItem = document.querySelector(`.lesson-item[data-lesson='${lessonId}']`);
-        if (!lessonItem) return;
+        if (!lessonItem) {
+            console.warn(`[updateLessonUI] Lesson item with data-lesson='${lessonId}' not found.`);
+            return;
+        }
 
         const statusElement = lessonItem.querySelector('.lesson-status');
         const buttonElement = lessonItem.querySelector('.start-btn');
@@ -633,31 +643,37 @@
             statusElement.className = "lesson-status not-started";
             buttonElement.textContent = "เริ่มบทเรียน";
         }
+        console.log(`[updateLessonUI] Lesson ${lessonId} updated to ${isCompleted ? 'Completed' : 'Not Started'}.`);
     }
     
     async function loadLessonsStatusFromFirestore(userId) {
         const userDocRef = doc(db, "users", userId);
+        console.log(`[loadLessonsStatusFromFirestore] Attempting to load user document for UID: ${userId}`);
         try {
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
                 const userData = userDocSnap.data();
                 const completedLessons = userData.completedLessons || [];
+                console.log(`[loadLessonsStatusFromFirestore] User document exists. Completed lessons from Firestore:`, completedLessons);
+
                 document.querySelectorAll('.lesson-item').forEach(item => {
                     const lessonId = parseInt(item.dataset.lesson);
-                    // Also update from localStorage for immediate feedback after finishing a lesson
                     const isCompletedByStorage = localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes";
+                    // Prioritize Firestore data, but if localStorage indicates done, honor it for immediate UI feedback.
                     const isCompleted = completedLessons.includes(lessonId) || isCompletedByStorage;
                     updateLessonUI(lessonId, isCompleted);
                 });
             } else {
-                // If user document doesn't exist, all lessons are not started.
+                console.warn(`[loadLessonsStatusFromFirestore] User document for UID: ${userId} does NOT exist (after initial check). Setting all lessons to not started.`);
+                // If user document doesn't exist (e.g., new user just signed up),
+                // ensure UI shows all lessons as not started. This complements resetLocalStorageForNewUser.
                 document.querySelectorAll('.lesson-item').forEach(item => {
                     const lessonId = parseInt(item.dataset.lesson);
                     updateLessonUI(lessonId, false); // Set all lessons to not started
                 });
             }
         } catch (error) {
-            console.error("Error loading lesson status:", error);
+            console.error("[loadLessonsStatusFromFirestore] Error loading lesson status:", error);
             showMessage("ไม่สามารถโหลดข้อมูลบทเรียนได้", "error");
         }
     }
@@ -678,11 +694,13 @@
         const userDocRef = doc(db, "users", userId);
         let leveledUpMessages = []; // To store messages for modals after transaction
 
+        console.log(`[completeLesson] Attempting to complete lesson ${lessonId} for user ${userId}. XP to add: ${xpToAdd}`);
+
         try {
             await runTransaction(db, async (transaction) => {
                 const userSnap = await transaction.get(userDocRef);
                 if (!userSnap.exists()) {
-                    console.error("completeLesson: User document does not exist for UID:", userId);
+                    console.error("[completeLesson] User document does not exist for UID during transaction. This should not happen if user signed up correctly:", userId);
                     throw new Error("User document does not exist!");
                 }
 
@@ -693,11 +711,9 @@
 
                 // Check if lesson is already completed
                 if (completedLessons.includes(lessonId)) {
-                    console.log(`Lesson ${lessonId} already completed.`);
-                    // No need to add XP or re-level up if already done.
-                    // Just show a message and update UI if necessary (might be redundant after loadLessonsStatusFromFirestore).
+                    console.log(`[completeLesson] Lesson ${lessonId} already completed in Firestore. Skipping XP/level-up logic.`);
                     showMessage(`คุณเรียนบทที่ ${lessonId} จบไปแล้ว`, "info");
-                    updateLessonUI(lessonId, true);
+                    updateLessonUI(lessonId, true); // Ensure UI is updated
                     return; 
                 }
 
@@ -729,12 +745,12 @@
                             name: nextLevelInfo.name,
                             reward: rewardForThisLevel
                         });
-                        console.log(`completeLesson: Leveled up! New Level: ${level}, Remaining XP: ${xp}, Next Level XP Threshold: ${nextLevelXPThreshold}`);
+                        console.log(`[completeLesson] Leveled up! New Level: ${level}, Remaining XP: ${xp}, Next Level XP Threshold: ${nextLevelXPThreshold}`);
                     } else {
                         // Reached max level
                         xp = Math.max(xp, nextLevelXPThreshold); // Cap XP at the max level's threshold if already at max
                         nextLevelXPThreshold = Infinity; // Set threshold to Infinity
-                        console.log("completeLesson: Reached max level.");
+                        console.log("[completeLesson] Reached max level.");
                         break;
                     }
                 }
@@ -753,11 +769,10 @@
                 }
 
                 transaction.update(userDocRef, finalUpdateData);
-                console.log("completeLesson: Transaction update prepared with data:", finalUpdateData);
+                console.log("[completeLesson] Transaction update prepared with data:", finalUpdateData);
             });
 
-            console.log(`Lesson ${lessonId} completed! +${xpToAdd} XP`);
-            // Show base XP message first
+            console.log(`[completeLesson] Lesson ${lessonId} completed successfully! +${xpToAdd} XP`);
             showMessage(`ยินดีด้วย! คุณได้รับ ${xpToAdd} XP จากบทเรียนที่ ${lessonId}`, "success");
             
             // Set localStorage flag for immediate UI update on return
@@ -773,13 +788,10 @@
             }
 
         } catch (error) {
-            console.error("Error completing lesson:", error);
+            console.error("[completeLesson] Error completing lesson:", error);
             showMessage("เกิดข้อผิดพลาดในการบันทึกข้อมูลบทเรียนและ XP", "error");
         }
     }
-
-    // Removed resetLessonsStatus and autoResetLessonsStatus functions
-    // as they are no longer needed for the desired behavior.
 
     document.querySelector('.container').addEventListener('click', async (event) => {
         if (event.target.matches('.start-btn') && !event.target.closest('.test-item')) {
@@ -797,12 +809,14 @@
             // When navigating to a lesson detail page, store the lesson ID and XP to process on return
             localStorage.setItem('lastViewedLessonId', lessonId);
             localStorage.setItem('lastViewedLessonXp', xpValue);
+            console.log(`[Event Listener] Navigating to lesson-detail for lesson ${lessonId}. Stored in localStorage.`);
         }
     });
 
     // Check for completed lessons from localStorage on page focus/return
     // This is crucial for updating the UI after a user comes back from a lesson detail page.
     window.addEventListener('focus', () => {
+        console.log("[window.focus] Window re-focused. Checking user and lesson status.");
         if (currentUser) {
             loadLessonsStatusFromFirestore(currentUser.uid);
             // Additionally, check for completion of the last viewed lesson
@@ -810,13 +824,18 @@
             const lastViewedLessonXp = parseInt(localStorage.getItem('lastViewedLessonXp'));
 
             if (lastViewedLessonId && localStorage.getItem(`MoneySkillz-lesson${lastViewedLessonId}-done`) === "yes") {
+                console.log(`[window.focus] Found completed lesson in localStorage (${lastViewedLessonId}). Attempting to update Firestore.`);
                 // If it's marked as done in localStorage, call completeLesson to ensure Firebase is updated
                 // and level-up logic is triggered, but only if it's not already completed in Firebase.
                 // The completeLesson function now handles the check for already completed lessons.
                 completeLesson(parseInt(lastViewedLessonId), lastViewedLessonXp);
                 localStorage.removeItem('lastViewedLessonId'); // Clear after processing
                 localStorage.removeItem('lastViewedLessonXp');
+            } else {
+                console.log("[window.focus] No completed lesson found in localStorage to process for Firestore update.");
             }
+        } else {
+            console.log("[window.focus] No current user. Skipping lesson status load.");
         }
         checkTestStatus();
     });

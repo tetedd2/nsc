@@ -168,15 +168,20 @@
             const userRef = db.collection('users').doc(result.user.uid);
             return userRef.get().then(doc => {
                 if (!doc.exists) {
+                    // --- ส่วนที่เพิ่ม/แก้ไข: ตั้งค่า User Document เริ่มต้นใน Firestore ให้ครบถ้วนสำหรับ Google Sign-In ---
                     userRef.set({
                         displayName: result.user.displayName,
                         email: result.user.email,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        level: "Level 1 – ผู้เริ่มต้น",
-                        xp: 0,
-                        nextLevelXP: 100,
-                        quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
-                        badges: []
+                        level: 1, // ระดับเริ่มต้น
+                        xp: 0, // ค่า XP เริ่มต้น
+                        nextLevelXP: 100, // XP ที่ต้องใช้เพื่อขึ้น Level 2 (ตาม LEVEL_CONFIG ของ Level 1)
+                        quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!", // คำคมเริ่มต้นของ Level 1
+                        badges: [], // เหรียญตราที่ปลดล็อคแล้ว (เริ่มต้นไม่มี)
+                        coins: 0, // เหรียญสะสม (เริ่มต้นไม่มี)
+                        inventory: [], // ไอเทมที่ซื้อจากร้านค้า (เริ่มต้นไม่มี)
+                        lastLoginReward: '', // สำหรับระบบรางวัลรายวัน
+                        completedLessons: [] // *** สำคัญมาก: เพื่อรีเซ็ตสถานะบทเรียน ***
                     });
                 }
             });
