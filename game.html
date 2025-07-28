@@ -304,35 +304,43 @@
 
     let userId = null;
     
+    // ตรวจสอบสถานะการล็อกอินของผู้ใช้และกำหนด userId
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         userId = user.uid;
         document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)}...)`;
       } else {
         try {
+          // หากผู้ใช้ไม่ได้ล็อกอิน ให้ล็อกอินแบบไม่ระบุตัวตน (anonymous)
           const anonymousUserCredential = await signInAnonymously(auth);
           userId = anonymousUserCredential.user.uid;
           document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)}...)`;
         } catch (error) {
           console.error("Error signing in anonymously:", error);
+          // หากเกิดข้อผิดพลาดในการล็อกอินแบบไม่ระบุตัวตน ให้ใช้ UUID ชั่วคราว (แต่จะบันทึกลง Firebase ไม่ได้)
           userId = crypto.randomUUID(); 
           document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)} - fallback)`;
         }
       }
+      // เรียกโหลดและแสดงผล EXP หลังจากได้ userId แล้ว
       await fetchAndDisplayExp();
     });
 
+    // โหลดและแสดงผลค่า EXP จาก Firestore
     async function fetchAndDisplayExp() {
-      if (!userId) return;
+      if (!userId) return; // หากไม่มี userId ไม่ต้องดำเนินการต่อ
       try {
         const userRef = doc(db, `users`, userId);
+        // ใช้ onSnapshot เพื่อฟังการเปลี่ยนแปลงของข้อมูลแบบเรียลไทม์
         onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
-            document.getElementById("totalExpValue").textContent = data.totalExp || 0;
+            // ดึงค่า xp จากเอกสารผู้ใช้ หรือ 0 หากไม่มี
+            document.getElementById("totalExpValue").textContent = data.xp || 0; // เปลี่ยนจาก data.totalExp เป็น data.xp
           } else {
+            // หากไม่มีเอกสารผู้ใช้ ให้ตั้งค่าเริ่มต้นเป็น 0 และสร้างเอกสารใหม่
             document.getElementById("totalExpValue").textContent = 0;
-            setDoc(userRef, { totalExp: 0 }, { merge: true });
+            setDoc(userRef, { xp: 0 }, { merge: true }); // เปลี่ยนจาก totalExp: 0 เป็น xp: 0
           }
         });
       } catch (error) {
@@ -340,24 +348,30 @@
       }
     }
 
+    // เพิ่มค่า EXP ให้กับผู้ใช้ใน Firestore
     async function addExp(expAmount) {
-      if (!userId) return;
+      if (!userId) return; // หากไม่มี userId ไม่ต้องดำเนินการต่อ
       try {
         const userRef = doc(db, `users`, userId);
         const docSnap = await getDoc(userRef);
         let currentExp = 0;
         if (docSnap.exists()) {
-          currentExp = docSnap.data().totalExp || 0;
+          // ดึงค่า xp ปัจจุบันจากเอกสาร
+          currentExp = docSnap.data().xp || 0; // เปลี่ยนจาก docSnap.data().totalExp เป็น docSnap.data().xp
         }
         const newExp = currentExp + expAmount;
-        await setDoc(userRef, { totalExp: newExp }, { merge: true });
+        // อัปเดตฟิลด์ xp ในเอกสารผู้ใช้
+        await setDoc(userRef, { xp: newExp }, { merge: true }); // เปลี่ยนจาก totalExp: newExp เป็น xp: newExp
+        console.log(`EXP added to Firebase (xp field): ${expAmount}. New total xp: ${newExp}`); // เพิ่ม log
       } catch (error) {
         console.error("Error adding EXP:", error);
       }
     }
     
+    // ค่า EXP ที่จะได้รับสำหรับแต่ละโหมดเกม (สำหรับหน้าเมนูนี้)
     const EXP_VALUES = { easy: 100, medium: 200, hard: 300, timed_multiplier: 5 };
 
+    // ฟังก์ชันสำหรับเพิ่ม EXP เมื่อเล่นเกมจบ (การจำลองจากหน้าเมนู)
     function addExpForGameCompletion(difficulty, score = 0) {
       let expGained = 0;
       if (difficulty in EXP_VALUES) {
@@ -366,25 +380,31 @@
         expGained = score * EXP_VALUES.timed_multiplier;
       }
       if (expGained > 0) addExp(expGained);
+      console.log(`Simulated game completion for difficulty: ${difficulty}, Score: ${score}, EXP Gained: ${expGained}`); // เพิ่ม log
     }
     
+    // เพิ่ม Event Listener ให้กับปุ่มเมนูเกม
     document.querySelectorAll('.menu-btn').forEach(button => {
       button.addEventListener('click', (event) => {
         const difficulty = event.currentTarget.dataset.difficulty;
         if (difficulty) {
+          // ใช้ setTimeout เพื่อจำลองการจบเกมและเพิ่ม EXP หลังจาก 1 วินาที
+          // ในสถานการณ์จริง ฟังก์ชันนี้จะถูกเรียกจากหน้าเกมเมื่อเกมจบลงจริงๆ
           setTimeout(() => {
-            const score = difficulty === 'timed' ? 50 : 0;
+            const score = difficulty === 'timed' ? 50 : 0; // คะแนนจำลองสำหรับโหมดจับเวลา
             addExpForGameCompletion(difficulty, score);
           }, 1000);
         }
       });
     });
 
+    // แสดงคะแนนรวมโหมดจับเวลาจาก Local Storage
     function showTotalScore() {
       let val = localStorage.getItem("money_score_timed");
       document.getElementById("totalScoreValue").textContent = val ? parseInt(val) : 0;
     }
 
+    // แสดงคะแนนสูงสุดจาก Local Storage
     function showHighScore() {
       let highScore = localStorage.getItem("arcadeHighScore");
       let highScoreValue = highScore ? parseInt(highScore) : 0;
@@ -392,9 +412,11 @@
       document.getElementById("highScore").style.display = highScoreValue === 0 ? "none" : "block";
     }
 
+    // เรียกฟังก์ชันแสดงคะแนนเมื่อโหลดหน้า
     showTotalScore();
     showHighScore();
 
+    // แสดงตัวอย่างกระดานคะแนนจาก Local Storage
     function showLeaderboardPreview() {
       let leaderboard = JSON.parse(localStorage.getItem("money_leaderboard")||"[]");
       if(leaderboard && leaderboard.length > 0) {
@@ -410,8 +432,5 @@
     
   </script>
   <script src="darkmode-toggle.js"></script>
-  
-  <link rel="stylesheet" href="navigation.css">
-  <script src="navigation.js"></script>
 </body>
 </html>

@@ -204,25 +204,171 @@
           }
       }
       
-      function checkInitialDoneStatus() {
+      function finishLesson() {
+        if (window.completeLessonInFirestore) {
+            window.completeLessonInFirestore(lessonId, 80);
+        } else {
+            console.error("Firebase script not loaded. Saving to localStorage only.");
+            localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+            window.checkInitialDoneStatus();
+        }
+      }
+
+      window.checkInitialDoneStatus = function() {
           if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
               doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
               doneBtn.disabled = true;
               doneBtn.classList.add('disabled');
-              checkButton.style.display = 'none';
-              resultContainer.style.display = 'none';
+              if(checkButton) checkButton.style.display = 'none';
+              if(resultContainer) resultContainer.style.display = 'none';
           }
       }
 
       buildEndOfChapterQuiz();
       checkButton.addEventListener('click', checkQuizAnswers);
-      doneBtn.addEventListener('click', () => {
-          localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
-          checkInitialDoneStatus();
-      });
-      checkInitialDoneStatus();
+      doneBtn.addEventListener('click', finishLesson);
+      window.checkInitialDoneStatus();
     }
   </script>
- <script src="darkmode-toggle.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, runTransaction, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // YOUR FIREBASE CONFIGURATION
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // LEVEL CONFIGURATION: กำหนดค่า XP สำหรับแต่ละเลเวล
+    const LEVEL_CONFIG = [
+        { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+        { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+        { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+        { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+        { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity },
+    ];
+
+    /**
+     * ฟังก์ชันหลักในการเพิ่ม XP, ตรวจสอบการเลเวลอัพ และบันทึกข้อมูลลง Firestore
+     * @param {string} uid - User ID ของ Firebase
+     * @param {number} amount - จำนวน XP ที่จะเพิ่ม
+     * @param {number} lessonId - ID ของบทเรียนที่เพิ่งเรียนจบ
+     * @returns {Promise<{success: boolean, message: string}>} - ผลลัพธ์และข้อความที่จะแสดง
+     */
+    async function grantXpAndLevelUp(uid, amount, lessonId) {
+        if (!uid || !amount || amount <= 0) return { success: false, message: "ข้อมูลไม่ถูกต้อง" };
+        const userRef = doc(db, 'users', uid);
+        let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userSnap = await transaction.get(userRef);
+                if (!userSnap.exists()) throw new Error("ไม่พบข้อมูลผู้ใช้");
+                
+                const userData = userSnap.data();
+                const completedLessons = userData.completedLessons || [];
+
+                // ตรวจสอบว่าเคยจบบทเรียนนี้หรือยัง
+                if (completedLessons.includes(lessonId)) {
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว";
+                    return; // ออกจากการทำงานโดยไม่ให้ XP ซ้ำ
+                }
+
+                let xp = userData.xp || 0;
+                let level = userData.level || 1;
+                let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+                let totalCoinReward = 0;
+                
+                xp += amount;
+
+                // วนลูปเพื่อตรวจสอบการเลเวลอัพ (เผื่อกรณีได้ XP เยอะจนเลเวลอัพหลายขั้น)
+                while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
+                    const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
+                    if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
+                        const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                        const rewardForThisLevel = 100 + (nextLevelInfo.level * 25); // คำนวณรางวัล
+                        totalCoinReward += rewardForThisLevel;
+                        
+                        xp -= nextLevelXP; // หัก XP ที่ใช้เลเวลอัพ
+                        level = nextLevelInfo.level; // อัปเดตเลเวลใหม่
+                        nextLevelXP = nextLevelInfo.xpToNext; // ตั้งค่า XP สำหรับเลเวลถัดไป
+                        finalMessage += `\n🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${nextLevelInfo.name}!`;
+                    } else {
+                        break; // เลเวลสูงสุดแล้ว
+                    }
+                }
+
+                const finalUpdateData = { xp, level, nextLevelXP, completedLessons: arrayUnion(lessonId) };
+                if (totalCoinReward > 0) {
+                    finalUpdateData.coins = increment(totalCoinReward);
+                    finalMessage += `\nได้รับ ${totalCoinReward} เหรียญ!`;
+                }
+                
+                transaction.update(userRef, finalUpdateData);
+            });
+            return { success: true, message: finalMessage };
+        } catch (error) {
+            console.error("Error in transaction: ", error);
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล" };
+        }
+    }
+    
+    /**
+     * ฟังก์ชันที่ถูกเรียกจากปุ่ม "เรียนจบบทนี้" เพื่อเริ่มกระบวนการให้ XP
+     * @param {number} lessonId - ID บทเรียน
+     * @param {number} xpToAdd - XP ที่จะให้
+     */
+    window.completeLessonInFirestore = async (lessonId, xpToAdd) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        if (doneBtn.disabled) return;
+
+        doneBtn.disabled = true;
+        doneStatus.textContent = "กำลังบันทึก...";
+        
+        const user = auth.currentUser;
+        if (user) {
+            // เรียกใช้ฟังก์ชัน grantXpAndLevelUp
+            const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
+            
+            // แสดงหน้าต่างแจ้งเตือนด้วยข้อความที่ได้รับกลับมา
+            alert(result.message); 
+            
+            doneStatus.textContent = result.message.split('\n')[0]; // แสดงข้อความแรกที่บรรทัดสถานะ
+            if(result.success) {
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                if (window.checkInitialDoneStatus) window.checkInitialDoneStatus();
+            } else {
+                doneBtn.disabled = false; // หากไม่สำเร็จ ให้กดปุ่มได้อีกครั้ง
+            }
+        } else {
+            alert("กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP");
+            doneBtn.disabled = false;
+            doneStatus.textContent = "โปรดเข้าสู่ระบบ";
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            const doneBtn = document.getElementById("doneBtn");
+            if (doneBtn) {
+                 // หากผู้ใช้ไม่ได้ login ให้ปิดการใช้งานปุ่มจบบทเรียน
+                 doneBtn.disabled = true;
+                 doneBtn.closest('.action-btn').textContent = "กรุณาเข้าสู่ระบบ";
+            }
+        }
+    });
+  </script>
+  <script src="darkmode-toggle.js"></script>
 </body>
 </html>

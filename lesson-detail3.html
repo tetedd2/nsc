@@ -30,8 +30,6 @@
     .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
     .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 24px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
     .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-
-    /* === NEW QUIZ STYLES FROM LESSON 2 === */
     .end-of-chapter-quiz .question { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #009688; }
     .end-of-chapter-quiz .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; }
     .end-of-chapter-quiz .choices { display: flex; flex-direction: column; gap: 10px; }
@@ -201,7 +199,6 @@
             <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/vxr9F4fZSyo?si=agMxRZMaFjUDJeNj" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
           </div>
           
-          <!-- NEW QUIZ STRUCTURE -->
           <div class="end-of-chapter-quiz" id="end-of-chapter-quiz"></div>
           <button type="button" class="action-btn" id="checkQuizBtn">ตรวจคำตอบ</button>
           <span id="quizResult" class="quiz-status"></span>
@@ -224,72 +221,37 @@
     document.getElementById("pagination").innerHTML = pag;
 
 
-    // --- NEW SCRIPT FOR QUIZ PAGE (ADAPTED FROM LESSON 2) ---
     if (page === pages.length) {
-        // --- Delay script to ensure HTML is rendered ---
         setTimeout(() => {
-            // --- QUIZ CONFIGURATION ---
             const quizData = [
-                {
-                    question: "1. ข้อใดต่อไปนี้จัดเป็น 'ความจำเป็น' (Needs)?",
-                    choices: ["ก. สมาร์ทโฟนรุ่นใหม่ล่าสุด", "ข. ค่าเดินทางไปทำงาน", "ค. ดินเนอร์บุฟเฟต์กับเพื่อน"],
-                    answer: "ข. ค่าเดินทางไปทำงาน"
-                },
-                {
-                    question: "2. เทคนิคใดที่แนะนำให้ใช้เมื่อเกิดความอยากซื้อของกะทันหัน?",
-                    choices: ["ก. รีบซื้อทันทีเพราะมีโปรโมชั่น", "ข. ถามความเห็นเพื่อนในโซเชียล", "ค. รอ 24 ชั่วโมงก่อนตัดสินใจ"],
-                    answer: "ค. รอ 24 ชั่วโมงก่อนตัดสินใจ"
-                },
-                {
-                    question: "3. ตามกฎ 50/30/20 ควรจัดสรรเงินสำหรับ 'ความอยากได้' (Wants) กี่เปอร์เซ็นต์?",
-                    choices: ["ก. 50%", "ข. 20%", "ค. 30%"],
-                    answer: "ค. 30%"
-                }
+                { question: "1. ข้อใดต่อไปนี้จัดเป็น 'ความจำเป็น' (Needs)?", choices: ["ก. สมาร์ทโฟนรุ่นใหม่ล่าสุด", "ข. ค่าเดินทางไปทำงาน", "ค. ดินเนอร์บุฟเฟต์กับเพื่อน"], answer: "ข. ค่าเดินทางไปทำงาน" },
+                { question: "2. เทคนิคใดที่แนะนำให้ใช้เมื่อเกิดความอยากซื้อของกะทันหัน?", choices: ["ก. รีบซื้อทันทีเพราะมีโปรโมชั่น", "ข. ถามความเห็นเพื่อนในโซเชียล", "ค. รอ 24 ชั่วโมงก่อนตัดสินใจ"], answer: "ค. รอ 24 ชั่วโมงก่อนตัดสินใจ" },
+                { question: "3. ตามกฎ 50/30/20 ควรจัดสรรเงินสำหรับ 'ความอยากได้' (Wants) กี่เปอร์เซ็นต์?", choices: ["ก. 50%", "ข. 20%", "ค. 30%"], answer: "ค. 30%" }
             ];
 
-            // --- GET ELEMENTS ---
             const quizContainer = document.getElementById('end-of-chapter-quiz');
             const checkButton = document.getElementById('checkQuizBtn');
             const resultContainer = document.getElementById('quizResult');
             const doneBtn = document.getElementById("doneBtn");
             const doneStatus = document.getElementById("doneStatus");
 
-            // --- FUNCTION: Build Quiz HTML ---
             function buildEndOfChapterQuiz() {
                 quizData.forEach((currentQuestion, questionNumber) => {
-                    const choicesHTML = currentQuestion.choices.map(choice => `
-                        <label class="choice">
-                            <input type="radio" name="chapter_question${questionNumber}" value="${choice}">
-                            ${choice}
-                        </label>
-                    `).join('');
-                    const questionHTML = `
-                        <div class="question">
-                            <div class="question-text">${currentQuestion.question}</div>
-                            <div class="choices">${choicesHTML}</div>
-                        </div>
-                    `;
+                    const choicesHTML = currentQuestion.choices.map(choice => `<label class="choice"><input type="radio" name="chapter_question${questionNumber}" value="${choice}">${choice}</label>`).join('');
+                    const questionHTML = `<div class="question"><div class="question-text">${currentQuestion.question}</div><div class="choices">${choicesHTML}</div></div>`;
                     if(quizContainer) quizContainer.innerHTML += questionHTML;
                 });
             }
 
-            // --- FUNCTION: Check Answers ---
             function checkQuizAnswers() {
                 if(!quizContainer) return;
                 const answerContainers = quizContainer.querySelectorAll('.choices');
-                let numCorrect = 0;
-                let allAnswered = true;
-
+                let numCorrect = 0, allAnswered = true;
                 quizData.forEach((currentQuestion, questionNumber) => {
                     const selector = `input[name=chapter_question${questionNumber}]:checked`;
                     const userAnswerNode = (answerContainers[questionNumber]) ? answerContainers[questionNumber].querySelector(selector) : null;
-                    if (!userAnswerNode) { 
-                        allAnswered = false; 
-                        return; 
-                    }
-                    if (userAnswerNode.value === currentQuestion.answer) {
-                        numCorrect++;
-                    }
+                    if (!userAnswerNode) { allAnswered = false; return; }
+                    if (userAnswerNode.value === currentQuestion.answer) numCorrect++;
                 });
                 
                 if (!allAnswered) {
@@ -297,7 +259,6 @@
                     resultContainer.className = "quiz-status incorrect";
                     return;
                 }
-
                 if (numCorrect === quizData.length) {
                     resultContainer.textContent = "ยอดเยี่ยม! คุณตอบถูกทุกข้อ";
                     resultContainer.className = "quiz-status correct";
@@ -313,39 +274,142 @@
                 }
             }
             
-            // --- FUNCTION: Handle Finishing Lesson ---
             function finishLesson() {
-                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
-                checkInitialDoneStatus();
+                if (window.completeLessonInFirestore) {
+                    window.completeLessonInFirestore(lessonId, 80);
+                } else {
+                    console.error("Firebase script not loaded. Saving to localStorage only.");
+                    localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                    window.checkInitialDoneStatus();
+                }
             }
 
-            // --- FUNCTION: Initial State Setup ---
-            function checkInitialDoneStatus() {
+            window.checkInitialDoneStatus = function() {
                 if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
                     doneStatus.textContent = "คุณเรียนจบบทนี้แล้ว!";
                     if(doneBtn) doneBtn.disabled = true;
                     if(doneBtn) doneBtn.classList.add('disabled');
                     if(checkButton) checkButton.style.display = 'none';
                     if(resultContainer) resultContainer.style.display = 'none';
-
-                    // Disable radio buttons after completion
-                    if(quizContainer) {
-                        quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
-                            radio.disabled = true;
-                        });
-                    }
+                    if(quizContainer) quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => { radio.disabled = true; });
                 }
             }
 
-            // --- INITIALIZE ---
             buildEndOfChapterQuiz();
             if(checkButton) checkButton.addEventListener('click', checkQuizAnswers);
             if(doneBtn) doneBtn.addEventListener('click', finishLesson);
-            checkInitialDoneStatus();
+            window.checkInitialDoneStatus();
 
         }, 200);
     }
   </script>
- <script src="darkmode-toggle.js"></script>
+
+  <!-- Firebase XP & Level Up System -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, runTransaction, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const LEVEL_CONFIG = [
+        { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+        { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+        { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+        { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+        { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity },
+    ];
+
+    async function grantXpAndLevelUp(uid, amount, lessonId) {
+        if (!uid || !amount || amount <= 0) return { success: false, message: "Invalid input." };
+        const userRef = doc(db, 'users', uid);
+        let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userSnap = await transaction.get(userRef);
+                if (!userSnap.exists()) throw new Error("User document not found.");
+                const userData = userSnap.data();
+                const completedLessons = userData.completedLessons || [];
+                if (completedLessons.includes(lessonId)) {
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว";
+                    return; 
+                }
+                let xp = userData.xp || 0;
+                let level = userData.level || 1;
+                let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+                let totalCoinReward = 0;
+                xp += amount;
+                while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
+                    const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
+                    if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
+                        const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                        const rewardForThisLevel = 100 + (nextLevelInfo.level * 25);
+                        totalCoinReward += rewardForThisLevel;
+                        xp -= nextLevelXP;
+                        level = nextLevelInfo.level;
+                        nextLevelXP = nextLevelInfo.xpToNext;
+                        finalMessage += `\n🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${nextLevelInfo.name}!`;
+                    } else { break; }
+                }
+                const finalUpdateData = { xp, level, nextLevelXP, completedLessons: arrayUnion(lessonId) };
+                if (totalCoinReward > 0) {
+                    finalUpdateData.coins = increment(totalCoinReward);
+                    finalMessage += `\nได้รับ ${totalCoinReward} เหรียญ!`;
+                }
+                transaction.update(userRef, finalUpdateData);
+            });
+            return { success: true, message: finalMessage };
+        } catch (error) {
+            console.error("Error in transaction: ", error);
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล" };
+        }
+    }
+
+    window.completeLessonInFirestore = async (lessonId, xpToAdd) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        if (doneBtn.disabled) return;
+        doneBtn.disabled = true;
+        doneStatus.textContent = "กำลังบันทึก...";
+        const user = auth.currentUser;
+        if (user) {
+            const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
+            alert(result.message);
+            doneStatus.textContent = result.message.split('\n')[0];
+            if(result.success) {
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                if (window.checkInitialDoneStatus) window.checkInitialDoneStatus();
+            } else {
+                doneBtn.disabled = false;
+            }
+        } else {
+            alert("กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP");
+            doneBtn.disabled = false;
+            doneStatus.textContent = "โปรดเข้าสู่ระบบ";
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            const doneBtn = document.getElementById("doneBtn");
+            if (doneBtn) {
+                 doneBtn.disabled = true;
+                 doneBtn.closest('.action-btn').textContent = "กรุณาเข้าสู่ระบบ";
+            }
+        }
+    });
+  </script>
+  <script src="darkmode-toggle.js"></script>
 </body>
 </html>

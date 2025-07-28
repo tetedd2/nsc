@@ -5,7 +5,7 @@
     <title>จับคู่การเงิน – ระดับง่าย</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="match-game-style.css"> 
+    <link rel="stylesheet" href="match-game-style.css">
     <link rel="stylesheet" href="theme-darkmode.css">
 </head>
 <body>
@@ -26,7 +26,7 @@
             <div class="score-item">คะแนน: <span id="score">0</span></div>
             <div class="score-item timer">เวลา: <span id="timer">120</span>s</div>
         </div>
-        <div class="card-board" id="gameBoard"></div>
+        <div class="card-board card-board-easy" id="gameBoard"></div>
         <div class="result-box" id="resultBox"></div>
         <div style="text-align:center;">
             <button class="main-btn" onclick="startGame()">เล่นใหม่</button>
@@ -37,8 +37,17 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
     <script src="match-easy.js"></script>
-    <script src="darkmode-toggle.js"></script>
+    <script>
+        // dark mode auto
+        (function(){
+          const enableDark = localStorage.getItem("moneySkillzDarkMode") === "true";
+          if(enableDark) {
+            document.body.classList.add("dark-mode");
+          }
+        })();
+    </script>
 </body>
 </html>

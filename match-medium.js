@@ -139,10 +139,13 @@ function startGame() {
 }
 
 function renderCards() {
-  document.getElementById("gameBoard").innerHTML =
+  const gameBoard = document.getElementById("gameBoard");
+  gameBoard.innerHTML =
     cards.map((c,idx)=>
       `<div class="card${c.correct?' correct':''}${isSelected(idx)?' flipped':''}${c.justReleased?' released':''}" onclick="selectCard(${idx})" id="card${idx}">${!c.correct ? c.text : ""}</div>`
     ).join('');
+    // Removed JavaScript logic for setting gridTemplateColumns
+    // This is now handled by CSS classes (card-board-easy, card-board-medium, card-board-hard)
 }
 
 function isSelected(idx) {
