@@ -28,12 +28,23 @@ const storage = getStorage(app);
 
 // Configuration for levels, names, and XP requirements
 const LEVEL_CONFIG = [
-    { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
-    { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
-    { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
-    { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
-    { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity }, // Max level
+    { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100, quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!" },
+    { level: 2, name: "นักออมฝึกหัด", xpToNext: 250, quote: "ทุกการออมเล็กๆ สร้างความมั่งคั่งที่ยิ่งใหญ่!" },
+    { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500, quote: "ความสม่ำเสมอคือกุญแจสู่ความสำเร็จทางการเงิน!" },
+    { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000, quote: "เงินทำงานให้คุณ ไม่ใช่คุณทำงานให้เงิน!" },
+    { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity, quote: "อิสรภาพทางการเงินรอคุณอยู่!" }, // Max level
 ];
+
+/**
+ * Gets level information from LEVEL_CONFIG based on level number.
+ * @param {number} level - The level number.
+ * @returns {object} The level configuration object.
+ */
+function getLevelInfo(level) {
+    // Ensure we don't go out of bounds for LEVEL_CONFIG
+    const foundLevel = LEVEL_CONFIG.find(l => l.level === level);
+    return foundLevel || LEVEL_CONFIG[0]; // Fallback to Level 1 if not found
+}
 
 /**
  * Adds XP to the user and checks for level-ups using a transaction.
@@ -42,66 +53,104 @@ const LEVEL_CONFIG = [
  * @param {number} amount - The amount of XP to add.
  */
 async function addXP(uid, amount) {
-    if (!uid || !amount || amount <= 0) return;
-    
+    if (!uid) {
+        console.warn("addXP: UID is missing.");
+        return;
+    }
+    // Allow amount 0 for explicit level-up checks, but warn if it's explicitly < 0
+    if (amount < 0) {
+        console.warn("addXP: Invalid amount. Amount:", amount);
+        return;
+    }
+
+
     const userRef = doc(db, 'users', uid);
+    let leveledUpMessages = []; // To store messages for modals after transaction
+
     try {
         await runTransaction(db, async (transaction) => {
             const userSnap = await transaction.get(userRef);
             if (!userSnap.exists()) {
-                throw "Document does not exist!";
+                console.error("addXP: User document does not exist for UID:", uid);
+                // Throw error to rollback transaction if user document is missing
+                throw new Error("User document does not exist!");
             }
 
             // Get current user data from the transaction
             const userData = userSnap.data();
             let xp = userData.xp || 0;
             let level = userData.level || 1;
-            let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
-            
+            // Ensure nextLevelXPThreshold is always based on the current level config
+            let nextLevelXPThreshold = getLevelInfo(level).xpToNext;
+
+            console.log(`addXP: Before update - XP: ${xp}, Level: ${level}, Next Level XP Threshold: ${nextLevelXPThreshold}`);
+
             let totalCoinReward = 0;
-            
+            leveledUpMessages = []; // Reset for each transaction attempt
+
             // Add new XP
             xp += amount;
 
             // Loop to handle potential multiple level-ups
-            while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
-                const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
-                
-                if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
-                    const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
-                    const rewardForThisLevel = 100 + (nextLevelInfo.level * 25);
-                    
-                    totalCoinReward += rewardForThisLevel;
-                    xp -= nextLevelXP; // Carry over remaining XP to the next level
-                    level = nextLevelInfo.level;
-                    nextLevelXP = nextLevelInfo.xpToNext;
+            while (xp >= nextLevelXPThreshold && nextLevelXPThreshold !== Infinity) {
+                const currentLevelInfo = getLevelInfo(level);
+                const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === currentLevelInfo.level);
 
-                    // Show level up alert (outside the transaction logic)
-                    setTimeout(() => {
-                       alert(`🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${nextLevelInfo.level} – ${nextLevelInfo.name}!\nได้รับ ${rewardForThisLevel} เหรียญ!`);
-                    }, 100);
+                if (currentLevelIndex < LEVEL_CONFIG.length - 1) { // Check if it's not the last level
+                    const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                    const rewardForThisLevel = 100 + (nextLevelInfo.level * 25); // Reward based on reaching *this* next level
+
+                    totalCoinReward += rewardForThisLevel;
+                    xp -= nextLevelXPThreshold; // Deduct XP required for the level just passed
+                    level = nextLevelInfo.level; // Update level
+                    nextLevelXPThreshold = nextLevelInfo.xpToNext; // Update threshold for the newly reached level
+
+                    leveledUpMessages.push({
+                        level: nextLevelInfo.level,
+                        name: nextLevelInfo.name,
+                        reward: rewardForThisLevel
+                    });
+                    console.log(`addXP: Leveled up! New Level: ${level}, Remaining XP: ${xp}, Next Level XP Threshold: ${nextLevelXPThreshold}`);
                 } else {
-                    // Reached max level, break the loop
+                    // Reached max level
+                    xp = Math.max(xp, nextLevelXPThreshold); // Cap XP at the max level's threshold if already at max
+                    nextLevelXPThreshold = Infinity; // Set threshold to Infinity
+                    console.log("addXP: Reached max level.");
                     break;
                 }
             }
-            
+
+            // Also update the user's quote based on the new level
+            const newQuote = getLevelInfo(level).quote;
+
             // Prepare the final data object for a single atomic update
             const finalUpdateData = {
                 xp: xp,
                 level: level,
-                nextLevelXP: nextLevelXP,
+                nextLevelXP: nextLevelXPThreshold, // Use the updated threshold
+                quote: newQuote // Update quote based on new level
             };
             if (totalCoinReward > 0) {
                 finalUpdateData.coins = increment(totalCoinReward);
             }
-            
-            // Perform a single, combined update at the end of the transaction
+
             transaction.update(userRef, finalUpdateData);
+            console.log("addXP: Transaction update prepared with data:", finalUpdateData);
         });
+
+        console.log("addXP: Transaction completed successfully.");
+
+        // Display level-up modals sequentially AFTER the transaction commits
+        for (const msg of leveledUpMessages) {
+            showLevelUpModal(msg.level, msg.name, msg.reward);
+            // Add a slight delay between multiple level-up modals if they happen
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
     } catch (error) {
-        console.error("Error adding XP and leveling up: ", error);
-        alert("เกิดข้อผิดพลาดในการเพิ่ม XP และอัปเดตเลเวล");
+        console.error("Error adding XP and leveling up:", error);
+        // Using a custom modal for errors as well, instead of alert()
+        showNotificationModal("เกิดข้อผิดพลาด", "เกิดข้อผิดพลาดในการเพิ่ม XP และอัปเดตเลเวล กรุณาลองใหม่อีกครั้ง: " + error.message);
     }
 }
 
@@ -136,28 +185,35 @@ onAuthStateChanged(auth, (user) => {
 
 // ================== Real-time Data Listeners ==================
 function attachRealtimeListeners(uid) {
-    detachRealtimeListeners(); 
+    detachRealtimeListeners();
 
     // --- Profile Listener ---
-    const userProfileListener = onSnapshot(doc(db, 'users', uid), (docSnapshot) => {
+    const userProfileListener = onSnapshot(doc(db, 'users', uid), async (docSnapshot) => { // Added async here
         if (docSnapshot.exists()) {
             const userData = docSnapshot.data();
             updateProfileUI(userData, auth.currentUser);
-            renderShop(userData); 
+            renderShop(userData);
         } else {
             // Create a new user profile if it doesn't exist
+            console.log("Creating new user profile for UID:", uid);
             const newUserProfile = {
                 displayName: auth.currentUser.displayName || "ผู้ใช้ใหม่",
                 level: 1, // Store level number instead of string
                 xp: 0,
                 nextLevelXP: LEVEL_CONFIG[0].xpToNext, // Get initial XP requirement from config
-                quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
+                quote: LEVEL_CONFIG[0].quote, // Use quote from LEVEL_CONFIG
                 badges: [],
                 coins: 0,
                 inventory: [],
                 lastLoginReward: ''
             };
-            setDoc(doc(db, 'users', uid), newUserProfile);
+            // Added await here to ensure the profile is written before potentially other operations
+            try {
+                await setDoc(doc(db, 'users', uid), newUserProfile);
+                console.log("New user profile created successfully.");
+            } catch (error) {
+                console.error("Error creating new user profile:", error);
+            }
         }
     }, (error) => console.error("Error listening to user profile:", error));
 
@@ -212,7 +268,7 @@ function renderShop(user) {
         console.warn("Could not find 'purchasedItemsContainer' or 'userCoins'. Shop rendering skipped.");
         return;
     }
-    
+
     userCoinsEl.textContent = user.coins || 0;
     const inventory = user.inventory || [];
 
@@ -237,7 +293,7 @@ function renderShop(user) {
                 <span class="purchased-name">${item.name}</span>
             `;
             purchasedContainer.appendChild(purchasedEl);
-        } else if (shopContainer) { 
+        } else if (shopContainer) {
             hasShopItems = true;
             const canAfford = userCoins >= item.price;
             const shopEl = document.createElement('div');
@@ -247,7 +303,7 @@ function renderShop(user) {
                 <div class="item-name">${item.name}</div>
                 <div class="item-price">${item.price} 🪙</div>
                 <button
-                    onclick="buyItem('${auth.currentUser.uid}', '${item.id}', ${item.price})"
+                    onclick="window.buyItem('${auth.currentUser.uid}', '${item.id}', ${item.price})"
                     ${!canAfford ? 'disabled' : ''}
                     class="${!canAfford ? 'cannot-afford' : ''}"
                 >
@@ -267,25 +323,40 @@ function renderShop(user) {
 }
 
 
-async function buyItem(uid, itemId, price) {
+window.buyItem = async function(uid, itemId, price) {
     const userRef = doc(db, 'users', uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) return alert('Error: ไม่พบข้อมูลผู้ใช้');
-
-    const user = userSnap.data();
-    if ((user.coins || 0) < price) return alert('เหรียญไม่พอสำหรับซื้อไอเทมนี้');
-    if ((user.inventory || []).includes(itemId)) return alert('คุณมีไอเทมนี้อยู่แล้ว');
-
     try {
-        await updateDoc(userRef, {
-            coins: increment(-price),
-            inventory: arrayUnion(itemId)
+        await runTransaction(db, async (transaction) => {
+            const userSnap = await transaction.get(userRef);
+            if (!userSnap.exists()) {
+                // Using custom modal for error
+                showNotificationModal("ข้อผิดพลาด", "ไม่พบข้อมูลผู้ใช้");
+                return;
+            }
+
+            const user = userSnap.data();
+            if ((user.coins || 0) < price) {
+                // Using custom modal for error
+                showNotificationModal("ไม่เพียงพอ", "เหรียญไม่พอสำหรับซื้อไอเทมนี้");
+                return;
+            }
+            if ((user.inventory || []).includes(itemId)) {
+                // Using custom modal for error
+                showNotificationModal("มีอยู่แล้ว", "คุณมีไอเทมนี้อยู่แล้ว");
+                return;
+            }
+
+            transaction.update(userRef, {
+                coins: increment(-price),
+                inventory: arrayUnion(itemId)
+            });
+            // Using custom modal for success
+            showNotificationModal("ซื้อสำเร็จ!", "ซื้อไอเทมสำเร็จ!");
         });
-        alert('ซื้อไอเทมสำเร็จ!');
     } catch (error) {
         console.error("Error buying item:", error);
-        alert('เกิดข้อผิดพลาดในการซื้อ: ' + error.message);
+        // Using custom modal for error
+        showNotificationModal("เกิดข้อผิดพลาด", 'เกิดข้อผิดพลาดในการซื้อ: ' + error.message);
     }
 }
 
@@ -305,7 +376,7 @@ async function giveDailyLoginReward(uid) {
                 lastLoginReward: todayStr
             });
             await addXP(uid, 15); // Grant 15 XP for daily login
-            alert('รับรางวัลล็อกอินประจำวัน +15 XP!');
+            showNotificationModal("รางวัลรายวัน", 'รับรางวัลล็อกอินประจำวัน +15 XP!');
         } catch (error) {
             console.error("Error giving daily reward:", error);
         }
@@ -315,7 +386,7 @@ async function giveDailyLoginReward(uid) {
 // ================== UI Update Functions ==================
 function resetUIToLoggedOutState() {
     updateProfileUI({}, null);
-    updateFinancialSummary(); 
+    updateFinancialSummary();
     document.getElementById('transactionsContainer').innerHTML = '<p class="no-transactions-message">กรุณาเข้าสู่ระบบเพื่อดูรายการธุรกรรม</p>';
     document.getElementById('goalTitle').textContent = "- กรุณาเข้าสู่ระบบ -";
     document.getElementById('goalAmount').textContent = "เป้าหมาย: 0.00 ฿";
@@ -335,23 +406,59 @@ function resetUIToLoggedOutState() {
 }
 
 function updateProfileUI(userData, user) {
+    console.log("updateProfileUI triggered. UserData:", userData);
     const defaultAvatar = 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png';
     document.getElementById('profilePicture').src = user?.photoURL || defaultAvatar;
     document.getElementById('usernameDisplay').textContent = userData?.displayName || user?.displayName || 'ผู้ใช้ใหม่';
-    document.getElementById('userQuote').textContent = `"${userData?.quote || 'เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!'}"`;
-    
+
     const userLevelNum = userData?.level || 1;
-    const levelInfo = LEVEL_CONFIG.find(l => l.level === userLevelNum) || LEVEL_CONFIG[0];
+    console.log("Current userLevelNum from userData:", userLevelNum);
+
+    const levelInfo = getLevelInfo(userLevelNum);
+    console.log("LevelInfo based on userLevelNum:", levelInfo);
+
+    document.getElementById('userQuote').textContent = `"${userData?.quote || levelInfo.quote}"`;
+
     document.getElementById('userLevel').textContent = `Level ${levelInfo.level} – ${levelInfo.name}`;
 
     const currentXP = userData?.xp || 0;
-    const nextLevelXP = userData?.nextLevelXP === Infinity ? 'MAX' : (userData?.nextLevelXP || levelInfo.xpToNext);
-    const progressPercent = nextLevelXP !== 'MAX' && nextLevelXP > 0 ? (currentXP / nextLevelXP) * 100 : 100;
-    
-    document.getElementById('userProgress').style.width = `${progressPercent}%`;
-    document.getElementById('progressValue').textContent = `${Math.round(progressPercent)}%`;
+    console.log("XP from userData:", currentXP);
+
+    // Determine the XP needed for the *next* level based on the current level's configuration.
+    // This is the most reliable source for checking level-up conditions.
+    const xpRequiredForNextLevel = levelInfo.xpToNext;
+
+    // For display purposes, handle 'MAX' level differently
+    const displayNextLevelXP = (xpRequiredForNextLevel === Infinity) ? 'MAX' : xpRequiredForNextLevel;
+
+    console.log("Calculated displayNextLevelXP (from LEVEL_CONFIG):", displayNextLevelXP);
+    console.log("XP required for next level (for check):", xpRequiredForNextLevel);
+
+
+    const progressPercent = (displayNextLevelXP !== 'MAX' && displayNextLevelXP > 0) ? (currentXP / displayNextLevelXP) * 100 : 100;
+
+    console.log("Calculated progressPercent:", progressPercent);
+
+    document.getElementById('userProgress').style.width = `${Math.min(100, progressPercent)}%`;
+    document.getElementById('progressValue').textContent = `${Math.round(Math.min(100, progressPercent))}%`;
     document.getElementById('currentXP').textContent = currentXP;
-    document.getElementById('nextLevelXP').textContent = nextLevelXP;
+    document.getElementById('nextLevelXP').textContent = displayNextLevelXP;
+
+    // ===== แก้ไขปัญหา XP เกินแต่ไม่อัปเลเวล =====
+    // ใช้ xpRequiredForNextLevel สำหรับการตรวจสอบการเลเวลอัพจริง
+    if (xpRequiredForNextLevel !== Infinity && currentXP >= xpRequiredForNextLevel) {
+        if (auth.currentUser && !window.isLevelingUp) {
+            window.isLevelingUp = true;
+            console.log("XP exceeded required for next level. Attempting to trigger level up via addXP(0).");
+            addXP(auth.currentUser.uid, 0).finally(() => {
+                window.isLevelingUp = false;
+                console.log("addXP(0) call finished. isLevelingUp reset.");
+            });
+        } else {
+            console.log(`Level up condition met, but not triggering: isLevelingUp=${window.isLevelingUp}, auth.currentUser=${!!auth.currentUser}`);
+        }
+    }
+    // ==========================================
 
     const badgesContainer = document.getElementById('userBadges');
     if (badgesContainer) {
@@ -402,7 +509,7 @@ function displayTransactions() {
             <div class="transaction-amount ${tx.type}">
                 ${tx.type === 'income' ? '+' : '-'} ${parseFloat(tx.amount).toFixed(2)} ฿
             </div>
-            <button class="delete-btn" onclick="window.deleteTransaction('${tx.id}')">&times;</button>
+            <button class="delete-btn" onclick="window.confirmDeleteTransaction('${tx.id}')">&times;</button>
         `;
         container.appendChild(item);
     });
@@ -423,7 +530,7 @@ function displayGoals() {
         nextBtn.style.display = 'none';
         return;
     }
-    
+
     document.getElementById('noGoalMsg').style.display = 'none';
     document.getElementById('goalTitle').style.display = 'block';
     document.getElementById('goalAmount').style.display = 'block';
@@ -437,8 +544,7 @@ function displayGoals() {
     if (currentGoalIndex >= goals.length) currentGoalIndex = 0;
 
     const goal = goals[currentGoalIndex];
-    
-    // ✅✅✅ This is the corrected part. It checks for 'targetAmount' first, then falls back to 'target'.
+
     const target = parseFloat(goal.targetAmount || goal.target || 0);
     const saved = parseFloat(goal.savings || 0);
     const progress = target > 0 ? (saved / target) * 100 : 0;
@@ -452,15 +558,25 @@ function displayGoals() {
 }
 
 // ================== Data Manipulation Functions ==================
-window.deleteTransaction = async function(transactionId) {
-    if (confirm("คุณแน่ใจหรือไม่ที่จะลบรายการนี้?") && auth.currentUser) {
-        try {
-            await deleteDoc(doc(db, "users", auth.currentUser.uid, "transactions", transactionId));
-            alert("ลบรายการเรียบร้อยแล้ว");
-        } catch (error) {
-            console.error("Error removing transaction: ", error);
-            alert("เกิดข้อผิดพลาดในการลบ: " + error.message);
+window.confirmDeleteTransaction = function(transactionId) {
+    showConfirmationModal("ยืนยันการลบ", "คุณแน่ใจหรือไม่ที่จะลบรายการนี้?", () => {
+        if (auth.currentUser) {
+            window.deleteTransaction(transactionId);
+        } else {
+            showNotificationModal("ข้อผิดพลาด", "กรุณาเข้าสู่ระบบเพื่อดำเนินการลบ");
         }
+    });
+};
+
+window.deleteTransaction = async function(transactionId) {
+    if (!auth.currentUser) return; // Should be checked by confirmDeleteTransaction
+
+    try {
+        await deleteDoc(doc(db, "users", auth.currentUser.uid, "transactions", transactionId));
+        showNotificationModal("ลบสำเร็จ", "ลบรายการเรียบร้อยแล้ว");
+    } catch (error) {
+        console.error("Error removing transaction: ", error);
+        showNotificationModal("เกิดข้อผิดพลาด", "เกิดข้อผิดพลาดในการลบ: " + error.message);
     }
 }
 
@@ -472,7 +588,10 @@ document.addEventListener('DOMContentLoaded', () => {
         goalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = auth.currentUser;
-            if (!user) return alert("กรุณาเข้าสู่ระบบ");
+            if (!user) {
+                showNotificationModal("ข้อผิดพลาด", "กรุณาเข้าสู่ระบบ");
+                return;
+            }
 
             const name = document.getElementById('goalNameInput').value.trim();
             const targetAmount = parseFloat(document.getElementById('goalTargetAmount').value);
@@ -491,9 +610,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     name, targetAmount, savings, dueDate,
                     createdAt: serverTimestamp()
                 });
-                
-                await addXP(user.uid, 50); 
-                
+
+                await addXP(user.uid, 50);
+
                 messageDiv.textContent = "สร้างเป้าหมายสำเร็จ! (+50 XP)";
                 messageDiv.style.color = "green";
                 goalForm.reset();
@@ -526,11 +645,92 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ================== Modal Control Functions ==================
+
+// Function to open the Goal Creation Modal
 function openGoalModal() { document.getElementById('goalModal').style.display = 'flex'; }
 window.closeGoalModal = function() {
     document.getElementById('goalModal').style.display = 'none';
     document.getElementById('goalMessage').textContent = '';
     document.getElementById('goalForm').reset();
+}
+
+// Custom Notification Modal
+window.showNotificationModal = function(title, message) {
+    const modal = document.getElementById('notificationModal');
+    // Check if modal elements exist before trying to access them
+    const modalTitle = document.getElementById('notificationModalTitle');
+    const modalMessage = document.getElementById('notificationModalMessage');
+
+    if (!modal || !modalTitle || !modalMessage) {
+        console.error("Notification modal elements not found. Cannot display custom notification.");
+        // Fallback to native alert if elements are missing
+        alert(`${title}: ${message}`);
+        return;
+    }
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.style.display = 'flex';
+}
+
+window.closeNotificationModal = function() {
+    document.getElementById('notificationModal').style.display = 'none';
+}
+
+// Custom Confirmation Modal
+window.showConfirmationModal = function(title, message, onConfirmCallback) {
+    const modal = document.getElementById('confirmationModal');
+    // Check if modal elements exist
+    const modalTitle = document.getElementById('confirmationModalTitle');
+    const modalMessage = document.getElementById('confirmationModalMessage');
+    const confirmBtn = document.getElementById('confirmModalConfirmBtn');
+
+    if (!modal || !modalTitle || !modalMessage || !confirmBtn) {
+        console.error("Confirmation modal elements not found. Cannot display custom confirmation.");
+        // Fallback to native confirm if elements are missing
+        if (confirm(`${title}: ${message}`)) {
+            onConfirmCallback();
+        }
+        return;
+    }
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+
+    confirmBtn.onclick = () => {
+        onConfirmCallback();
+        closeConfirmationModal();
+    };
+
+    modal.style.display = 'flex';
+}
+
+window.closeConfirmationModal = function() {
+    document.getElementById('confirmationModal').style.display = 'none';
+}
+
+
+// Custom Level-Up Modal
+window.showLevelUpModal = function(level, name, reward) {
+    const modal = document.getElementById('levelUpModal');
+    const modalLevel = document.getElementById('levelUpModalLevel');
+    const modalName = document.getElementById('levelUpModalName');
+    const modalReward = document.getElementById('levelUpModalReward');
+
+    if (!modal || !modalLevel || !modalName || !modalReward) {
+        console.error("Level-up modal elements not found. Cannot display custom level-up notification.");
+        alert(`🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${name}!\nได้รับ ${reward} เหรียญ!`);
+        return;
+    }
+
+    modalLevel.textContent = `Level ${level}`;
+    modalName.textContent = name;
+    modalReward.textContent = `ได้รับ ${reward} เหรียญ!`;
+    modal.style.display = 'flex';
+}
+
+window.closeLevelUpModal = function() {
+    document.getElementById('levelUpModal').style.display = 'none';
 }
 
 // ================== AI Chatbot Logic ==================

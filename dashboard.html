@@ -61,9 +61,9 @@
     .item-icon { font-size: 2em; margin-bottom: 5px; }
     .item-name { font-weight: 600; margin-bottom: 5px; }
     .item-price { margin-bottom: 10px; color: #555; }
-    .shop-item button { 
-        width: 100%; 
-        padding: 8px; 
+    .shop-item button {
+        width: 100%;
+        padding: 8px;
         border: none;
         border-radius: 5px;
         background-color: #28a745;
@@ -73,6 +73,138 @@
     .shop-item button.cannot-afford, .shop-item button:disabled {
         background-color: #ccc;
         cursor: not-allowed;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0,0,0,0.9); /* Black with 90% opacity (slightly transparent) */
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-content {
+        background-color: var(--card-background);
+        margin: auto;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        max-width: 90%;
+        width: 350px;
+        text-align: center;
+        position: relative;
+        animation: fadeIn 0.3s ease-out;
+    }
+    .modal-content h2 {
+        color: var(--text-color); /* ใช้สีข้อความหลัก */
+        margin-bottom: 15px;
+        font-size: 1.5em;
+    }
+    .modal-content p {
+        color: var(--text-color); /* ใช้สีข้อความหลัก */
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+    /* บังคับให้สีข้อความใน Modal มีความคมชัดในทุกโหมด */
+    body.dark-mode .modal-content h2,
+    body.dark-mode .modal-content p {
+        color: #e0e0e0 !important; /* สีเทาอ่อนสำหรับ Dark Mode */
+    }
+    body:not(.dark-mode) .modal-content h2,
+    body:not(.dark-mode) .modal-content p {
+        color: #333 !important; /* สีดำเข้มสำหรับ Light Mode */
+    }
+
+    .modal-buttons button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1em;
+        margin: 0 8px;
+        transition: background-color 0.3s ease;
+    }
+    .modal-buttons button:hover {
+        background-color: var(--primary-dark-color);
+    }
+    .modal-buttons .cancel-btn {
+        background-color: #ccc;
+        color: #333;
+    }
+    .modal-buttons .cancel-btn:hover {
+        background-color: #bbb;
+    }
+    .close-button {
+        color: var(--text-color-light);
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    .close-button:hover,
+    .close-button:focus {
+        color: var(--primary-color);
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* Level Up Modal Specific Styles */
+    .level-up-modal-content {
+        background: linear-gradient(to bottom right, #8aff8a, #4CAF50); /* Green gradient */
+        color: white;
+        padding: 40px 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 20px rgba(0, 128, 0, 0.4);
+        border: 3px solid #66bb6a;
+        animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .level-up-modal-content h2 {
+        font-size: 2.2em;
+        margin-bottom: 10px;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .level-up-modal-content p {
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        color: white;
+    }
+    .level-up-modal-content .modal-reward {
+        font-weight: bold;
+        font-size: 1.5em;
+        margin-top: 15px;
+        color: #ffeb3b; /* Gold color for reward */
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    }
+    .level-up-modal-content .level-up-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+        animation: bounce 0.8s infinite alternate;
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes zoomIn {
+        from { transform: scale(0.5); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes bounce {
+        from { transform: translateY(0); }
+        to { transform: translateY(-10px); }
     }
   </style>
 </head>
@@ -101,7 +233,7 @@
         </p>
       </div>
     </div>
-    
+
     <!-- ส่วนแสดงเหรียญรางวัลที่ซื้อแล้ว -->
     <div class="container card-section">
       <h2><span class="icon">🏆</span> เหรียญรางวัลของฉัน</h2>
@@ -209,6 +341,50 @@
     </div>
   </div>
 
+  <!-- START: เพิ่ม Notification Modal -->
+  <div id="notificationModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeNotificationModal()">&times;</span>
+      <h2 id="notificationModalTitle"></h2>
+      <p id="notificationModalMessage"></p>
+      <div class="modal-buttons">
+        <button onclick="closeNotificationModal()">ตกลง</button>
+      </div>
+    </div>
+  </div>
+  <!-- END: เพิ่ม Notification Modal -->
+
+  <!-- START: เพิ่ม Confirmation Modal -->
+  <div id="confirmationModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeConfirmationModal()">&times;</span>
+      <h2 id="confirmationModalTitle"></h2>
+      <p id="confirmationModalMessage"></p>
+      <div class="modal-buttons">
+        <button id="confirmModalConfirmBtn">ยืนยัน</button>
+        <button onclick="closeConfirmationModal()" class="cancel-btn">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+  <!-- END: เพิ่ม Confirmation Modal -->
+
+  <!-- START: เพิ่ม Level Up Modal -->
+  <div id="levelUpModal" class="modal">
+    <div class="modal-content level-up-modal-content">
+      <span class="close-button" onclick="closeLevelUpModal()">&times;</span>
+      <div class="level-up-icon">🎉</div>
+      <h2>ยินดีด้วย!</h2>
+      <p>คุณเลเวลอัพเป็น <span id="levelUpModalLevel"></span></p>
+      <p><span id="levelUpModalName"></span></p>
+      <p class="modal-reward" id="levelUpModalReward"></p>
+      <div class="modal-buttons">
+        <button onclick="closeLevelUpModal()">ยอดเยี่ยม!</button>
+      </div>
+    </div>
+  </div>
+  <!-- END: เพิ่ม Level Up Modal -->
+
+
   <div class="ai-chat-btn" onclick="document.getElementById('aiChatBox').style.display='flex'">
     <span>🤖</span>
   </div>
@@ -242,7 +418,7 @@
   <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
-  
+
   <script type="module" src="dashboard.js" defer></script>
   <script src="darkmode-toggle.js"></script>
   <link rel="stylesheet" href="exit-app.css">

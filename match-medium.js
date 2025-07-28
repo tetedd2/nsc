@@ -13,68 +13,162 @@ const firebaseConfig = {
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
-const database = firebase.database();
+const firestore = firebase.firestore(); // ใช้ Firestore
+const auth = firebase.auth();
+let userId = null;
+
+// Authentication
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        userId = user.uid;
+    } else {
+        try {
+            const anonymousUser = await auth.signInAnonymously();
+            userId = anonymousUser.user.uid;
+        } catch (error) {
+            console.error("Anonymous sign-in failed", error);
+        }
+    }
+    loadPlayerData();
+});
 
 // EXP System
 let playerData = {
     level: 1,
     exp: 0,
-    totalExp: 0
+    xp: 0 // รวมเป็น xp
 };
 
-// Load player data
-function loadPlayerData() {
-    const playerId = getPlayerId();
-    database.ref('players/' + playerId).once('value', (snapshot) => {
-        if (snapshot.exists()) {
-            playerData = snapshot.val();
+// Configuration for levels, names, and XP requirements (จาก dashboard.js)
+const LEVEL_CONFIG = [
+    { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+    { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+    { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+    { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+    { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity }, // Max level
+];
+
+// Load player data from Firestore
+async function loadPlayerData() {
+    if (!userId) return;
+    try {
+        const userRef = firestore.collection('users').doc(userId);
+        const doc = await userRef.get();
+        if (doc.exists) {
+            const data = doc.data();
+            playerData.xp = data.xp || 0;
+            playerData.level = data.level || 1;
+        } else {
+            await userRef.set({
+                xp: 0,
+                level: 1,
+                nextLevelXP: LEVEL_CONFIG[0].xpToNext,
+                displayName: auth.currentUser.displayName || "ผู้เล่นใหม่",
+                coins: 0,
+                badges: [],
+                inventory: []
+            }, { merge: true });
+            playerData.xp = 0;
+            playerData.level = 1;
         }
         updateExpDisplay();
-    });
-}
-
-function getPlayerId() {
-    let playerId = localStorage.getItem('playerId');
-    if (!playerId) {
-        playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('playerId', playerId);
+    } catch (error) {
+        console.error("Error loading player data from Firestore:", error);
     }
-    return playerId;
 }
 
 function getExpToNextLevel(level) {
-    return level * 100;
+    const levelInfo = LEVEL_CONFIG.find(l => l.level === level);
+    return levelInfo ? levelInfo.xpToNext : Infinity;
 }
 
 function updateExpDisplay() {
-    const expToNext = getExpToNextLevel(playerData.level);
-    const expProgress = (playerData.exp / expToNext) * 100;
-    
-    document.getElementById('playerLevel').textContent = playerData.level;
-    document.getElementById('playerExp').textContent = playerData.exp;
-    document.getElementById('expToNext').textContent = expToNext;
-    document.getElementById('expFill').style.width = expProgress + '%';
+    const playerLevelEl = document.getElementById('playerLevel');
+    const playerExpEl = document.getElementById('playerExp');
+    const expToNextEl = document.getElementById('expToNext');
+    const expFillEl = document.getElementById('expFill');
+    if (playerLevelEl && playerExpEl && expToNextEl && expFillEl) {
+        const expToNext = getExpToNextLevel(playerData.level);
+        const expProgress = expToNext > 0 && expToNext !== Infinity ? (playerData.xp / expToNext * 100) : 100;
+        playerLevelEl.textContent = playerData.level;
+        playerExpEl.textContent = playerData.xp;
+        expToNextEl.textContent = expToNext === Infinity ? 'MAX' : expToNext;
+        expFillEl.style.width = expProgress + '%';
+    }
 }
 
-function addExp(amount) {
-    if (amount <= 0) return { gained: 0, levelUp: false };
-    
-    playerData.exp += amount;
-    playerData.totalExp += amount;
-    
-    let levelUp = false;
-    while (playerData.exp >= getExpToNextLevel(playerData.level)) {
-        playerData.exp -= getExpToNextLevel(playerData.level);
-        playerData.level++;
-        levelUp = true;
+async function addExp(expAmount) {
+    if (!userId || expAmount <= 0) return { gained: 0, levelUp: false, newLevel: playerData.level };
+
+    let levelUpOccurred = false;
+    let newCalculatedLevel = playerData.level;
+
+    try {
+        const userRef = firestore.collection('users').doc(userId);
+        await firestore.runTransaction(async (transaction) => {
+            const userSnap = await transaction.get(userRef);
+            if (!userSnap.exists()) throw new Error("User document not found during transaction.");
+            
+            const userData = userSnap.data();
+            let xp = userData.xp || 0;
+            let level = userData.level || 1;
+            let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+            let totalCoinReward = 0;
+            let leveledUpMessages = [];
+
+            xp += expAmount;
+
+            while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
+                const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
+                if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
+                    const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                    const rewardForThisLevel = 100 + (nextLevelInfo.level * 25);
+                    totalCoinReward += rewardForThisLevel;
+                    xp -= nextLevelXP;
+                    level = nextLevelInfo.level;
+                    nextLevelXP = nextLevelInfo.xpToNext;
+                    leveledUpMessages.push({
+                        level: nextLevelInfo.level,
+                        name: nextLevelInfo.name,
+                        reward: rewardForThisLevel
+                    });
+                } else {
+                    break;
+                }
+            }
+            
+            if (level > newCalculatedLevel) {
+                levelUpOccurred = true;
+                newCalculatedLevel = level;
+            }
+
+            const finalUpdateData = {
+                xp: xp,
+                level: level,
+                nextLevelXP: nextLevelXP,
+            };
+            if (totalCoinReward > 0) {
+                finalUpdateData.coins = firebase.firestore.FieldValue.increment(totalCoinReward);
+            }
+            
+            transaction.update(userRef, finalUpdateData);
+
+            playerData.xp = xp;
+            playerData.level = level;
+
+            for (const msg of leveledUpMessages) {
+                showModal(`🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${msg.level} – ${msg.name}!\nได้รับ ${msg.reward} เหรียญ!`);
+                await new Promise(resolve => setTimeout(resolve, 500)); 
+            }
+        });
+
+        updateExpDisplay();
+        return { gained: expAmount, levelUp: levelUpOccurred, newLevel: newCalculatedLevel };
+
+    } catch (error) {
+        console.error("addExp: Error in Firestore transaction:", error);
+        return { gained: 0, levelUp: false, newLevel: playerData.level };
     }
-    
-    const playerId = getPlayerId();
-    database.ref('players/' + playerId).set(playerData);
-    
-    updateExpDisplay();
-    
-    return { gained: amount, levelUp: levelUp, newLevel: playerData.level };
 }
 
 // Medium level financial terms
@@ -196,7 +290,7 @@ window.selectCard = function(idx){
   }
 }
 
-function endGame(win){
+async function endGame(win){ // ทำฟังก์ชัน endGame เป็น async
   clearInterval(timerInterval);
   
   let expGained = 0;
@@ -209,7 +303,7 @@ function endGame(win){
   }
   
   expGained = Math.max(expGained, 0);
-  const expResult = addExp(expGained);
+  const expResult = await addExp(expGained); // เรียก addExp และรอผลลัพธ์
   
   let message = win
     ? `🎉 เก่งมาก!<br>จับคู่ครบ <br><span style='color:#159988;font-size:1.3em;font-weight:700;'>${score} คะแนน</span><br>`
