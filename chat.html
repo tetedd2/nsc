@@ -2,75 +2,218 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>แชท 1-1 กับเพื่อน | MoneySkillz</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <title>แชท | MoneySkillz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Kanit', sans-serif; background: #f5fafb; color: #222; margin: 0; padding: 0;}
-    .chat-container { max-width: 480px; margin: 32px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 12px #e0ece9; padding: 16px; }
-    h2 { margin-bottom: 14px; color: #13bba9; }
-    select, input[type="text"] { padding: 8px; border-radius: 8px; border: 1px solid #d7dbde; margin-bottom: 8px;}
-    .messages { background: #f4f7fa; border-radius: 10px; min-height: 200px; max-height: 320px; overflow-y: auto; padding: 12px; margin-bottom: 12px;}
-    .msg-row { margin-bottom: 6px; }
-    .me { color: #13bba9; font-weight: bold; }
-    .friend { color: #355; font-weight: bold; }
-    .my-bubble { background: #a1f2e2; color: #222; display: inline-block; border-radius: 11px 19px 8px 19px; padding: 6px 15px; margin-left: 10px; }
-    .friend-bubble { background: #e2e5fc; display: inline-block; border-radius: 19px 11px 19px 8px; padding: 6px 15px; margin-right: 10px; }
-    .input-row { display: flex; gap: 8px; }
-    button { background: #13bba9; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer;}
-    button:hover { background: #0b9387; }
-    .top-left-back-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      width: 50px;
-      height: 50px;
-      background: rgba(255, 255, 255, 0.8);
-      color: #00796B;
-      border-radius: 50%;
+    /* CSS Variables for easy theme management 
+      ตัวแปร CSS เพื่อให้ปรับแก้ธีมสีได้ง่าย
+    */
+    :root {
+      --primary-color: #13bba9;
+      --primary-hover: #0f9a8c;
+      --background-color: #f0f4f8;
+      --my-bubble-bg: linear-gradient(135deg, #13bba9 0%, #0c9b8b 100%);
+      --friend-bubble-bg: #ffffff;
+      --text-dark: #333;
+      --text-light: #fff;
+      --text-secondary: #6c757d;
+    }
+
+    /* Basic setup for full-screen layout */
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: var(--background-color);
+      color: var(--text-dark);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh; /* Full viewport height */
+      overflow: hidden; /* Prevent body scrolling */
+    }
+
+    /* ==== Header Section ==== */
+    .chat-header {
+      background: #fff;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 2em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      position: fixed; /* Stick to the top */
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    .back-btn {
+      font-size: 1.8em;
       font-weight: bold;
+      color: var(--primary-color);
       text-decoration: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1001;
-      backdrop-filter: blur(5px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transition: all 0.2s ease-in-out;
+      margin-right: 12px;
     }
-    .top-left-back-btn:hover {
-      transform: scale(1.1);
-      background: rgba(255, 255, 255, 1);
+    
+    .friend-info {
+      flex-grow: 1;
     }
-    @media (max-width: 600px) {
-      .chat-container { padding: 7px; margin-top: 80px;} /* Add margin to avoid overlap with back button */
-      .messages { min-height: 120px; max-height: 220px; }
-      input[type="text"] { width: 80%; }
+
+    #friendSelect {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-family: 'Kanit', sans-serif;
+      font-size: 1.1em;
+      font-weight: 500;
+      color: var(--text-dark);
+      -webkit-appearance: none; /* Removes default styling on iOS */
+      -moz-appearance: none; /* Removes default styling on Firefox */
+      appearance: none; /* Removes default arrow */
+    }
+    #friendSelect:focus{
+        outline: none;
+    }
+
+    /* ==== Messages Area ==== */
+    .messages-container {
+      flex-grow: 1; /* Take up all available space */
+      overflow-y: auto; /* Allow scrolling for messages */
+      padding: 90px 16px 80px 16px; /* Top/Bottom padding to avoid overlap with fixed header/footer */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .msg-row {
+      display: flex;
+      margin-bottom: 12px;
+      max-width: 80%;
+      align-items: flex-end; /* Align items to the bottom */
+    }
+    .msg-bubble {
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-size: 1em;
+      line-height: 1.5;
+    }
+
+    /* My Messages Styling */
+    .msg-row.me {
+      align-self: flex-end;
+    }
+    .msg-bubble.my-bubble {
+      background: var(--my-bubble-bg);
+      color: var(--text-light);
+      border-bottom-right-radius: 5px;
+    }
+
+    /* Friend's Messages Styling */
+    .msg-row.friend {
+      align-self: flex-start;
+    }
+    .msg-bubble.friend-bubble {
+      background: var(--friend-bubble-bg);
+      color: var(--text-dark);
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    
+    .timestamp {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin: 0 8px;
+        white-space: nowrap;
+        margin-bottom: 5px;
+    }
+    /* Adjust timestamp position for my messages */
+    .msg-row.me .timestamp {
+        order: -1; /* Move timestamp before the bubble */
+    }
+
+
+    /* ==== Input Footer Section ==== */
+    .input-footer {
+      background: #fff;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+      position: fixed; /* Stick to the bottom */
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    #msgInput {
+      flex-grow: 1;
+      padding: 12px 18px;
+      border-radius: 22px;
+      border: 1px solid #e0e0e0;
+      background: var(--background-color);
+      font-family: 'Kanit', sans-serif;
+      font-size: 1em;
+    }
+    #msgInput:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .send-btn {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      font-size: 1.5em;
+      line-height: 44px; /* Center the icon vertically */
+      text-align: center;
+      padding-left: 3px; /* visual adjustment for the icon */
+      flex-shrink: 0; /* Prevent button from shrinking */
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .send-btn:hover {
+      background: var(--primary-hover);
+    }
+    .send-btn:active {
+        transform: scale(0.9);
     }
   </style>
 </head>
 <body>
-  <a href="dashboard.html" class="top-left-back-btn">←</a>
 
-  <div class="chat-container">
-    <h2>💬 แชทกับเพื่อน</h2>
-    <select id="friendSelect" onchange="loadChat()">
-      <option value="">เลือกเพื่อน...</option>
-    </select>
-    <div class="messages" id="chatBox"></div>
-    <div class="input-row">
-      <input id="msgInput" type="text" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter'){sendMsg();}">
-      <button onclick="sendMsg()">ส่ง</button>
+  <!-- Header: Back button and friend selector -->
+  <header class="chat-header">
+    <a href="dashboard.html" class="back-btn">‹</a>
+    <div class="friend-info">
+      <select id="friendSelect" onchange="loadChat()">
+        <option value="">เลือกเพื่อนเพื่อเริ่มแชท...</option>
+      </select>
     </div>
-  </div>
+  </header>
+
+  <!-- Main content: Where messages appear -->
+  <main class="messages-container" id="chatBox">
+    <!-- Chat messages will be loaded here by JavaScript -->
+    <p style="text-align: center; color: #999; margin-top: 20px;">เลือกเพื่อนจากด้านบนเพื่อเริ่มแชท</p>
+  </main>
+
+  <!-- Footer: Text input and send button -->
+  <footer class="input-footer">
+    <input id="msgInput" type="text" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter'){sendMsg();}">
+    <button class="send-btn" onclick="sendMsg()">&#10148;</button>
+  </footer>
   
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
   <script>
-    // ==== Firebase Config ====
+    // ==== Firebase Config (Updated with your details) ====
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
       apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
       authDomain: "myapplication-bd04c034.firebaseapp.com",
@@ -81,86 +224,147 @@
       appId: "1:49782830313:web:c81b5d86a937f22d296c78",
       measurementId: "G-Z2ZBWGB245"
     };
+
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
+    // ==== Global Variables ====
     let currentUserId = null;
-    let friends = [];
     let selectedFriendId = "";
-    let chatListener = null;
+    let chatListener = null; // To keep track of the active listener
 
-    // ==== Auth ====
+    // ==== DOM Elements ====
+    const friendSelect = document.getElementById("friendSelect");
+    const chatBox = document.getElementById("chatBox");
+    const msgInput = document.getElementById("msgInput");
+
+    // ==== Authentication State Change Listener ====
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUserId = user.uid;
-        loadFriends();
+        await loadFriends();
       } else {
-        window.location = "login.html"; // แนะนำแก้ path ตามโปรเจกต์คุณ
+        // If not logged in, redirect to login page
+        console.log("User is not logged in. Redirecting...");
+        window.location.href = "login.html"; // Adjust the path if needed
       }
     });
 
-    // ==== โหลดรายชื่อเพื่อน ====
+    // ==== Function to Load Friends into the Selector ====
     async function loadFriends() {
-      const userDoc = await db.collection("users").doc(currentUserId).get();
-      friends = userDoc.data().friends || [];
-      const select = document.getElementById("friendSelect");
-      select.innerHTML = `<option value="">เลือกเพื่อน...</option>`;
-      for (const fId of friends) {
-        const fDoc = await db.collection("users").doc(fId).get();
-        if (!fDoc.exists) continue;
-        select.innerHTML += `<option value="${fId}">${fDoc.data().name}</option>`;
+      try {
+        const userDoc = await db.collection("users").doc(currentUserId).get();
+        if (!userDoc.exists) {
+            console.error("Current user document not found.");
+            return;
+        }
+        const friends = userDoc.data().friends || [];
+        
+        // Clear previous options but keep the default one
+        const defaultOptionHTML = `<option value="">เลือกเพื่อนเพื่อเริ่มแชท...</option>`;
+        friendSelect.innerHTML = defaultOptionHTML;
+
+        for (const friendId of friends) {
+          const friendDoc = await db.collection("users").doc(friendId).get();
+          if (friendDoc.exists) {
+            const friendName = friendDoc.data().name || 'Friend';
+            friendSelect.innerHTML += `<option value="${friendId}">${friendName}</option>`;
+          }
+        }
+      } catch (error) {
+        console.error("Error loading friends:", error);
       }
     }
 
-    // ==== ใช้ uid เล็กกว่าไว้หน้าสุดเสมอ ====
-    function chatDocId(uid1, uid2) {
-      return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
+    // ==== Function to Create a Consistent Chat Document ID ====
+    function getChatDocId(uid1, uid2) {
+      // Sort UIDs to ensure the same ID is generated regardless of who starts the chat
+      return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
     }
+
+    // ==== Function to Load Chat Messages ====
     function loadChat() {
-      selectedFriendId = document.getElementById("friendSelect").value;
+      selectedFriendId = friendSelect.value;
+
+      // Unsubscribe from the previous chat listener to prevent multiple listeners
+      if (chatListener) {
+        chatListener(); 
+      }
+
       if (!selectedFriendId) {
-        document.getElementById("chatBox").innerHTML = "";
-        if (chatListener) chatListener();
+        chatBox.innerHTML = '<p style="text-align: center; color: #999; margin-top: 20px;">เลือกเพื่อนจากด้านบนเพื่อเริ่มแชท</p>';
         return;
       }
-      if (chatListener) chatListener(); // ปิด listener เก่า
-      const docId = chatDocId(currentUserId, selectedFriendId);
+      
+      const docId = getChatDocId(currentUserId, selectedFriendId);
+      
+      // Listen for real-time updates on the chat messages
       chatListener = db.collection("chats").doc(docId)
         .collection("messages").orderBy("timestamp")
-        .onSnapshot((snap) => {
+        .onSnapshot((querySnapshot) => {
           let html = "";
-          snap.forEach(doc => {
-            const msg = doc.data();
-            const isMe = msg.sender === currentUserId;
-            html += `<div class="msg-row">
-              ${isMe
-                ? `<span class="me">ฉัน</span><span class="my-bubble">${msg.text}</span>`
-                : `<span class="friend">${msg.senderName || 'เพื่อน'}</span><span class="friend-bubble">${msg.text}</span>`
-              }
-            </div>`;
-          });
-          document.getElementById("chatBox").innerHTML = html;
-          // auto scroll to bottom
-          const chatBox = document.getElementById("chatBox");
+          if (querySnapshot.empty) {
+              html = '<p style="text-align: center; color: #999;">ยังไม่มีข้อความ ทักทายเพื่อนของคุณได้เลย!</p>';
+          } else {
+            querySnapshot.forEach(doc => {
+              const msg = doc.data();
+              const isMe = msg.sender === currentUserId;
+              const bubbleClass = isMe ? 'me' : 'friend';
+              const bubbleType = isMe ? 'my-bubble' : 'friend-bubble';
+              // Format timestamp to a readable time string
+              const time = msg.timestamp ? msg.timestamp.toDate().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+
+              html += `
+                <div class="msg-row ${bubbleClass}">
+                  <div class="msg-bubble ${bubbleType}">
+                    ${escapeHTML(msg.text)}
+                  </div>
+                  <div class="timestamp">${time}</div>
+                </div>`;
+            });
+          }
+          chatBox.innerHTML = html;
+          // Automatically scroll to the latest message
           chatBox.scrollTop = chatBox.scrollHeight;
+        }, (error) => {
+            console.error("Error listening to chat:", error);
+            chatBox.innerHTML = '<p style="text-align: center; color: red;">ขออภัย ไม่สามารถโหลดแชทได้</p>';
         });
     }
 
-    // ==== ส่งข้อความ ====
+    // ==== Function to Send a Message ====
     async function sendMsg() {
-      const text = document.getElementById("msgInput").value.trim();
-      if (!text || !selectedFriendId) return;
-      const userDoc = await db.collection("users").doc(currentUserId).get();
-      const docId = chatDocId(currentUserId, selectedFriendId);
-      await db.collection("chats").doc(docId)
-        .collection("messages").add({
-          sender: currentUserId,
-          senderName: userDoc.data().name || "",
-          text,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      document.getElementById("msgInput").value = "";
+      const text = msgInput.value.trim();
+      if (!text || !selectedFriendId) {
+        return; // Do nothing if input is empty or no friend is selected
+      }
+
+      const docId = getChatDocId(currentUserId, selectedFriendId);
+      
+      try {
+        // Add the new message to Firestore
+        await db.collection("chats").doc(docId)
+          .collection("messages").add({
+            sender: currentUserId,
+            text: text,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        // Clear the input field and refocus for the next message
+        msgInput.value = "";
+        msgInput.focus();
+      } catch(error) {
+          console.error("Error sending message:", error);
+          // In a real app, you might show a user-friendly error message here
+      }
+    }
+    
+    // ==== Utility to escape HTML to prevent XSS ====
+    function escapeHTML(str) {
+        const p = document.createElement('p');
+        p.appendChild(document.createTextNode(str));
+        return p.innerHTML;
     }
   </script>
 </body>
