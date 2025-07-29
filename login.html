@@ -40,7 +40,7 @@
     .password-container {
         position: relative;
         width: 100%;
-        margin-bottom: 10px; /* Add margin to container */
+        margin-bottom: 10px;
     }
     input {
       width: 100%;
@@ -51,7 +51,6 @@
       box-sizing: border-box;
       margin-bottom: 10px;
     }
-    /* Add padding for the icon */
     .password-container input {
         padding-right: 40px;
         margin-bottom: 0;
@@ -83,7 +82,7 @@
         transform: scale(0.98);
     }
     .google-btn {
-      background-color: #db4437; /* Red for Google */
+      background-color: #db4437;
     }
     .google-btn:hover {
         background-color: #c53c2e;
@@ -124,73 +123,111 @@
     </div>
   </div>
 
+  <!-- Firebase SDK Scripts -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
   <script>
+    // --- ใส่ Firebase Configuration ของคุณที่นี่ ---
     const firebaseConfig = {
-      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
-      authDomain: "myapplication-bd04c034.firebaseapp.com",
-      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "myapplication-bd04c034",
-      storageBucket: "myapplication-bd04c034.firebasestorage.app",
-      messagingSenderId: "49782830313",
-      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const auth = firebase.auth();
     const db = firebase.firestore();
 
     document.addEventListener('DOMContentLoaded', () => {
       const loginForm = document.getElementById('loginForm');
+      const googleSignInBtn = document.getElementById('googleSignIn');
       const messageDiv = document.getElementById('messageDiv');
 
-      // Redirect if already logged in
+      // ตรวจสอบสถานะการล็อกอิน ถ้าล็อกอินอยู่แล้วให้ไปหน้า dashboard
       auth.onAuthStateChanged(user => {
           if (user) {
+              console.log("ผู้ใช้ล็อกอินอยู่แล้ว กำลังเปลี่ยนเส้นทาง...");
               window.location.href = "dashboard.html";
           }
       });
 
+      // จัดการการล็อกอินด้วยอีเมลและรหัสผ่าน
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
+
         auth.signInWithEmailAndPassword(email, password)
-          .then(() => { window.location.href = "dashboard.html"; })
-          .catch(error => { messageDiv.textContent = "อีเมลหรือรหัสผ่านไม่ถูกต้อง"; });
+          .then((userCredential) => {
+            console.log("เข้าสู่ระบบด้วยอีเมลสำเร็จ:", userCredential.user);
+            window.location.href = "dashboard.html"; 
+          })
+          .catch(error => { 
+            console.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ:", error);
+            messageDiv.textContent = "อีเมลหรือรหัสผ่านไม่ถูกต้อง"; 
+          });
       });
 
-      document.getElementById('googleSignIn').addEventListener('click', () => {
+      // --- จัดการการล็อกอินด้วย Google ---
+      googleSignInBtn.addEventListener('click', () => {
+        // 1. สร้าง Provider สำหรับ Google
         const provider = new firebase.auth.GoogleAuthProvider();
+        
+        console.log("กำลังเริ่มกระบวนการล็อกอินด้วย Google...");
+        messageDiv.textContent = ""; // เคลียร์ข้อความ error เก่า
+
+        // 2. แสดงหน้าต่าง Popup ของ Google เพื่อให้ผู้ใช้ล็อกอิน
         auth.signInWithPopup(provider)
           .then((result) => {
-            const userRef = db.collection('users').doc(result.user.uid);
+            console.log("ล็อกอินด้วย Google สำเร็จ:", result);
+            const user = result.user; // ข้อมูลผู้ใช้จาก Google
+            const userRef = db.collection('users').doc(user.uid);
+
+            // 3. ตรวจสอบว่าผู้ใช้คนนี้เคยล็อกอินมาก่อนหรือไม่ (มีข้อมูลใน Firestore หรือยัง)
             return userRef.get().then(doc => {
                 if (!doc.exists) {
-                    // --- ส่วนที่เพิ่ม/แก้ไข: ตั้งค่า User Document เริ่มต้นใน Firestore ให้ครบถ้วนสำหรับ Google Sign-In ---
+                    // 4. ถ้าเป็นผู้ใช้ใหม่ ให้สร้างข้อมูลเริ่มต้นใน Firestore
+                    console.log(`ผู้ใช้ใหม่ (UID: ${user.uid}) กำลังสร้างข้อมูลใน Firestore...`);
                     userRef.set({
-                        displayName: result.user.displayName,
-                        email: result.user.email,
+                        displayName: user.displayName,
+                        email: user.email,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        level: 1, // ระดับเริ่มต้น
-                        xp: 0, // ค่า XP เริ่มต้น
-                        nextLevelXP: 100, // XP ที่ต้องใช้เพื่อขึ้น Level 2 (ตาม LEVEL_CONFIG ของ Level 1)
-                        quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!", // คำคมเริ่มต้นของ Level 1
-                        badges: [], // เหรียญตราที่ปลดล็อคแล้ว (เริ่มต้นไม่มี)
-                        coins: 0, // เหรียญสะสม (เริ่มต้นไม่มี)
-                        inventory: [], // ไอเทมที่ซื้อจากร้านค้า (เริ่มต้นไม่มี)
-                        lastLoginReward: '', // สำหรับระบบรางวัลรายวัน
-                        completedLessons: [] // *** สำคัญมาก: เพื่อรีเซ็ตสถานะบทเรียน ***
+                        level: 1,
+                        xp: 0,
+                        nextLevelXP: 100,
+                        quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
+                        badges: [],
+                        coins: 0,
+                        inventory: [],
+                        lastLoginReward: '',
+                        completedLessons: []
                     });
+                } else {
+                    console.log(`ผู้ใช้เก่า (UID: ${user.uid}) กลับมาล็อกอิน`);
                 }
             });
           })
-          .then(() => { window.location.href = "dashboard.html"; })
-          .catch(error => { messageDiv.textContent = "เกิดข้อผิดพลาดกับ Google Sign-In: " + error.message; });
+          .then(() => {
+            // 5. เมื่อทุกอย่างเรียบร้อย ให้เปลี่ยนไปหน้า dashboard
+            window.location.href = "dashboard.html";
+          })
+          .catch(error => {
+            // 6. จัดการข้อผิดพลาดที่อาจเกิดขึ้น
+            console.error("เกิดข้อผิดพลาดกับ Google Sign-In:", error);
+            messageDiv.textContent = "เกิดข้อผิดพลาดกับ Google Sign-In: " + error.message; 
+          });
       });
 
-      // --- Logic for password toggle ---
+      // Logic สำหรับแสดง/ซ่อนรหัสผ่าน
       document.querySelector('.toggle-password').addEventListener('click', function() {
           const passwordInput = document.getElementById('password');
           const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';

@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="match-game-style.css">
-    <link rel="stylesheet" href="theme-darkmode.css">
 </head>
 <body>
     <div class="container">
@@ -24,8 +23,9 @@
         </div>
         <div class="score-row">
             <div class="score-item">คะแนน: <span id="score">0</span></div>
-            <div class="score-item timer">เวลา: <span id="timer">60</span>s</div>
+            <div class="score-item timer">เวลา: <span id="timer">75</span>s</div>
         </div>
+        <!-- แก้ไข: ใช้ id ที่ถูกต้องสำหรับบอร์ดเกม -->
         <div class="card-board card-board-hard" id="gameBoard"></div>
         <div class="result-box" id="resultBox"></div>
         <div style="text-align:center;">
@@ -36,8 +36,11 @@
         <div class="modal-content" id="modalContent"></div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <!-- แก้ไข: เรียกใช้ Firebase SDK ที่ถูกต้องสำหรับ Firestore และ Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
     <script src="match-hard.js"></script>
     <script src="darkmode-toggle.js"></script>
 </body>
