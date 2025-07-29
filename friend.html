@@ -2,243 +2,300 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบเพื่อน - MoneySkillz</title>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Kanit', sans-serif; background: #f7fafc; color: #222; padding: 24px; margin: 0; }
-    h2 { color: #13bba9; }
-    .box { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px #d0ebe8; max-width: 420px; margin: 24px auto; }
-    input[type="text"] { padding: 8px; border-radius: 7px; border: 1px solid #cfd8dc; margin-right: 8px; width: 60%; }
-    button { background: #13bba9; color: #fff; border: none; border-radius: 7px; padding: 8px 14px; cursor: pointer; font-family: 'Kanit'; font-size: 1em; }
-    button:hover { background: #0b9387; }
-    .list-box { margin-top: 16px; }
-    ul { list-style: none; padding: 0; }
-    li { background: #f1fefb; border-radius: 7px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-    .msg { color: #db1f4b; margin: 12px 0; }
-    .top-left-back-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      width: 50px;
-      height: 50px;
-      background: rgba(255, 255, 255, 0.8);
-      color: #00796B;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2em;
-      font-weight: bold;
-      text-decoration: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1001;
-      backdrop-filter: blur(5px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transition: all 0.2s ease-in-out;
-    }
-    .top-left-back-btn:hover {
-      transform: scale(1.1);
-      background: rgba(255, 255, 255, 1);
-    }
+    body { font-family: 'Kanit', sans-serif; background-color: #f7fafc; color: #2d3748; padding: 24px; margin: 0; line-height: 1.6; }
+    h2 { color: #13bba9; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+    .container { max-width: 500px; margin: 24px auto; }
+    .box { background-color: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); margin-bottom: 24px; }
+    input[type="text"] { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; margin-right: 8px; width: calc(100% - 110px); font-family: 'Kanit'; font-size: 1em; }
+    button { background-color: #13bba9; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; font-family: 'Kanit'; font-size: 1em; transition: background-color 0.2s; }
+    button:hover { background-color: #0f9a8d; }
+    button.accept { background-color: #48bb78; }
+    button.accept:hover { background-color: #38a169; }
+    button.decline { background-color: #f56565; }
+    button.decline:hover { background-color: #e53e3e; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { background-color: #f1fefb; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .msg { color: #4a5568; margin: 12px 0; font-size: 0.9em; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-info b { font-size: 1.1em; }
+    .user-info span { font-size: 0.8em; color: #718096; }
+    .button-group { display: flex; gap: 8px; }
+    .top-left-back-btn { position: fixed; top: 20px; left: 20px; width: 50px; height: 50px; background: rgba(255, 255, 255, 0.8); color: #00796B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2em; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); backdrop-filter: blur(5px); transition: all 0.2s; }
+    .top-left-back-btn:hover { transform: scale(1.1); }
     @media (max-width: 600px) {
-      .box { padding: 10px; }
-      input[type="text"] { width: 90%; margin-bottom: 8px; }
+      .box { padding: 16px; }
+      input[type="text"] { width: 100%; margin: 0 0 10px 0; }
     }
   </style>
 </head>
 <body>
   <a href="dashboard.html" class="top-left-back-btn">←</a>
 
-  <div class="box">
-    <h2>🔗 เพิ่มเพื่อน</h2>
-    <div>
-      <input id="friendSearchInput" type="text" placeholder="กรอกชื่อผู้ใช้ หรืออีเมล">
-      <button onclick="searchFriend()">ค้นหา</button>
-      <div id="friendSearchResult" class="msg"></div>
+  <div class="container">
+    <div class="box">
+      <h2>🔗 เพิ่มเพื่อน</h2>
+      <div>
+        <input id="friendSearchInput" type="text" placeholder="กรอกอีเมลของเพื่อน">
+        <button onclick="searchFriend()">ค้นหา</button>
+        <div id="friendSearchResult" class="msg"></div>
+      </div>
+    </div>
+
+    <div class="box">
+      <h2>📨 คำขอเป็นเพื่อน</h2>
+      <ul id="friendRequestsList"><li>ไม่มีคำขอใหม่</li></ul>
+    </div>
+
+    <div class="box">
+      <h2>👫 เพื่อนของคุณ</h2>
+      <ul id="friendsList"><li>ยังไม่มีเพื่อน</li></ul>
     </div>
   </div>
 
-  <div class="box list-box">
-    <h2>📨 คำขอเป็นเพื่อน</h2>
-    <ul id="friendRequestsList"></ul>
-  </div>
+  <script type="module">
+    // Import functions from the Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, where, updateDoc, arrayUnion, arrayRemove, writeBatch, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  <div class="box list-box">
-    <h2>👫 เพื่อนของคุณ</h2>
-    <ul id="friendsList"></ul>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script>
-    // ==== Firebase Config ====
+    // Your web app's Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
-      authDomain: "myapplication-bd04c034.firebaseapp.com",
-      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "myapplication-bd04c034",
-      storageBucket: "myapplication-bd04c034.firebasestorage.app",
-      messagingSenderId: "49782830313",
-      appId: "1:49782830313:web:c81b5d86a937f22d296c78",
-      measurementId: "G-Z2ZBWGB245"
+      apiKey: "YOUR_API_KEY", // กรุณาใส่ค่าของคุณ
+      authDomain: "YOUR_AUTH_DOMAIN", // กรุณาใส่ค่าของคุณ
+      projectId: "YOUR_PROJECT_ID", // กรุณาใส่ค่าของคุณ
+      storageBucket: "YOUR_STORAGE_BUCKET", // กรุณาใส่ค่าของคุณ
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // กรุณาใส่ค่าของคุณ
+      appId: "YOUR_APP_ID" // กรุณาใส่ค่าของคุณ
     };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
     let currentUserId = null;
-    let currentUserName = "";
+    let unsubscribeRequests = null;
+    let unsubscribeFriends = null;
 
-    // ==== Auth: รอจน login ก่อน ====
-    auth.onAuthStateChanged(async (user) => {
+    // Listen for authentication state changes
+    onAuthStateChanged(auth, user => {
       if (user) {
         currentUserId = user.uid;
-        // ดึงชื่อผู้ใช้
-        const userSnap = await db.collection("users").doc(currentUserId).get();
-        if(userSnap.exists) {
-          currentUserName = userSnap.data().name || "";
-        }
-        loadFriendRequests();
-        loadFriends();
+        // Start listening for real-time updates
+        listenForFriendData();
       } else {
-        window.location = "login.html";
+        console.log("User not logged in. Redirecting...");
+        window.location.href = "./login.html"; // <-- FIXED HERE
       }
     });
 
-    // ==== 1. ค้นหาเพื่อน (ทั้งอีเมลและชื่อ) ====
-    async function searchFriend() {
-      const input = document.getElementById("friendSearchInput").value.trim();
-      if (!input) return;
-      document.getElementById("friendSearchResult").textContent = "กำลังค้นหา...";
-      let usersRef = db.collection("users");
-      let snapshot = await usersRef.where("email", "==", input).get();
-      // ถ้าไม่เจอ email ให้ค้นด้วย name
-      if (snapshot.empty) {
-        snapshot = await usersRef.where("name", "==", input).get();
-      }
-      if (snapshot.empty) {
-        document.getElementById("friendSearchResult").textContent = "ไม่พบผู้ใช้";
-        return;
-      }
-      let found = false;
-      snapshot.forEach(doc => {
-        if(doc.id === currentUserId) {
-          document.getElementById("friendSearchResult").textContent = "นี่คือคุณเอง!";
-          found = true;
+    // --- All functions are now global ---
+    window.searchFriend = async () => {
+      const searchInput = document.getElementById("friendSearchInput").value.trim();
+      const resultDiv = document.getElementById("friendSearchResult");
+
+      if (!searchInput) return;
+      resultDiv.textContent = "กำลังค้นหา...";
+
+      try {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("email", "==", searchInput));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          resultDiv.textContent = "ไม่พบผู้ใช้ที่มีอีเมลนี้";
           return;
         }
-        found = true;
-        document.getElementById("friendSearchResult").innerHTML = `
-          <b>${doc.data().name} (${doc.data().email || ''})</b>
-          <button onclick="sendFriendRequest('${doc.id}')">ส่งคำขอเป็นเพื่อน</button>
+
+        const foundUser = querySnapshot.docs[0];
+        const foundUserId = foundUser.id;
+        const foundUserData = foundUser.data();
+
+        if (foundUserId === currentUserId) {
+          resultDiv.textContent = "คุณไม่สามารถเพิ่มตัวเองเป็นเพื่อนได้";
+          return;
+        }
+
+        resultDiv.innerHTML = `
+          <div class="user-info"><b>${foundUserData.name || 'N/A'}</b><span>${foundUserData.email}</span></div>
+          <button onclick="sendFriendRequest('${foundUserId}')">ส่งคำขอ</button>
         `;
-      });
-      if(!found) document.getElementById("friendSearchResult").textContent = "ไม่พบผู้ใช้";
-    }
+        resultDiv.style.display = 'flex';
+        resultDiv.style.justifyContent = 'space-between';
+        resultDiv.style.alignItems = 'center';
 
-    // ==== 2. ส่งคำขอเป็นเพื่อน ====
-    async function sendFriendRequest(friendId) {
-      if(friendId === currentUserId) return;
-      // ป้องกันส่งซ้ำ
-      const userSnap = await db.collection("users").doc(friendId).get();
-      if(userSnap.exists) {
-        let reqs = userSnap.data().friendRequests || [];
-        let alreadyFriend = (userSnap.data().friends || []).includes(currentUserId);
-        if(alreadyFriend) {
-          document.getElementById("friendSearchResult").textContent = "เป็นเพื่อนกันอยู่แล้ว!";
-          return;
+      } catch (error) {
+        console.error("Error searching for friend:", error);
+        resultDiv.textContent = "เกิดข้อผิดพลาดในการค้นหา";
+      }
+    };
+
+    window.sendFriendRequest = async (targetId) => {
+        const resultDiv = document.getElementById("friendSearchResult");
+        try {
+            const targetUserRef = doc(db, "users", targetId);
+            const currentUserRef = doc(db, "users", currentUserId);
+
+            const targetDoc = await getDoc(targetUserRef);
+            if (!targetDoc.exists()) {
+                resultDiv.textContent = "ไม่พบผู้ใช้นี้";
+                return;
+            }
+            const targetData = targetDoc.data();
+
+            if (targetData.friends && targetData.friends.includes(currentUserId)) {
+                 resultDiv.textContent = "คุณเป็นเพื่อนกับผู้ใช้นี้อยู่แล้ว";
+                 return;
+            }
+             if (targetData.friendRequests && targetData.friendRequests.includes(currentUserId)) {
+                 resultDiv.textContent = "คุณได้ส่งคำขอไปแล้ว";
+                 return;
+            }
+
+            await updateDoc(targetUserRef, {
+                friendRequests: arrayUnion(currentUserId)
+            });
+            resultDiv.textContent = "ส่งคำขอเป็นเพื่อนแล้ว!";
+        } catch (error) {
+            console.error("Error sending friend request:", error);
+            resultDiv.textContent = "เกิดข้อผิดพลาดในการส่งคำขอ";
         }
-        if(reqs.includes(currentUserId)) {
-          document.getElementById("friendSearchResult").textContent = "ส่งคำขอแล้ว รอการตอบรับ!";
-          return;
+    };
+    
+    window.acceptFriend = async (requesterId) => {
+        const batch = writeBatch(db);
+        
+        // Reference to current user's document
+        const currentUserRef = doc(db, "users", currentUserId);
+        batch.update(currentUserRef, {
+            friends: arrayUnion(requesterId),
+            friendRequests: arrayRemove(requesterId)
+        });
+
+        // Reference to requester's document
+        const requesterRef = doc(db, "users", requesterId);
+        batch.update(requesterRef, {
+            friends: arrayUnion(currentUserId)
+        });
+
+        try {
+            await batch.commit();
+            console.log("Friend accepted.");
+        } catch (error) {
+            console.error("Error accepting friend request:", error);
         }
-      }
-      await db.collection("users").doc(friendId).update({
-        friendRequests: firebase.firestore.FieldValue.arrayUnion(currentUserId)
-      });
-      document.getElementById("friendSearchResult").textContent = "ส่งคำขอแล้ว! รอการตอบรับ";
+    };
+    
+    window.declineFriend = async (requesterId) => {
+        const currentUserRef = doc(db, "users", currentUserId);
+        try {
+            await updateDoc(currentUserRef, {
+                friendRequests: arrayRemove(requesterId)
+            });
+            console.log("Friend request declined.");
+        } catch (error) {
+            console.error("Error declining friend request:", error);
+        }
+    };
+
+    window.removeFriend = async (friendId) => {
+        // In a real app, use a custom modal instead of confirm()
+        if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบเพื่อนคนนี้?")) return;
+
+        const batch = writeBatch(db);
+
+        const currentUserRef = doc(db, "users", currentUserId);
+        batch.update(currentUserRef, {
+            friends: arrayRemove(friendId)
+        });
+
+        const friendRef = doc(db, "users", friendId);
+        batch.update(friendRef, {
+            friends: arrayRemove(currentUserId)
+        });
+        
+        try {
+            await batch.commit();
+            console.log("Friend removed.");
+        } catch (error) {
+            console.error("Error removing friend: ", error);
+        }
+    };
+
+    // Main function to setup real-time listeners
+    function listenForFriendData() {
+        if (unsubscribeRequests) unsubscribeRequests();
+        if (unsubscribeFriends) unsubscribeFriends();
+
+        const currentUserRef = doc(db, "users", currentUserId);
+
+        // Listener for friend requests and friends list
+        unsubscribeRequests = onSnapshot(currentUserRef, async (docSnap) => {
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                await renderFriendRequests(userData.friendRequests || []);
+                await renderFriendsList(userData.friends || []);
+            } else {
+                console.log("Current user document not found!");
+            }
+        }, (error) => {
+            console.error("Error listening to user document:", error);
+        });
     }
 
-    // ==== 3. โหลดคำขอเป็นเพื่อน ====
-    async function loadFriendRequests() {
-      const userDoc = await db.collection("users").doc(currentUserId).get();
-      const requests = (userDoc.data().friendRequests || []);
-      let html = "";
-      if(requests.length === 0) html = "<li>ไม่มีคำขอ</li>";
-      for(const reqId of requests) {
-        const reqDoc = await db.collection("users").doc(reqId).get();
-        if(!reqDoc.exists) continue;
-        html += `<li>
-          <b>${reqDoc.data().name}</b>
-          <span>
-            <button onclick="acceptFriend('${reqId}')">รับ</button>
-            <button onclick="declineFriend('${reqId}')">ปฏิเสธ</button>
-          </span>
-        </li>`;
-      }
-      document.getElementById("friendRequestsList").innerHTML = html;
+    async function renderFriendRequests(requestIds) {
+        const listElement = document.getElementById("friendRequestsList");
+        if (requestIds.length === 0) {
+            listElement.innerHTML = '<li>ไม่มีคำขอใหม่</li>';
+            return;
+        }
+
+        let html = '';
+        for (const id of requestIds) {
+            const userDoc = await getDoc(doc(db, "users", id));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                html += `
+                    <li>
+                        <div class="user-info"><b>${userData.name}</b><span>${userData.email}</span></div>
+                        <div class="button-group">
+                            <button class="accept" onclick="acceptFriend('${id}')">รับ</button>
+                            <button class="decline" onclick="declineFriend('${id}')">ปฏิเสธ</button>
+                        </div>
+                    </li>
+                `;
+            }
+        }
+        listElement.innerHTML = html;
     }
 
-    // ==== 4. ตอบรับเพื่อน ====
-    async function acceptFriend(friendId) {
-      const batch = db.batch();
-      const userRef = db.collection("users").doc(currentUserId);
-      const friendRef = db.collection("users").doc(friendId);
-      batch.update(userRef, {
-        friends: firebase.firestore.FieldValue.arrayUnion(friendId),
-        friendRequests: firebase.firestore.FieldValue.arrayRemove(friendId)
-      });
-      batch.update(friendRef, {
-        friends: firebase.firestore.FieldValue.arrayUnion(currentUserId)
-      });
-      await batch.commit();
-      loadFriendRequests();
-      loadFriends();
+    async function renderFriendsList(friendIds) {
+        const listElement = document.getElementById("friendsList");
+        if (friendIds.length === 0) {
+            listElement.innerHTML = '<li>ยังไม่มีเพื่อน</li>';
+            return;
+        }
+
+        let html = '';
+        for (const id of friendIds) {
+            const userDoc = await getDoc(doc(db, "users", id));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                html += `
+                    <li>
+                        <div class="user-info"><b>${userData.name}</b><span>${userData.email}</span></div>
+                        <button class="decline" onclick="removeFriend('${id}')">ลบเพื่อน</button>
+                    </li>
+                `;
+            }
+        }
+        listElement.innerHTML = html;
     }
 
-    // ==== 5. ปฏิเสธคำขอ ====
-    async function declineFriend(friendId) {
-      const userRef = db.collection("users").doc(currentUserId);
-      await userRef.update({
-        friendRequests: firebase.firestore.FieldValue.arrayRemove(friendId)
-      });
-      loadFriendRequests();
-    }
-
-    // ==== 6. โหลดรายชื่อเพื่อน ====
-    async function loadFriends() {
-      const userDoc = await db.collection("users").doc(currentUserId).get();
-      const friends = (userDoc.data().friends || []);
-      let html = "";
-      if(friends.length === 0) html = "<li>ยังไม่มีเพื่อน</li>";
-      for(const friendId of friends) {
-        const friendDoc = await db.collection("users").doc(friendId).get();
-        if(!friendDoc.exists) continue;
-        html += `<li>
-          <b>${friendDoc.data().name}</b>
-          <button onclick="removeFriend('${friendId}')">ลบเพื่อน</button>
-        </li>`;
-      }
-      document.getElementById("friendsList").innerHTML = html;
-    }
-
-    // ==== 7. ลบเพื่อน ====
-    async function removeFriend(friendId) {
-      if(!confirm("ยืนยันการลบเพื่อนคนนี้?")) return;
-      const batch = db.batch();
-      const userRef = db.collection("users").doc(currentUserId);
-      const friendRef = db.collection("users").doc(friendId);
-      batch.update(userRef, {
-        friends: firebase.firestore.FieldValue.arrayRemove(friendId)
-      });
-      batch.update(friendRef, {
-        friends: firebase.firestore.FieldValue.arrayRemove(currentUserId)
-      });
-      await batch.commit();
-      loadFriends();
-    }
   </script>
 </body>
 </html>
