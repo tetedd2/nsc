@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>รายการแชท | MoneySkillz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts (Kanit) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm p-4 sticky top-0 z-10 flex items-center">
+    <a href="dashboard.html" class="text-teal-500 text-2xl font-bold mr-4">&larr;</a>
+    <h1 class="font-bold text-xl text-gray-800">แชททั้งหมด</h1>
+  </header>
+
+  <!-- Chat List -->
+  <main id="chatListContainer" class="p-2">
+    <ul id="chatList" class="space-y-2">
+      <!-- Conversation list will be loaded here -->
+      <li class="p-4 text-center text-gray-500">กำลังโหลดรายการแชท...</li>
+    </ul>
+  </main>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  
+  <script>
+    (function() {
+      // ==== 1. Firebase Configuration ====
+      const firebaseConfig = {
+        apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+        authDomain: "myapplication-bd04c034.firebaseapp.com",
+        databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "myapplication-bd04c034",
+        storageBucket: "myapplication-bd04c034.firebasestorage.app",
+        messagingSenderId: "49782830313",
+        appId: "1:49782830313:web:c81b5d86a937f22d296c78",
+        measurementId: "G-Z2ZBWGB245"
+      };
+
+      // Initialize Firebase
+      if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+      }
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      // ==== 2. Global Variables & DOM Elements ====
+      let currentUserId = null;
+      const chatList = document.getElementById('chatList');
+
+      // ==== 3. Authentication & Initial Load ====
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          currentUserId = user.uid;
+          loadConversations();
+        } else {
+          const currentUrl = window.location.href;
+          const loginUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/login.html';
+          window.location.href = loginUrl;
+        }
+      });
+
+      // ==== 4. Load Conversations ====
+      function loadConversations() {
+        // เราจะดึงข้อมูล chat ทั้งหมดที่ user คนปัจจุบันเป็นสมาชิกอยู่
+        // และเรียงตามเวลาของข้อความล่าสุด
+        db.collection('chats')
+          .where('participants', 'array-contains', currentUserId)
+          .orderBy('lastMessage.timestamp', 'desc')
+          .onSnapshot(async (snapshot) => {
+            if (snapshot.empty) {
+              chatList.innerHTML = '<li class="p-4 text-center text-gray-500">ยังไม่มีการสนทนา<br>เริ่มแชทกับเพื่อนได้เลย!</li>';
+              return;
+            }
+
+            chatList.innerHTML = ''; // Clear list before rendering
+            
+            // ใช้ Promise.all เพื่อรอให้ดึงข้อมูลของเพื่อนทุกคนเสร็จก่อน
+            const chatPromises = snapshot.docs.map(async doc => {
+              const chatData = doc.data();
+              
+              // หา ID ของเพื่อนในห้องแชท
+              const friendId = chatData.participants.find(id => id !== currentUserId);
+              if (!friendId) return null;
+
+              // ดึงข้อมูลของเพื่อน (ชื่อ)
+              const userDoc = await db.collection('users').doc(friendId).get();
+              const friendName = userDoc.exists ? userDoc.data().name : 'เพื่อน';
+              
+              const lastMessageText = chatData.lastMessage ? chatData.lastMessage.text : '...';
+              const lastMessageSender = chatData.lastMessage && chatData.lastMessage.senderId === currentUserId ? 'คุณ: ' : '';
+
+              // สร้าง HTML สำหรับแต่ละรายการแชท
+              const li = document.createElement('li');
+              li.innerHTML = `
+                <a href="chat.html?friendId=${friendId}" class="block bg-white p-4 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                  <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800">${friendName}</h3>
+                  </div>
+                  <p class="text-gray-600 text-sm truncate">${lastMessageSender}${lastMessageText}</p>
+                </a>
+              `;
+              return li;
+            });
+
+            const chatElements = await Promise.all(chatPromises);
+            chatElements.forEach(el => {
+              if(el) chatList.appendChild(el);
+            });
+
+          }, error => {
+            console.error("Error loading conversations: ", error);
+            chatList.innerHTML = '<li class="p-4 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดรายการแชท</li>';
+          });
+      }
+    })();
+  </script>
+</body>
+</html>

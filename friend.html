@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบเพื่อน - MoneySkillz</title>
+  <title>ระบบเพื่อน - MoneySkillz (ธีมสีใหม่)</title>
   
   <!-- Tailwind CSS for styling -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -25,81 +25,106 @@
     }
     /* สไตล์สำหรับปุ่ม */
     .btn {
-      @apply text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105;
+      @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform transform hover:scale-105;
     }
+    /* --- ธีมสีใหม่ (Teal) --- */
     .btn-primary {
-      @apply bg-teal-500 hover:bg-teal-600;
+      @apply bg-teal-600 hover:bg-teal-700 focus:ring-teal-500;
     }
     .btn-secondary {
-      @apply bg-gray-500 hover:bg-gray-600;
+      @apply bg-gray-500 hover:bg-gray-600 focus:ring-gray-500;
     }
     .btn-danger {
-      @apply bg-red-500 hover:bg-red-600;
+      @apply bg-rose-500 hover:bg-rose-600 focus:ring-rose-500;
     }
     .btn-success {
-      @apply bg-green-500 hover:bg-green-600;
+      @apply bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-500;
     }
     /* การ์ดสำหรับแสดงข้อมูล */
     .card {
-      @apply bg-white rounded-xl shadow-md p-6 mb-6;
+      @apply bg-white rounded-xl shadow-lg p-6 mb-6 transition-shadow hover:shadow-xl;
     }
     /* สไตล์สำหรับ input */
     .input-field {
-        @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500;
+        @apply block w-full px-4 py-2 text-gray-700 bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500;
+    }
+    /* --- สีข้อความหลัก (Teal) --- */
+    .main-text-color {
+        @apply text-teal-600;
     }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-teal-50 min-h-screen">
+
+  <!-- Back Button -->
+  <div class="absolute top-6 left-6 z-10">
+      <a href="dashboard.html" class="text-teal-600 hover:text-teal-800 font-medium inline-flex items-center gap-2 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          กลับ
+      </a>
+  </div>
 
   <!-- Main Container -->
-  <div class="container mx-auto max-w-lg p-4">
+  <div class="container mx-auto max-w-lg p-4 pt-20">
     <header class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-teal-600">ระบบเพื่อน</h1>
-      <p class="text-gray-500">เพิ่มเพื่อน แชท และแข่งขันกัน!</p>
+      <h1 class="text-5xl font-bold main-text-color">ระบบเพื่อน</h1>
+      <p class="text-gray-500 mt-2">เชื่อมต่อกับเพื่อนและเติบโตไปด้วยกัน</p>
     </header>
 
     <!-- User ID Section -->
     <div id="user-info-card" class="card text-center hidden">
-        <h2 class="text-xl font-bold mb-2 text-gray-700">User ID ของคุณ</h2>
-        <p class="text-lg bg-gray-200 text-teal-700 font-mono p-2 rounded-lg break-all" id="userIdDisplay"></p>
-        <p class="text-sm text-gray-500 mt-2">แชร์ ID นี้เพื่อให้เพื่อนของคุณเพิ่มคุณได้</p>
+        <h2 class="text-xl font-bold mb-3 text-gray-800 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h4a2 2 0 012 2v1m-4 0h4" /></svg>
+            User ID ของคุณ
+        </h2>
+        <div class="flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+            <p class="text-md text-teal-700 font-mono p-2 break-all" id="userIdDisplay"></p>
+            <button id="copyIdButton" class="btn btn-primary p-2 ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            </button>
+        </div>
+        <p class="text-sm text-gray-500 mt-3">แชร์ ID นี้เพื่อให้เพื่อนของคุณเพิ่มคุณได้</p>
     </div>
 
     <!-- Search Section -->
     <div class="card">
-      <h2 class="text-2xl font-bold mb-4 text-teal-600">ค้นหาเพื่อน</h2>
-      <div class="flex flex-col sm:flex-row gap-2">
-        <input type="text" id="searchInput" class="input-field flex-grow" placeholder="ป้อน User ID ของเพื่อน">
-        <button id="searchButton" class="btn btn-primary w-full sm:w-auto">ค้นหา</button>
+      <h2 class="text-2xl font-bold mb-4 main-text-color">ค้นหาเพื่อน</h2>
+      <div class="relative">
+        <input type="text" id="searchInput" class="input-field !pl-10" placeholder="ป้อน User ID หรืออีเมลของเพื่อน">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        </span>
       </div>
+      <button id="searchButton" class="btn btn-primary w-full mt-3">ค้นหา</button>
       <div id="searchResult" class="mt-4"></div>
     </div>
 
     <!-- Friend Requests Section -->
     <div class="card">
-      <h2 class="text-2xl font-bold mb-4 text-teal-600">คำขอเป็นเพื่อน</h2>
-      <ul id="friendRequestsList" class="space-y-3">
-        <!-- Friend requests will be loaded here -->
-      </ul>
+      <h2 class="text-2xl font-bold mb-4 main-text-color flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+        คำขอเป็นเพื่อน
+      </h2>
+      <ul id="friendRequestsList" class="space-y-3"></ul>
     </div>
 
     <!-- Friends List Section -->
     <div class="card">
-      <h2 class="text-2xl font-bold mb-4 text-teal-600">รายชื่อเพื่อน</h2>
-      <ul id="friendsList" class="space-y-3">
-        <!-- Friends list will be loaded here -->
-      </ul>
+      <h2 class="text-2xl font-bold mb-4 main-text-color flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        รายชื่อเพื่อน
+      </h2>
+      <ul id="friendsList" class="space-y-3"></ul>
     </div>
       
-    <div class="text-center mt-4">
-        <a href="dashboard.html" class="text-teal-600 hover:underline">&larr; กลับไปหน้าหลัก</a>
-    </div>
   </div>
 
-  <!-- Modal for alerts and confirmations -->
-  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
-      <p id="modalMessage" class="mb-4 text-lg"></p>
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center transform transition-all scale-95 opacity-0" id="modal-content">
+      <p id="modalMessage" class="mb-5 text-lg text-gray-700"></p>
       <div id="modal-buttons" class="flex justify-center gap-4">
         <button id="modalConfirm" class="btn btn-primary">ยืนยัน</button>
         <button id="modalCancel" class="btn btn-secondary">ยกเลิก</button>
@@ -113,36 +138,33 @@
       <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-teal-500"></div>
   </div>
 
+  <!-- Firebase SDK (Version 9 - Modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, arrayUnion, arrayRemove, writeBatch, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-  <script>
     // ==== 1. Firebase Configuration ====
-    // ใส่ค่า Firebase Config ของคุณที่นี่
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.firebasestorage.app",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78",
+      measurementId: "G-Z2ZBWGB245"
     };
 
     // Initialize Firebase
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // ==== 2. Global Variables ====
+    // ==== 2. Global Variables & DOM Elements ====
     let currentUserId = null;
     let currentUserData = null;
 
-    // DOM Elements
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
     const searchResult = document.getElementById('searchResult');
@@ -150,44 +172,43 @@
     const friendsList = document.getElementById('friendsList');
     const userIdDisplay = document.getElementById('userIdDisplay');
     const userInfoCard = document.getElementById('user-info-card');
+    const copyIdButton = document.getElementById('copyIdButton');
     const loader = document.getElementById('loader');
-    
-    // Modal Elements
     const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modal-content');
     const modalMessage = document.getElementById('modalMessage');
     const modalConfirm = document.getElementById('modalConfirm');
     const modalCancel = document.getElementById('modalCancel');
     const modalOk = document.getElementById('modalOk');
 
     // ==== 3. Authentication ====
-    auth.onAuthStateChanged(async user => {
+    onAuthStateChanged(auth, user => {
       showLoader();
       if (user) {
         currentUserId = user.uid;
         userIdDisplay.textContent = currentUserId;
         userInfoCard.classList.remove('hidden');
         
-        // Listen for real-time updates on the user's document
-        db.collection("users").doc(currentUserId).onSnapshot(doc => {
-            if (doc.exists) {
+        const userDocRef = doc(db, "users", currentUserId);
+        onSnapshot(userDocRef, (doc) => {
+            if (doc.exists()) {
                 currentUserData = { id: doc.id, ...doc.data() };
                 loadFriendRequests();
                 loadFriends();
             } else {
-                console.error("User document not found!");
-                // อาจจะต้องสร้าง document ของ user ถ้ายังไม่มี
+                console.error("User document not found! You might need to create it upon registration.");
             }
             hideLoader();
-        }, err => {
-            console.error("Error fetching user data:", err);
+        }, (error) => {
+            console.error("Error fetching user data:", error);
             showAlert("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
             hideLoader();
         });
 
       } else {
-        // ถ้ายังไม่ login ให้ redirect ไปหน้า login
         console.log("No user is signed in.");
-        window.location.href = 'login.html';
+        // window.location.href = 'login.html'; 
+        hideLoader();
       }
     });
     
@@ -195,43 +216,81 @@
     const showLoader = () => loader.classList.remove('hidden');
     const hideLoader = () => loader.classList.add('hidden');
 
-    // ฟังก์ชันสำหรับแสดง Alert
+    const openModal = () => {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    const closeModal = () => {
+        modalContent.classList.add('scale-95', 'opacity-0');
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
     const showAlert = (message) => {
         modalMessage.textContent = message;
         modalConfirm.classList.add('hidden');
         modalCancel.classList.add('hidden');
         modalOk.classList.remove('hidden');
-        modal.classList.remove('hidden');
-        modalOk.onclick = () => modal.classList.add('hidden');
+        openModal();
+        modalOk.onclick = () => closeModal();
     };
 
-    // ฟังก์ชันสำหรับแสดง Confirmation
     const showConfirm = (message, onConfirmCallback) => {
         modalMessage.textContent = message;
         modalConfirm.classList.remove('hidden');
         modalCancel.classList.remove('hidden');
         modalOk.classList.add('hidden');
-        modal.classList.remove('hidden');
+        openModal();
         
         modalConfirm.onclick = () => {
-            modal.classList.add('hidden');
+            closeModal();
             onConfirmCallback(true);
         };
         modalCancel.onclick = () => {
-            modal.classList.add('hidden');
+            closeModal();
             onConfirmCallback(false);
         };
     };
-
-    // ==== 5. Search for Users ====
-    const handleSearch = async () => {
-        const query = searchInput.value.trim();
-        if (!query) {
-            searchResult.innerHTML = `<p class="text-red-500">กรุณาป้อน User ID ที่ต้องการค้นหา</p>`;
-            return;
+    
+    // Function to copy User ID
+    const copyUserId = () => {
+        const idToCopy = userIdDisplay.textContent;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(idToCopy).then(() => {
+                showAlert('คัดลอก User ID แล้ว!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                showAlert('ไม่สามารถคัดลอกได้');
+            });
+        } else {
+            // Fallback for older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = idToCopy;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showAlert('คัดลอก User ID แล้ว!');
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                showAlert('ไม่สามารถคัดลอกได้');
+            }
+            document.body.removeChild(textArea);
         }
-        if (query === currentUserId) {
-            searchResult.innerHTML = `<p class="text-yellow-500">คุณไม่สามารถเพิ่มตัวเองเป็นเพื่อนได้</p>`;
+    };
+    copyIdButton.addEventListener('click', copyUserId);
+
+
+    // ==== 5. Search for Users (Handles Email and ID) ====
+    const handleSearch = async () => {
+        const queryValue = searchInput.value.trim();
+        if (!queryValue) {
+            searchResult.innerHTML = `<p class="text-rose-500 text-center">กรุณาป้อน User ID หรืออีเมลที่ต้องการค้นหา</p>`;
             return;
         }
 
@@ -239,42 +298,70 @@
         searchResult.innerHTML = '';
 
         try {
-            const userDoc = await db.collection("users").doc(query).get();
+            let userDoc = null;
+            const isEmail = queryValue.includes('@');
 
-            if (!userDoc.exists) {
-                searchResult.innerHTML = `<p class="text-red-500">ไม่พบผู้ใช้ ID: ${query}</p>`;
+            if (isEmail) {
+                // Search by email
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("email", "==", queryValue));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    userDoc = querySnapshot.docs[0];
+                }
+            } else {
+                // Search by User ID
+                const userDocRef = doc(db, "users", queryValue);
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    userDoc = docSnap;
+                }
+            }
+
+            if (!userDoc) {
+                searchResult.innerHTML = `<p class="text-rose-500 text-center">ไม่พบผู้ใช้</p>`;
+                return;
+            }
+            
+            if (userDoc.id === currentUserId) {
+                searchResult.innerHTML = `<p class="text-amber-500 text-center">คุณไม่สามารถเพิ่มตัวเองเป็นเพื่อนได้</p>`;
                 return;
             }
 
             const foundUser = { id: userDoc.id, ...userDoc.data() };
             const userName = foundUser.name || 'ผู้ใช้ไม่มีชื่อ';
 
-            // Check friendship status
-            const isFriend = currentUserData.friends && currentUserData.friends.includes(foundUser.id);
-            const hasSentRequest = foundUser.friendRequests && foundUser.friendRequests.includes(currentUserId);
-            const hasReceivedRequest = currentUserData.friendRequests && currentUserData.friendRequests.includes(foundUser.id);
+            const isFriend = currentUserData.friends?.includes(foundUser.id);
+            const hasSentRequest = foundUser.friendRequests?.includes(currentUserId);
+            const hasReceivedRequest = currentUserData.friendRequests?.includes(foundUser.id);
 
             let buttonHtml = '';
             if (isFriend) {
-                buttonHtml = `<span class="text-green-500 font-semibold">เป็นเพื่อนกันแล้ว</span>`;
+                buttonHtml = `<span class="text-emerald-500 font-semibold">เป็นเพื่อนกันแล้ว</span>`;
             } else if (hasSentRequest) {
                 buttonHtml = `<span class="text-blue-500 font-semibold">ส่งคำขอไปแล้ว</span>`;
             } else if (hasReceivedRequest) {
                 buttonHtml = `<button onclick="acceptFriendRequest('${foundUser.id}')" class="btn btn-success text-sm">ตอบรับคำขอ</button>`;
             } else {
-                buttonHtml = `<button onclick="sendFriendRequest('${foundUser.id}')" class="btn btn-primary text-sm">ส่งคำขอเป็นเพื่อน</button>`;
+                buttonHtml = `<button onclick="sendFriendRequest('${foundUser.id}')" class="btn btn-primary text-sm">ส่งคำขอ</button>`;
             }
 
             searchResult.innerHTML = `
-                <div class="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
-                    <p class="font-semibold">${userName} <span class="text-xs text-gray-500">(${foundUser.id})</span></p>
+                <div class="flex items-center justify-between bg-teal-50 p-3 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold">${userName.charAt(0).toUpperCase()}</div>
+                        <p class="font-semibold text-gray-800">${userName}</p>
+                    </div>
                     <div>${buttonHtml}</div>
                 </div>
             `;
 
         } catch (error) {
             console.error("Error searching for user:", error);
-            searchResult.innerHTML = `<p class="text-red-500">เกิดข้อผิดพลาดในการค้นหา</p>`;
+            searchResult.innerHTML = `<p class="text-rose-500 text-center">เกิดข้อผิดพลาดในการค้นหา</p>`;
+            if (error.code === 'failed-precondition') {
+                 searchResult.innerHTML += `<p class="text-amber-500 text-center text-sm mt-2">หมายเหตุ: การค้นหาด้วยอีเมลอาจต้องใช้ Index ใน Firestore กรุณาตรวจสอบ Console เพื่อสร้าง Index</p>`;
+            }
         } finally {
             hideLoader();
         }
@@ -282,21 +369,17 @@
     
     searchButton.addEventListener('click', handleSearch);
     searchInput.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') {
-            handleSearch();
-        }
+        if (event.key === 'Enter') handleSearch();
     });
 
     // ==== 6. Friend Request Logic ====
     window.sendFriendRequest = async (friendId) => {
         showLoader();
         try {
-            const friendRef = db.collection("users").doc(friendId);
-            await friendRef.update({
-                friendRequests: firebase.firestore.FieldValue.arrayUnion(currentUserId)
-            });
+            const friendRef = doc(db, "users", friendId);
+            await updateDoc(friendRef, { friendRequests: arrayUnion(currentUserId) });
             showAlert("ส่งคำขอเป็นเพื่อนสำเร็จ!");
-            handleSearch(); // Refresh search result
+            handleSearch();
         } catch (error) {
             console.error("Error sending friend request:", error);
             showAlert("เกิดข้อผิดพลาดในการส่งคำขอ");
@@ -308,19 +391,11 @@
     window.acceptFriendRequest = async (friendId) => {
         showLoader();
         try {
-            const batch = db.batch();
-            const userRef = db.collection("users").doc(currentUserId);
-            const friendRef = db.collection("users").doc(friendId);
-
-            // Add each other to friends list and remove request
-            batch.update(userRef, {
-                friends: firebase.firestore.FieldValue.arrayUnion(friendId),
-                friendRequests: firebase.firestore.FieldValue.arrayRemove(friendId)
-            });
-            batch.update(friendRef, {
-                friends: firebase.firestore.FieldValue.arrayUnion(currentUserId)
-            });
-
+            const batch = writeBatch(db);
+            const userRef = doc(db, "users", currentUserId);
+            const friendRef = doc(db, "users", friendId);
+            batch.update(userRef, { friends: arrayUnion(friendId), friendRequests: arrayRemove(friendId) });
+            batch.update(friendRef, { friends: arrayUnion(currentUserId) });
             await batch.commit();
             showAlert("คุณเป็นเพื่อนกันแล้ว!");
         } catch (error) {
@@ -334,10 +409,8 @@
     window.declineFriendRequest = async (friendId) => {
         showLoader();
         try {
-            const userRef = db.collection("users").doc(currentUserId);
-            await userRef.update({
-                friendRequests: firebase.firestore.FieldValue.arrayRemove(friendId)
-            });
+            const userRef = doc(db, "users", currentUserId);
+            await updateDoc(userRef, { friendRequests: arrayRemove(friendId) });
             showAlert("ปฏิเสธคำขอแล้ว");
         } catch (error) {
             console.error("Error declining friend request:", error);
@@ -348,29 +421,35 @@
     };
 
     // ==== 7. Load Data from Firestore ====
+    const createListItemHTML = (id, name, buttons) => {
+        const initial = name.charAt(0).toUpperCase() || '?';
+        return `
+            <li class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold">${initial}</div>
+                    <p class="font-semibold text-gray-800">${name}</p>
+                </div>
+                <div class="flex gap-2">${buttons}</div>
+            </li>
+        `;
+    };
+
     const loadFriendRequests = async () => {
         const requests = currentUserData.friendRequests || [];
         if (requests.length === 0) {
-            friendRequestsList.innerHTML = `<li class="text-gray-500">ไม่มีคำขอเป็นเพื่อน</li>`;
+            friendRequestsList.innerHTML = `<li class="text-gray-500 text-center py-2">ไม่มีคำขอเป็นเพื่อน</li>`;
             return;
         }
-
         let html = '';
         for (const friendId of requests) {
-            const friendDoc = await db.collection("users").doc(friendId).get();
-            if (!friendDoc.exists) continue;
-            const friendData = friendDoc.data();
-            const friendName = friendData.name || 'ผู้ใช้ไม่มีชื่อ';
-
-            html += `
-                <li class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                    <p class="font-semibold">${friendName}</p>
-                    <div class="flex gap-2">
-                        <button onclick="acceptFriendRequest('${friendId}')" class="btn btn-success text-sm">ยอมรับ</button>
-                        <button onclick="declineFriendRequest('${friendId}')" class="btn btn-danger text-sm">ปฏิเสธ</button>
-                    </div>
-                </li>
+            const friendDoc = await getDoc(doc(db, "users", friendId));
+            if (!friendDoc.exists()) continue;
+            const friendName = friendDoc.data().name || 'ผู้ใช้ไม่มีชื่อ';
+            const buttons = `
+                <button onclick="acceptFriendRequest('${friendId}')" class="btn btn-success p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></button>
+                <button onclick="declineFriendRequest('${friendId}')" class="btn btn-danger p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
             `;
+            html += createListItemHTML(friendId, friendName, buttons);
         }
         friendRequestsList.innerHTML = html;
     };
@@ -378,23 +457,16 @@
     const loadFriends = async () => {
         const friends = currentUserData.friends || [];
         if (friends.length === 0) {
-            friendsList.innerHTML = `<li class="text-gray-500">ยังไม่มีเพื่อน</li>`;
+            friendsList.innerHTML = `<li class="text-gray-500 text-center py-2">ยังไม่มีเพื่อน</li>`;
             return;
         }
-
         let html = '';
         for (const friendId of friends) {
-            const friendDoc = await db.collection("users").doc(friendId).get();
-            if (!friendDoc.exists) continue;
-            const friendData = friendDoc.data();
-            const friendName = friendData.name || 'ผู้ใช้ไม่มีชื่อ';
-
-            html += `
-                <li class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                    <p class="font-semibold">${friendName}</p>
-                    <button onclick="removeFriend('${friendId}')" class="btn btn-danger text-sm">ลบเพื่อน</button>
-                </li>
-            `;
+            const friendDoc = await getDoc(doc(db, "users", friendId));
+            if (!friendDoc.exists()) continue;
+            const friendName = friendDoc.data().name || 'ผู้ใช้ไม่มีชื่อ';
+            const buttons = `<button onclick="removeFriend('${friendId}')" class="btn btn-danger p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
+            html += createListItemHTML(friendId, friendName, buttons);
         }
         friendsList.innerHTML = html;
     };
@@ -405,17 +477,11 @@
             if (confirmed) {
                 showLoader();
                 try {
-                    const batch = db.batch();
-                    const userRef = db.collection("users").doc(currentUserId);
-                    const friendRef = db.collection("users").doc(friendId);
-
-                    batch.update(userRef, {
-                        friends: firebase.firestore.FieldValue.arrayRemove(friendId)
-                    });
-                    batch.update(friendRef, {
-                        friends: firebase.firestore.FieldValue.arrayRemove(currentUserId)
-                    });
-
+                    const batch = writeBatch(db);
+                    const userRef = doc(db, "users", currentUserId);
+                    const friendRef = doc(db, "users", friendId);
+                    batch.update(userRef, { friends: arrayRemove(friendId) });
+                    batch.update(friendRef, { friends: arrayRemove(currentUserId) });
                     await batch.commit();
                     showAlert("ลบเพื่อนสำเร็จ");
                 } catch (error) {
@@ -427,7 +493,6 @@
             }
         });
     };
-
   </script>
 </body>
 </html>
