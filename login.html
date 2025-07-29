@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', 'Leelawadee UI', 'Tahoma', sans-serif;
       background: linear-gradient(135deg, #eaf4f4, #b2dfdb 75%, #b2ebf2);
       min-height: 100vh; margin: 0;
       display: flex; justify-content: center; align-items: center;
@@ -129,15 +129,16 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   
   <script>
-    // --- ใส่ Firebase Configuration ของคุณที่นี่ ---
+    // ✅ Firebase Configuration
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.firebasestorage.app",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78",
+      measurementId: "G-Z2ZBWGB245"
     };
 
     // Initialize Firebase
@@ -152,15 +153,15 @@
       const googleSignInBtn = document.getElementById('googleSignIn');
       const messageDiv = document.getElementById('messageDiv');
 
-      // ตรวจสอบสถานะการล็อกอิน ถ้าล็อกอินอยู่แล้วให้ไปหน้า dashboard
+      // ตรวจสอบสถานะการล็อกอิน (จะทำงานทั้งตอนเปิดหน้าเว็บและหลังจาก redirect กลับมา)
       auth.onAuthStateChanged(user => {
           if (user) {
-              console.log("ผู้ใช้ล็อกอินอยู่แล้ว กำลังเปลี่ยนเส้นทาง...");
+              console.log("ผู้ใช้ล็อกอินอยู่ กำลังเปลี่ยนเส้นทางไป dashboard...");
               window.location.href = "dashboard.html";
           }
       });
 
-      // จัดการการล็อกอินด้วยอีเมลและรหัสผ่าน
+      // จัดการการล็อกอินด้วยอีเมลและรหัสผ่าน (เหมือนเดิม)
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
@@ -177,57 +178,57 @@
           });
       });
 
-      // --- จัดการการล็อกอินด้วย Google ---
+      // --- 🔄 [แก้ไข] จัดการการล็อกอินด้วย Google โดยกลับไปใช้ Popup ---
       googleSignInBtn.addEventListener('click', () => {
-        // 1. สร้าง Provider สำหรับ Google
         const provider = new firebase.auth.GoogleAuthProvider();
         
-        console.log("กำลังเริ่มกระบวนการล็อกอินด้วย Google...");
-        messageDiv.textContent = ""; // เคลียร์ข้อความ error เก่า
+        console.log("กำลังเริ่มกระบวนการล็อกอินด้วย Google (Popup)...");
+        messageDiv.textContent = "";
 
-        // 2. แสดงหน้าต่าง Popup ของ Google เพื่อให้ผู้ใช้ล็อกอิน
+        // กลับมาใช้ signInWithPopup เพราะเข้ากันได้กับสภาพแวดล้อมนี้
         auth.signInWithPopup(provider)
           .then((result) => {
             console.log("ล็อกอินด้วย Google สำเร็จ:", result);
-            const user = result.user; // ข้อมูลผู้ใช้จาก Google
+            const user = result.user;
             const userRef = db.collection('users').doc(user.uid);
 
-            // 3. ตรวจสอบว่าผู้ใช้คนนี้เคยล็อกอินมาก่อนหรือไม่ (มีข้อมูลใน Firestore หรือยัง)
+            // ตรวจสอบว่าเป็นผู้ใช้ใหม่หรือไม่
             return userRef.get().then(doc => {
-                if (!doc.exists) {
-                    // 4. ถ้าเป็นผู้ใช้ใหม่ ให้สร้างข้อมูลเริ่มต้นใน Firestore
-                    console.log(`ผู้ใช้ใหม่ (UID: ${user.uid}) กำลังสร้างข้อมูลใน Firestore...`);
-                    userRef.set({
-                        displayName: user.displayName,
-                        email: user.email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        level: 1,
-                        xp: 0,
-                        nextLevelXP: 100,
-                        quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
-                        badges: [],
-                        coins: 0,
-                        inventory: [],
-                        lastLoginReward: '',
-                        completedLessons: []
-                    });
-                } else {
-                    console.log(`ผู้ใช้เก่า (UID: ${user.uid}) กลับมาล็อกอิน`);
-                }
+              if (!doc.exists) {
+                // ถ้าเป็นผู้ใช้ใหม่ ให้สร้างข้อมูลใน Firestore
+                console.log(`ผู้ใช้ใหม่ (UID: ${user.uid}) กำลังสร้างข้อมูลใน Firestore...`);
+                return userRef.set({
+                  displayName: user.displayName,
+                  email: user.email,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  level: 1,
+                  xp: 0,
+                  nextLevelXP: 100,
+                  quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
+                  badges: [],
+                  coins: 0,
+                  inventory: [],
+                  lastLoginReward: '',
+                  completedLessons: []
+                });
+              } else {
+                console.log(`ผู้ใช้เก่า (UID: ${user.uid}) กลับมาล็อกอิน`);
+              }
             });
           })
           .then(() => {
-            // 5. เมื่อทุกอย่างเรียบร้อย ให้เปลี่ยนไปหน้า dashboard
+            // เมื่อทุกอย่างเรียบร้อย ให้เปลี่ยนไปหน้า dashboard
+            // (onAuthStateChanged จะจัดการเรื่องนี้อยู่แล้ว แต่ใส่ไว้เผื่อ)
             window.location.href = "dashboard.html";
           })
           .catch(error => {
-            // 6. จัดการข้อผิดพลาดที่อาจเกิดขึ้น
-            console.error("เกิดข้อผิดพลาดกับ Google Sign-In:", error);
+            // จัดการข้อผิดพลาดที่อาจเกิดขึ้น
+            console.error("เกิดข้อผิดพลาดกับ Google Sign-In (Popup):", error);
             messageDiv.textContent = "เกิดข้อผิดพลาดกับ Google Sign-In: " + error.message; 
           });
       });
 
-      // Logic สำหรับแสดง/ซ่อนรหัสผ่าน
+      // Logic สำหรับแสดง/ซ่อนรหัสผ่าน (เหมือนเดิม)
       document.querySelector('.toggle-password').addEventListener('click', function() {
           const passwordInput = document.getElementById('password');
           const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';

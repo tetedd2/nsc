@@ -195,7 +195,72 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, updateDoc, increment, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let currentUser = null;
+
+    // --- Authentication ---
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+      } else {
+        // If not logged in, sign in anonymously to get a UID
+        try {
+          const userCredential = await signInAnonymously(auth);
+          currentUser = userCredential.user;
+        } catch (error) {
+          console.error("Anonymous sign-in failed:", error);
+        }
+      }
+    });
+
+    /**
+     * Awards coins to the current user.
+     * @param {number} amount The number of coins to award.
+     * @returns {Promise<boolean>} True if successful, false otherwise.
+     */
+    async function addCoins(amount) {
+      if (!currentUser || amount <= 0) return false;
+      const userRef = doc(db, 'users', currentUser.uid);
+      try {
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
+            // If user document doesn't exist, create it.
+            // This is crucial for anonymous users who might not have a doc yet.
+            await setDoc(userRef, { coins: amount }, { merge: true });
+        } else {
+            // Use increment for a safe, atomic update
+            await updateDoc(userRef, {
+                coins: increment(amount)
+            });
+        }
+        console.log(`Awarded ${amount} coins to user ${currentUser.uid}`);
+        return true;
+      } catch (error) {
+        console.error("Error adding coins:", error);
+        return false;
+      }
+    }
+
+
     const sets = {
       1: { name: "วัยเรียนใช้เงิน", icon: "🎓", questions: [
         { q: "ถ้าได้เงินค่าขนมมา 100 บาท สิ่งแรกที่ควรทำคืออะไร?", c: ["ซื้อขนมที่อยากกิน", "ให้เพื่อนยืม", "แบ่งออมก่อนใช้", "เอาไปเล่นเกมทั้งหมด"], a: 2, explain: "การออมก่อนใช้ (Pay Yourself First) เป็นหลักการพื้นฐานที่สำคัญที่สุดในการสร้างวินัยทางการเงิน", recommend: "ลองตั้งเป้าหมายออม 10-20% ของเงินที่ได้มาทุกครั้ง แล้วคุณจะเห็นเงินเก็บเพิ่มขึ้นอย่างน่าทึ่ง" },
@@ -386,19 +451,42 @@
 
     document.getElementById('finishBtn').onclick = showScore;
 
-    function showScore() {
+    async function showScore() {
       document.getElementById('quiz-section').style.display = 'none';
       document.getElementById('score-section').style.display = 'block';
       document.getElementById('score').textContent = score;
       document.getElementById('total').textContent = currentSet.length;
       
       const percent = (score / currentSet.length) * 100;
+      const passThreshold = 60; // เกณฑ์การผ่านคือ 60%
       let msg = '';
-      if(percent >= 80) msg = "ยอดเยี่ยม! คุณคือสุดยอดนักการเงินรุ่นเยาว์! 🤩";
-      else if(percent >= 60) msg = "เก่งมาก! ความรู้ทางการเงินแน่นปึ้ก 😊";
-      else msg = "พยายามได้ดีมาก! มาทบทวนกันอีกหน่อยนะ 👍";
-      document.getElementById('scoreMsg').textContent = msg;
-      
+
+      if (percent >= 80) {
+        msg = "ยอดเยี่ยม! คุณคือสุดยอดนักการเงินรุ่นเยาว์! 🤩";
+      } else if (percent >= passThreshold) {
+        msg = "เก่งมาก! ความรู้ทางการเงินแน่นปึ้ก 😊";
+      } else {
+        msg = "พยายามได้ดีมาก! แต่ยังไม่ผ่านเกณฑ์ ลองทบทวนแล้วเล่นใหม่อีกครั้งนะ 👍";
+      }
+
+      // --- REVISED: Award Coins Conditionally ---
+      if (percent >= passThreshold) {
+          const finalScore = score * 10; // 1 correct = 10 points
+          const coinsEarned = Math.floor(finalScore / 2); // 2 points = 1 coin
+          if (coinsEarned > 0) {
+              const success = await addCoins(coinsEarned);
+              if (success) {
+                  msg += `<br>คุณผ่านแล้ว! ได้รับ ${coinsEarned} 🪙 เหรียญ!`;
+              }
+          }
+      } else {
+          // No coins awarded
+          msg += `<br>คุณยังไม่ได้รับเหรียญในรอบนี้`;
+      }
+      document.getElementById('scoreMsg').innerHTML = msg;
+      // --- END REVISED ---
+
+
       const ctx = document.getElementById('pieChart').getContext('2d');
       new Chart(ctx, {
         type: 'doughnut',
