@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>รายการแชท | MoneySkillz</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แชท | MoneySkillz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,123 +14,206 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
   
   <style>
-    body {
+    html, body {
       font-family: 'Kanit', sans-serif;
+      overscroll-behavior-y: contain;
+    }
+    /* ซ่อน scrollbar */
+    ::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    .chat-bubble {
+      @apply max-w-xs md:max-w-md break-words rounded-2xl py-2 px-4 shadow-sm;
+    }
+    .sent {
+      @apply bg-teal-600 text-white rounded-br-none ml-auto;
+    }
+    .received {
+      @apply bg-white text-gray-800 rounded-bl-none mr-auto;
     }
   </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-white shadow-sm p-4 sticky top-0 z-10 flex items-center">
-    <a href="dashboard.html" class="text-teal-500 text-2xl font-bold mr-4">&larr;</a>
-    <h1 class="font-bold text-xl text-gray-800">แชททั้งหมด</h1>
+  <header class="bg-white shadow-sm p-3 flex items-center gap-4 sticky top-0 z-10">
+    <a href="chat-list.html" class="text-teal-600 hover:text-teal-800 text-2xl font-bold transition-colors">&larr;</a>
+    <div id="friendInfo" class="flex items-center gap-3">
+       <div id="friendAvatar" class="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold">?</div>
+       <h1 id="friendName" class="font-bold text-lg text-gray-800">กำลังโหลด...</h1>
+    </div>
   </header>
 
-  <!-- Chat List -->
-  <main id="chatListContainer" class="p-2">
-    <ul id="chatList" class="space-y-2">
-      <!-- Conversation list will be loaded here -->
-      <li class="p-4 text-center text-gray-500">กำลังโหลดรายการแชท...</li>
-    </ul>
+  <!-- Messages Area -->
+  <main id="chatBox" class="flex-1 p-4 overflow-y-auto space-y-4">
+    <div class="text-center text-gray-500">
+        <p>กำลังโหลดข้อความ...</p>
+    </div>
   </main>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  
-  <script>
-    (function() {
-      // ==== 1. Firebase Configuration ====
-      const firebaseConfig = {
-        apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
-        authDomain: "myapplication-bd04c034.firebaseapp.com",
-        databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "myapplication-bd04c034",
-        storageBucket: "myapplication-bd04c034.firebasestorage.app",
-        messagingSenderId: "49782830313",
-        appId: "1:49782830313:web:c81b5d86a937f22d296c78",
-        measurementId: "G-Z2ZBWGB245"
-      };
+  <!-- Input Footer -->
+  <footer class="bg-white p-2 border-t border-gray-200 sticky bottom-0">
+    <div class="flex items-center gap-2">
+      <input id="msgInput" type="text" placeholder="พิมพ์ข้อความ..." class="w-full bg-gray-100 border-transparent rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-teal-500">
+      <button id="sendButton" class="bg-teal-600 text-white rounded-full p-3 focus:outline-none hover:bg-teal-700 transition-colors flex-shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+  </footer>
 
-      // Initialize Firebase
-      if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
-      }
-      const auth = firebase.auth();
-      const db = firebase.firestore();
+  <!-- Firebase SDK (Version 9 - Modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, writeBatch, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-      // ==== 2. Global Variables & DOM Elements ====
-      let currentUserId = null;
-      const chatList = document.getElementById('chatList');
+    // ==== 1. Firebase Configuration ====
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.firebasestorage.app",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78",
+      measurementId: "G-Z2ZBWGB245"
+    };
 
-      // ==== 3. Authentication & Initial Load ====
-      auth.onAuthStateChanged(user => {
-        if (user) {
-          currentUserId = user.uid;
-          loadConversations();
-        } else {
-          const currentUrl = window.location.href;
-          const loginUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/login.html';
-          window.location.href = loginUrl;
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ==== 2. Global Variables & DOM Elements ====
+    let currentUserId = null;
+    let friendId = null;
+    let chatListener = null;
+
+    const chatBox = document.getElementById('chatBox');
+    const msgInput = document.getElementById('msgInput');
+    const sendButton = document.getElementById('sendButton');
+    const friendNameEl = document.getElementById('friendName');
+    const friendAvatarEl = document.getElementById('friendAvatar');
+
+    // ==== 3. Helper Functions ====
+    const getFriendIdFromUrl = () => new URLSearchParams(window.location.search).get('friendId');
+    const scrollToBottom = () => { chatBox.scrollTop = chatBox.scrollHeight; };
+    
+    // ==== 4. Authentication & Initial Load ====
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUserId = user.uid;
+        friendId = getFriendIdFromUrl();
+
+        if (!friendId) {
+          friendNameEl.textContent = "ไม่พบเพื่อน";
+          chatBox.innerHTML = '<p class="text-center text-red-500">ไม่พบ ID ของเพื่อนใน URL</p>';
+          return;
         }
-      });
+        
+        loadChat();
 
-      // ==== 4. Load Conversations ====
-      function loadConversations() {
-        // เราจะดึงข้อมูล chat ทั้งหมดที่ user คนปัจจุบันเป็นสมาชิกอยู่
-        // และเรียงตามเวลาของข้อความล่าสุด
-        db.collection('chats')
-          .where('participants', 'array-contains', currentUserId)
-          .orderBy('lastMessage.timestamp', 'desc')
-          .onSnapshot(async (snapshot) => {
-            if (snapshot.empty) {
-              chatList.innerHTML = '<li class="p-4 text-center text-gray-500">ยังไม่มีการสนทนา<br>เริ่มแชทกับเพื่อนได้เลย!</li>';
-              return;
-            }
-
-            chatList.innerHTML = ''; // Clear list before rendering
-            
-            // ใช้ Promise.all เพื่อรอให้ดึงข้อมูลของเพื่อนทุกคนเสร็จก่อน
-            const chatPromises = snapshot.docs.map(async doc => {
-              const chatData = doc.data();
-              
-              // หา ID ของเพื่อนในห้องแชท
-              const friendId = chatData.participants.find(id => id !== currentUserId);
-              if (!friendId) return null;
-
-              // ดึงข้อมูลของเพื่อน (ชื่อ)
-              const userDoc = await db.collection('users').doc(friendId).get();
-              const friendName = userDoc.exists ? userDoc.data().name : 'เพื่อน';
-              
-              const lastMessageText = chatData.lastMessage ? chatData.lastMessage.text : '...';
-              const lastMessageSender = chatData.lastMessage && chatData.lastMessage.senderId === currentUserId ? 'คุณ: ' : '';
-
-              // สร้าง HTML สำหรับแต่ละรายการแชท
-              const li = document.createElement('li');
-              li.innerHTML = `
-                <a href="chat.html?friendId=${friendId}" class="block bg-white p-4 rounded-lg shadow-sm hover:bg-gray-50 transition">
-                  <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800">${friendName}</h3>
-                  </div>
-                  <p class="text-gray-600 text-sm truncate">${lastMessageSender}${lastMessageText}</p>
-                </a>
-              `;
-              return li;
-            });
-
-            const chatElements = await Promise.all(chatPromises);
-            chatElements.forEach(el => {
-              if(el) chatList.appendChild(el);
-            });
-
-          }, error => {
-            console.error("Error loading conversations: ", error);
-            chatList.innerHTML = '<li class="p-4 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดรายการแชท</li>';
-          });
+      } else {
+        const currentUrl = window.location.href;
+        const loginUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/login.html';
+        window.location.href = loginUrl;
       }
-    })();
+    });
+
+    // ==== 5. Chat Logic ====
+    const loadChat = async () => {
+        try {
+            const friendDoc = await getDoc(doc(db, "users", friendId));
+            if (friendDoc.exists()) {
+                const friendName = friendDoc.data().name || 'เพื่อน';
+                friendNameEl.textContent = friendName;
+                friendAvatarEl.textContent = friendName.charAt(0).toUpperCase();
+            } else {
+                friendNameEl.textContent = "ไม่พบข้อมูลเพื่อน";
+            }
+        } catch (error) {
+            console.error("Error fetching friend data:", error);
+            friendNameEl.textContent = "ผิดพลาด";
+        }
+
+        if (chatListener) chatListener();
+
+        const chatDocId = currentUserId < friendId ? `${currentUserId}_${friendId}` : `${friendId}_${currentUserId}`;
+        const messagesQuery = query(collection(db, "chats", chatDocId, "messages"), orderBy("timestamp", "asc"));
+        
+        chatListener = onSnapshot(messagesQuery, snapshot => {
+            chatBox.innerHTML = '';
+            if (snapshot.empty) {
+                chatBox.innerHTML = '<p class="text-center text-gray-500">เริ่มการสนทนาได้เลย!</p>';
+                return;
+            }
+            snapshot.forEach(doc => {
+                const msg = doc.data();
+                const isSentByMe = msg.senderId === currentUserId;
+                
+                const bubble = document.createElement('div');
+                bubble.textContent = msg.text;
+                bubble.className = `chat-bubble ${isSentByMe ? 'sent' : 'received'}`;
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex';
+                wrapper.appendChild(bubble);
+                chatBox.appendChild(wrapper);
+            });
+            setTimeout(scrollToBottom, 100);
+        }, error => {
+            console.error("Error fetching chat:", error);
+            chatBox.innerHTML = '<p class="text-center text-red-500">เกิดข้อผิดพลาดในการโหลดแชท</p>';
+        });
+    };
+
+    // ==== 6. Send Message ====
+    const sendMessage = async () => {
+        const text = msgInput.value.trim();
+        if (!text || !friendId) return;
+
+        const localMsgValue = msgInput.value;
+        msgInput.value = '';
+
+        const chatDocId = currentUserId < friendId ? `${currentUserId}_${friendId}` : `${friendId}_${currentUserId}`;
+        const chatDocRef = doc(db, "chats", chatDocId);
+        const newMessageRef = doc(collection(chatDocRef, "messages"));
+
+        const timestamp = serverTimestamp();
+        const messagePayload = {
+            text: localMsgValue,
+            senderId: currentUserId,
+            timestamp: timestamp
+        };
+
+        try {
+            const batch = writeBatch(db);
+
+            batch.set(chatDocRef, {
+                participants: [currentUserId, friendId],
+                lastMessage: messagePayload
+            }, { merge: true });
+
+            batch.set(newMessageRef, messagePayload);
+
+            await batch.commit();
+
+            scrollToBottom();
+        } catch (error) {
+            console.error("Error sending message:", error);
+            msgInput.value = localMsgValue;
+        }
+    };
+
+    sendButton.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+
   </script>
 </body>
 </html>
