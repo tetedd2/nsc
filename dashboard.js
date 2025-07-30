@@ -160,6 +160,7 @@ let transactions = [];
 let goals = [];
 let currentGoalIndex = 0;
 let unsubscribeListeners = [];
+// window.isSpendingBlocked = false; // REMOVED - Replaced with localStorage
 const allBadges = [ // Define all available badges for the application
     { id: 'first_transaction', name: 'นักบันทึกมือใหม่', description: 'บันทึกธุรกรรมแรกของคุณ', icon: '✍️' },
     { id: 'first_goal', name: 'ผู้ตั้งเป้าหมาย', description: 'สร้างเป้าหมายการออมแรก', icon: '🎯' },
@@ -489,6 +490,32 @@ function updateFinancialSummary() {
     document.getElementById('income').textContent = `${totalIncome.toFixed(2)} ฿`;
     document.getElementById('expense').textContent = `${totalExpense.toFixed(2)} ฿`;
     document.getElementById('balance').textContent = `${balance.toFixed(2)} ฿`;
+
+    // Financial alert logic
+    const alertElement = document.getElementById('financial-alert');
+    if (!alertElement) return;
+
+    if (totalIncome > 0) {
+        const balancePercentage = (balance / totalIncome) * 100;
+
+        if (balancePercentage < 30) {
+            alertElement.textContent = '🚨 เงินคงเหลือน้อยกว่า 30%! ระบบจะจำกัดการสร้างรายจ่ายเพื่อช่วยคุณออม';
+            alertElement.className = 'financial-alert danger';
+            alertElement.style.display = 'block';
+            localStorage.setItem('isSpendingBlocked', 'true'); // Use localStorage
+        } else if (balancePercentage < 40) {
+            alertElement.textContent = '⚠️ ระวัง! เงินคงเหลือของคุณน้อยกว่า 40% ของรายรับทั้งหมด ลองลดรายจ่ายที่ไม่จำเป็นดูนะ';
+            alertElement.className = 'financial-alert warning';
+            alertElement.style.display = 'block';
+            localStorage.setItem('isSpendingBlocked', 'false'); // Use localStorage
+        } else {
+            alertElement.style.display = 'none';
+            localStorage.setItem('isSpendingBlocked', 'false'); // Use localStorage
+        }
+    } else {
+        alertElement.style.display = 'none';
+        localStorage.setItem('isSpendingBlocked', 'false'); // Use localStorage
+    }
 }
 
 function displayTransactions() {

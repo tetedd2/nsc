@@ -1,345 +1,389 @@
-// --- INITIALIZATION & EVENT LISTENERS ---
+// ================== Firebase SDK v9 Imports ==================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { 
+    getFirestore, collection, doc, onSnapshot, query, orderBy, addDoc, deleteDoc, updateDoc, 
+    serverTimestamp, runTransaction
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Set the minimum selectable date to today
-  const today = new Date().toISOString().split('T')[0];
-  const goalDateElement = document.getElementById('goalDate');
-  if (goalDateElement) {
-    goalDateElement.setAttribute('min', today);
-  }
+// ================== Firebase Configuration ==================
+const firebaseConfig = {
+    apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+    authDomain: "myapplication-bd04c034.firebaseapp.com",
+    databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "myapplication-bd04c034",
+    storageBucket: "myapplication-bd04c034.firebasestorage.app",
+    messagingSenderId: "49782830313",
+    appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+};
 
-  // Add event listeners to form inputs for real-time preview
-  const formInputs = ['goalName', 'goalAmount', 'goalDate', 'planType'];
-  formInputs.forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.addEventListener('input', previewPlan);
+// ================== Firebase Initialization ==================
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ================== DOM Elements ==================
+const goalsGrid = document.getElementById('goalsGrid');
+const addGoalFab = document.getElementById('addGoalFab');
+const goalModal = document.getElementById('goalModal');
+const addGoalForm = document.getElementById('addGoalForm');
+const modalTitle = document.getElementById('modalTitle');
+const goalNameInput = document.getElementById('goalName');
+const goalAmountInput = document.getElementById('goalAmount');
+const currentAmountInput = document.getElementById('currentAmount');
+const goalDateInput = document.getElementById('goalDate');
+const planTypeSelect = document.getElementById('planType');
+const planPreviewDiv = document.getElementById('planPreview');
+
+const addSavingsModal = document.getElementById('addSavingsModal');
+const addSavingsForm = document.getElementById('addSavingsForm');
+const savingsModalTitle = document.getElementById('savingsModalTitle');
+const savingsGoalName = document.getElementById('savingsGoalName');
+const savingsGoalId = document.getElementById('savingsGoalId');
+const savingsInstallmentIndex = document.getElementById('savingsInstallmentIndex');
+const savingsAmountInput = document.getElementById('savingsAmount');
+
+let currentUser = null;
+let unsubscribeGoals = null;
+
+// ================== Dark Mode Logic ==================
+(function() {
+  const enableDark = localStorage.getItem("moneySkillzDarkMode") === "true";
+  if (enableDark) document.body.classList.add("dark-mode");
+})();
+
+// ================== Authentication Observer ==================
+onAuthStateChanged(auth, user => {
+    if (user) {
+        currentUser = user;
+        fetchGoals();
+    } else {
+        currentUser = null;
+        if (unsubscribeGoals) unsubscribeGoals();
+        goalsGrid.innerHTML = `<div class="placeholder-card"><p>กรุณาเข้าสู่ระบบเพื่อดูและจัดการเป้าหมายของคุณ</p></div>`;
     }
-  });
-
-  // Fetch and display existing goals when the page loads
-  displayCurrentGoals();
 });
 
+// ================== Fetch and Render Goals ==================
+function fetchGoals() {
+    if (!currentUser) return;
+    const goalsRef = collection(db, 'users', currentUser.uid, 'goals');
+    const q = query(goalsRef, orderBy('dueDate', 'asc'));
 
-// --- GOAL DISPLAY & MANAGEMENT ---
-
-/**
- * Fetches goals from Firebase and displays them on the page using a real-time listener.
- */
-function displayCurrentGoals() {
-  firebase.auth().onAuthStateChanged(function(user) {
-    const goalListContainer = document.getElementById('currentGoalsList');
-    // Ensure the container element exists before proceeding
-    if (!goalListContainer) {
-      console.error("Error: The element with id 'currentGoalsList' was not found in the DOM.");
-      return;
-    }
-
-    if (!user) {
-      goalListContainer.innerHTML = '<div class="no-goals-message">กรุณาเข้าสู่ระบบเพื่อดูเป้าหมายของคุณ</div>';
-      return;
-    }
-
-    goalListContainer.innerHTML = '<div class="loading-message">กำลังโหลดข้อมูลเป้าหมาย...</div>';
-
-    // Use onSnapshot for real-time updates
-    db.collection("users").doc(user.uid).collection("goals").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-      goalListContainer.innerHTML = ""; // Clear previous list
-      if (snapshot.empty) {
-        goalListContainer.innerHTML = `<div class="no-goals-message">- ยังไม่มีเป้าหมายที่ตั้งไว้ -</div>`;
-        return;
-      }
-      snapshot.forEach(doc => {
-        const goal = doc.data();
-        goal.id = doc.id;
-        
-        goal.savings = goal.plan ? goal.plan.reduce((sum, p) => sum + (parseFloat(p.saved) || 0), 0) : 0;
-        const percent = goal.targetAmount > 0 ? ((goal.savings / goal.targetAmount) * 100) : 0;
-        
-        const goalBlock = document.createElement('div');
-        goalBlock.classList.add('goal-block');
-        goalBlock.innerHTML = `
-          <button class="delete-btn" title="ลบเป้าหมายนี้" onclick="deleteGoal('${goal.id}', '${goal.name.replace(/'/g, "\\'")}')">✖</button>
-          <div class="goal-title">${goal.name}</div>
-          <div class="goal-money">
-            ออมแล้ว: <span class="current-savings">฿${goal.savings.toLocaleString('th-TH', {maximumFractionDigits: 2})}</span> / 
-            <span class="total-amount">฿${goal.targetAmount.toLocaleString('th-TH', {maximumFractionDigits: 2})}</span>
-            <span class="progress-text">(${percent.toFixed(0)}%)</span>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar" style="width: ${percent}%"></div>
-          </div>
-          <div class="saving-plan-title">📅 แผนการออม (${planTypeText(goal.planType)})</div>
-          <div class="saving-plan-list">
-            ${goal.plan ? goal.plan.map((p, planIdx) => `
-              <div class="saving-row">
-                <div class="saving-row-info">
-                  <b>งวดที่ ${p.round}</b> (${p.date})<br>
-                  เป้าหมาย: <b>${parseFloat(p.amount).toLocaleString('th-TH', {maximumFractionDigits: 2})}</b> บาท
-                </div>
-                <div class="saving-row-action">
-                  <div class="bar-bg">
-                    <div class="bar" style="width:${((parseFloat(p.saved) || 0)/parseFloat(p.amount)*100)||0}%"></div>
-                  </div>
-                  <span class="bar-label">ออมแล้ว: <b>${(parseFloat(p.saved)||0).toLocaleString('th-TH', {maximumFractionDigits: 2})}</b> บาท</span>
-                  <div class="saving-input-group">
-                      <input type="number" class="saving-input" placeholder="ใส่จำนวนเงิน" min="0" step="0.01">
-                      <button class="add-saving-btn" onclick="addSavingToPlan('${goal.id}', ${planIdx}, this)">+ ออม</button>
-                  </div>
-                </div>
-              </div>
-            `).join('') : '<i>ไม่มีแผนการออม</i>'}
-          </div>
-        `;
-        goalListContainer.appendChild(goalBlock);
-      });
+    unsubscribeGoals = onSnapshot(q, snapshot => {
+        if (snapshot.empty) {
+            goalsGrid.innerHTML = `<div class="placeholder-card"><h3>ยังไม่มีเป้าหมาย</h3><p>คลิกปุ่ม '+' เพื่อสร้างเป้าหมายแรกของคุณ!</p></div>`;
+            return;
+        }
+        goalsGrid.innerHTML = '';
+        snapshot.forEach(doc => {
+            const goal = { id: doc.id, ...doc.data() };
+            goalsGrid.appendChild(createGoalCard(goal));
+        });
     }, error => {
         console.error("Error fetching goals: ", error);
-        goalListContainer.innerHTML = `<div class="no-goals-message">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+        goalsGrid.innerHTML = `<div class="placeholder-card"><p>เกิดข้อผิดพลาดในการโหลดเป้าหมาย</p></div>`;
     });
-  });
 }
 
-/**
- * Adds a specified amount to a saving plan installment using a secure transaction.
- */
-function addSavingToPlan(goalId, planIdx, buttonElement) {
-  const user = firebase.auth().currentUser;
-  if (!user) { return alert("กรุณาเข้าสู่ระบบก่อน"); }
+// ================== Create HTML for a Goal Card ==================
+function createGoalCard(goal) {
+    const card = document.createElement('div');
+    card.className = 'goal-card';
+    const targetAmount = parseFloat(goal.targetAmount || 0);
+    const currentSavings = parseFloat(goal.currentSavings || 0);
+    const progress = targetAmount > 0 ? (currentSavings / targetAmount) * 100 : 0;
+    const dueDate = goal.dueDate ? new Date(goal.dueDate).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : 'ไม่มีกำหนด';
 
-  const inputElement = buttonElement.closest('.saving-input-group').querySelector('.saving-input');
-  const saveAmount = parseFloat(inputElement.value);
+    let planHtml = '';
+    if (goal.plan && goal.plan.length > 0) {
+        planHtml = `
+        <div class="goal-plan-details">
+            ${goal.plan.map((installment, index) => createInstallmentRow(installment, index, goal)).join('')}
+        </div>`;
+    }
 
-  if (isNaN(saveAmount) || saveAmount <= 0) { return alert("กรุณาใส่จำนวนเงินที่ถูกต้องและมากกว่า 0"); }
-  
-  const goalRef = db.collection("users").doc(user.uid).collection("goals").doc(goalId);
+    card.innerHTML = `
+        <div class="goal-card-header">
+            <h3>${goal.name}</h3>
+            <button class="delete-goal-btn" title="ลบเป้าหมาย"><i class="fas fa-trash-alt"></i></button>
+        </div>
+        <div class="goal-card-body">
+            <p class="due-date"><i class="fas fa-calendar-alt"></i> กำหนด: ${dueDate}</p>
+            <div class="progress-info">
+                <span class="current">${currentSavings.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ฿</span>
+                <span class="target">${targetAmount.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ฿</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${Math.min(progress, 100)}%;"></div>
+            </div>
+        </div>
+        ${planHtml}
+    `;
 
-  db.runTransaction(transaction => {
-    return transaction.get(goalRef).then(doc => {
-      if (!doc.exists) { throw "เป้าหมายไม่พบ"; }
-      
-      const goal = doc.data();
-      const plan = goal.plan || [];
-      if (!plan[planIdx]) { throw "ไม่พบแผนการออมสำหรับงวดนี้"; }
-      
-      const currentSaved = parseFloat(plan[planIdx].saved) || 0;
-      const targetAmountForInstallment = parseFloat(plan[planIdx].amount);
-      let newSavedAmount = currentSaved + saveAmount;
-
-      if (newSavedAmount > targetAmountForInstallment) {
-        alert(`คุณออมเงินเกินเป้าหมายงวดนี้ (${(newSavedAmount - targetAmountForInstallment).toFixed(2)} บาท) ระบบจะบันทึกให้เท่ากับยอดเป้าหมายของงวดนี้เท่านั้น`);
-        newSavedAmount = targetAmountForInstallment;
-      }
-      
-      plan[planIdx].saved = newSavedAmount;
-      const totalSavings = plan.reduce((sum, p) => sum + (parseFloat(p.saved) || 0), 0);
-
-      transaction.update(goalRef, { plan: plan, savings: totalSavings });
+    card.querySelector('.delete-goal-btn').addEventListener('click', () => {
+        if (confirm(`คุณแน่ใจหรือไม่ที่จะลบเป้าหมาย "${goal.name}"?`)) deleteGoal(goal.id);
     });
-  }).then(() => {
-    console.log(`Transaction successfully committed for goal ${goalId}!`);
-    inputElement.value = ''; // Clear input on success
-  }).catch(error => {
-    console.error("Transaction failed: ", error);
-    alert("เกิดข้อผิดพลาดในการบันทึกเงินออม: " + error);
-  });
+    
+    // Add event listeners for each "Add Savings" button in the plan
+    card.querySelectorAll('.add-installment-savings-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const installmentIndex = e.currentTarget.dataset.index;
+            const installment = goal.plan[installmentIndex];
+            openAddSavingsModal(goal, installment, installmentIndex);
+        });
+    });
+
+    return card;
 }
 
+function createInstallmentRow(installment, index, goal) {
+    const instAmount = parseFloat(installment.amount || 0);
+    const instSaved = parseFloat(installment.saved || 0);
+    const instProgress = instAmount > 0 ? (instSaved / instAmount) * 100 : 0;
+    const isPaid = instSaved >= instAmount;
 
-/**
- * Deletes a goal from Firebase after user confirmation.
- */
-function deleteGoal(goalId, goalName) {
-  if (!confirm(`คุณต้องการลบเป้าหมาย "${goalName}" จริงหรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
-  
-  const user = firebase.auth().currentUser;
-  if (user) {
-    db.collection("users").doc(user.uid).collection("goals").doc(goalId).delete()
-      .catch(error => {
-        console.error("Error removing goal: ", error);
-        alert("เกิดข้อผิดพลาดในการลบเป้าหมาย");
-      });
-  }
+    return `
+    <div class="installment-row ${isPaid ? 'paid' : ''}">
+        <div class="installment-header">
+            <span>งวดที่ ${installment.round} (${installment.date})</span>
+            <span class="installment-progress-info">${instSaved.toLocaleString('th-TH', {minimumFractionDigits: 2})} / ${instAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})} ฿</span>
+        </div>
+        <div class="installment-progress-bar-container">
+            <div class="installment-progress-bar" style="width: ${Math.min(instProgress, 100)}%;"></div>
+        </div>
+        <div class="add-installment-savings-group">
+            <button class="add-installment-savings-btn" data-index="${index}" data-goal-id="${goal.id}" ${isPaid ? 'disabled' : ''}>
+                ${isPaid ? '<i class="fas fa-check"></i> ชำระแล้ว' : '+ เพิ่มเงินออม'}
+            </button>
+        </div>
+    </div>
+    `;
 }
 
-/**
- * Converts plan type key to readable Thai text.
- */
-function planTypeText(type) {
-  const types = {
-    daily_divide: "รายวัน (หารตามวัน)",
-    daily_fixed: "รายวัน (สูตร 20 งวด)",
-    weekly: "รายสัปดาห์",
-    monthly: "รายเดือน",
-    once: "ครั้งเดียว"
-  };
-  return types[type] || "ไม่ระบุ";
+// ================== Modal Handling ==================
+function openGoalModal() {
+    addGoalForm.reset();
+    currentAmountInput.value = 0;
+    planPreviewDiv.style.display = 'none';
+    goalModal.style.display = 'flex';
 }
+function closeGoalModal() { goalModal.style.display = 'none'; }
 
+function openAddSavingsModal(goal, installment, index) {
+    addSavingsForm.reset();
+    savingsGoalName.textContent = goal.name;
+    savingsModalTitle.textContent = `💰 เพิ่มเงินออม (งวดที่ ${installment.round})`;
+    savingsGoalId.value = goal.id;
+    savingsInstallmentIndex.value = index;
 
-// --- FORM INTERACTIVITY & PREVIEW ---
+    const remaining = (installment.amount || 0) - (installment.saved || 0);
+    savingsAmountInput.placeholder = `เหลืออีก ${remaining.toLocaleString('th-TH', {maximumFractionDigits: 2})} บาท`;
+    savingsAmountInput.max = remaining.toFixed(2);
 
-/**
- * Displays a real-time preview of the savings plan.
- */
+    addSavingsModal.style.display = 'flex';
+}
+function closeAddSavingsModal() { addSavingsModal.style.display = 'none'; }
+
+addGoalFab.addEventListener('click', openGoalModal);
+goalModal.querySelector('.close-button').addEventListener('click', closeGoalModal);
+addSavingsModal.querySelector('.close-button').addEventListener('click', closeAddSavingsModal);
+window.addEventListener('click', (e) => {
+    if (e.target === goalModal) closeGoalModal();
+    if (e.target === addSavingsModal) closeAddSavingsModal();
+});
+
+// ================== Plan Calculation & Preview ==================
 function previewPlan() {
-  const goalAmount = parseFloat(document.getElementById('goalAmount').value);
-  const goalDateStr = document.getElementById('goalDate').value;
-  const planType = document.getElementById('planType').value;
-  const previewBox = document.getElementById('planPreview');
-  const submitButton = document.querySelector('.primary-button');
-
-  if (!goalAmount || !goalDateStr || goalAmount <= 0) {
-    previewBox.style.display = 'none';
-    submitButton.disabled = true;
-    return;
-  }
-
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const endDate = new Date(goalDateStr); endDate.setHours(0, 0, 0, 0);
-
-  let text = "";
-  let isValid = true;
-  previewBox.classList.remove('warning');
-
-  if (endDate < today) {
-    text = 'กรุณาเลือกวันที่ในอนาคต';
-    isValid = false;
-    previewBox.classList.add('warning');
-  } else {
-    const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-    switch (planType) {
-      case 'monthly':
-        const monthDiff = (endDate.getFullYear() - today.getFullYear()) * 12 + (endDate.getMonth() - today.getMonth()) + 1;
-        const numMonths = monthDiff > 0 ? monthDiff : 1;
-        text = `ออม <b>${(goalAmount / numMonths).toLocaleString('th-TH', {maximumFractionDigits: 2})}</b> บาท/เดือน (${numMonths} เดือน)`;
-        break;
-      case 'weekly':
-        const numWeeks = Math.ceil(daysDiff / 7) || 1;
-        text = `ออม <b>${(goalAmount / numWeeks).toLocaleString('th-TH', {maximumFractionDigits: 2})}</b> บาท/สัปดาห์ (${numWeeks} สัปดาห์)`;
-        break;
-      case 'daily_divide':
-        const numDays = daysDiff >= 0 ? daysDiff + 1 : 1;
-        text = `ออม <b>${(goalAmount / numDays).toLocaleString('th-TH', {maximumFractionDigits: 2})}</b> บาท/วัน (${numDays} วัน)`;
-        break;
-      case 'daily_fixed':
-        if (daysDiff < 19) {
-          text = '<b>ข้อควรระวัง:</b> แผนนี้ต้องใช้เวลาอย่างน้อย 20 วัน';
-          previewBox.classList.add('warning');
-        } else {
-          text = `ออม <b>${(goalAmount * 0.05).toLocaleString('th-TH', {maximumFractionDigits: 2})}</b> บาท/วัน (20 งวด)`;
-        }
-        break;
-      case 'once':
-        text = `บันทึกเป้าหมาย <b>${goalAmount.toLocaleString('th-TH')}</b> บาท`;
-        break;
+    const amount = parseFloat(goalAmountInput.value);
+    const dateStr = goalDateInput.value;
+    const planType = planTypeSelect.value;
+    
+    if (!amount || !dateStr || !planType || amount <= 0) {
+        planPreviewDiv.style.display = 'none';
+        return;
     }
-  }
-  previewBox.innerHTML = text;
-  previewBox.style.display = 'block';
-  submitButton.disabled = !isValid;
+
+    const { text, isValid } = calculatePlanPreview(amount, dateStr, planType);
+    planPreviewDiv.innerHTML = text;
+    planPreviewDiv.className = isValid ? 'plan-preview' : 'plan-preview warning';
+    planPreviewDiv.style.display = 'block';
+    addGoalForm.querySelector('button[type="submit"]').disabled = !isValid;
 }
 
+['input', 'change'].forEach(evt => {
+    goalAmountInput.addEventListener(evt, previewPlan);
+    goalDateInput.addEventListener(evt, previewPlan);
+    planTypeSelect.addEventListener(evt, previewPlan);
+});
 
-// --- SAVING NEW GOAL ---
+function calculatePlanPreview(amount, dateStr, planType) {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const endDate = new Date(dateStr);
+    if (endDate < today) return { text: 'กรุณาเลือกวันที่ในอนาคต', isValid: false };
 
-/**
- * Calculates the saving plan installments.
- * @returns {Array} An array of plan installment objects.
- */
-function calculateSavingPlan(planType, goalAmount, today, endDate) {
-    let savingPlan = [];
+    const diffTime = endDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    let installments = 0;
+    let periodText = '';
+    
     switch (planType) {
-        case 'monthly': {
-            const monthDiff = (endDate.getFullYear() - today.getFullYear()) * 12 + (endDate.getMonth() - today.getMonth()) + 1;
-            const numInstallments = monthDiff > 0 ? monthDiff : 1;
-            const perInstallment = goalAmount / numInstallments;
-            for (let i = 0; i < numInstallments; i++) {
-                let d = new Date(today); d.setMonth(d.getMonth() + i);
-                savingPlan.push({ round: i + 1, date: d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short' }), amount: perInstallment.toFixed(2), saved: 0 });
-            } break;
-        }
-        case 'weekly': {
-            const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-            const numInstallments = Math.ceil(daysDiff / 7) || 1;
-            const perInstallment = goalAmount / numInstallments;
-            for (let i = 0; i < numInstallments; i++) {
-                let d = new Date(today); d.setDate(d.getDate() + i * 7);
-                savingPlan.push({ round: i + 1, date: d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }), amount: perInstallment.toFixed(2), saved: 0 });
-            } break;
-        }
-        case 'daily_divide': {
-            const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24)) + 1;
-            const numInstallments = daysDiff > 0 ? daysDiff : 1;
-            const perInstallment = goalAmount / numInstallments;
-            for (let i = 0; i < numInstallments; i++) {
-                let d = new Date(today); d.setDate(d.getDate() + i);
-                savingPlan.push({ round: i + 1, date: d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }), amount: perInstallment.toFixed(2), saved: 0 });
-            } break;
-        }
-        case 'daily_fixed': {
-            const numInstallments = 20; const perInstallment = goalAmount * 0.05;
-            for (let i = 0; i < numInstallments; i++) {
-                let d = new Date(today); d.setDate(d.getDate() + i);
-                savingPlan.push({ round: i + 1, date: d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }), amount: perInstallment.toFixed(2), saved: 0 });
-            } break;
-        }
-        case 'once': {
-            savingPlan.push({ round: 1, date: endDate.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }), amount: goalAmount.toFixed(2), saved: 0 });
+        case 'daily':
+            installments = diffDays;
+            periodText = 'วัน';
             break;
-        }
+        case 'weekly':
+            installments = Math.ceil(diffDays / 7);
+            periodText = 'สัปดาห์';
+            break;
+        case 'monthly':
+            installments = (endDate.getFullYear() - today.getFullYear()) * 12 + (endDate.getMonth() - today.getMonth()) + 1;
+            periodText = 'เดือน';
+            break;
+        case 'yearly':
+            installments = (endDate.getFullYear() - today.getFullYear()) + 1;
+            periodText = 'ปี';
+            break;
     }
-    return savingPlan;
+    
+    if (installments <= 0) installments = 1;
+    const amountPer = amount / installments;
+    return { 
+        text: `ออม <b>${amountPer.toLocaleString('th-TH', {maximumFractionDigits: 2})}</b> บาท/${periodText} (ทั้งหมด ${installments} งวด)`,
+        isValid: true
+    };
 }
 
-/**
- * Saves the new goal to Firebase.
- */
-function saveGoal(event) {
-  event.preventDefault();
-  const form = document.getElementById('addGoalForm');
-  const goalName = document.getElementById('goalName').value.trim();
-  const goalAmount = parseFloat(document.getElementById('goalAmount').value);
-  const goalDate = document.getElementById('goalDate').value;
-  const planType = document.getElementById('planType').value;
+// ================== CRUD Operations ==================
+addGoalForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
 
-  if (!goalName || !goalAmount || !goalAmount || !goalDate) { return alert("กรุณากรอกข้อมูลให้ครบถ้วน"); }
-
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const endDate = new Date(goalDate); endDate.setHours(0, 0, 0, 0);
-
-  if (endDate < today) { return alert("ไม่สามารถเลือกวันที่ในอดีตได้"); }
-  if (planType === 'daily_fixed' && (endDate - today) / (1000 * 60 * 60 * 24) < 19) {
-      return alert("สำหรับแผน 'ออมรายวัน (20 งวด x 5%)' ต้องมีระยะเวลาอย่างน้อย 20 วัน");
-  }
-
-  const savingPlan = calculateSavingPlan(planType, goalAmount, today, endDate);
-  const user = firebase.auth().currentUser;
-
-  if (user) {
-    const goal = {
-      name: goalName,
-      targetAmount: goalAmount,
-      savings: 0,
-      dueDate: goalDate,
-      planType: planType,
-      plan: savingPlan,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      status: 'active'
+    const goalData = {
+        name: goalNameInput.value,
+        targetAmount: parseFloat(goalAmountInput.value),
+        currentSavings: parseFloat(currentAmountInput.value),
+        dueDate: goalDateInput.value,
+        planType: planTypeSelect.value,
+        createdAt: serverTimestamp(),
+        plan: calculatePlan(
+            planTypeSelect.value,
+            parseFloat(goalAmountInput.value) - parseFloat(currentAmountInput.value),
+            goalDateInput.value
+        )
     };
 
-    db.collection("users").doc(user.uid).collection("goals").add(goal)
-      .then(() => {
-        alert("บันทึกเป้าหมายใหม่สำเร็จ!");
-        form.reset();
-        previewPlan();
-      })
-      .catch(err => {
-          console.error("Error adding document: ", err);
-          alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
-      });
-  } else {
-    alert("เกิดข้อผิดพลาด: ไม่พบข้อมูลผู้ใช้ กรุณาลองเข้าสู่ระบบใหม่อีกครั้ง");
-  }
+    try {
+        const goalsRef = collection(db, 'users', currentUser.uid, 'goals');
+        await addDoc(goalsRef, goalData);
+        closeGoalModal();
+    } catch (error) {
+        console.error("Error saving goal: ", error);
+        alert("เกิดข้อผิดพลาดในการบันทึกเป้าหมาย");
+    }
+});
+
+function calculatePlan(planType, amountToSave, dateStr) {
+    const plan = [];
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const endDate = new Date(dateStr);
+    const diffTime = endDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    let installments = 0;
+    if (planType === 'daily') installments = diffDays;
+    if (planType === 'weekly') installments = Math.ceil(diffDays / 7);
+    if (planType === 'monthly') installments = (endDate.getFullYear() - today.getFullYear()) * 12 + (endDate.getMonth() - today.getMonth()) + 1;
+    if (planType === 'yearly') installments = (endDate.getFullYear() - today.getFullYear()) + 1;
+    
+    if (installments <= 0) installments = 1;
+    const amountPer = amountToSave / installments;
+
+    for (let i = 0; i < installments; i++) {
+        let d = new Date(today);
+        if (planType === 'daily') d.setDate(d.getDate() + i);
+        if (planType === 'weekly') d.setDate(d.getDate() + i * 7);
+        if (planType === 'monthly') d.setMonth(d.getMonth() + i);
+        if (planType === 'yearly') d.setFullYear(d.getFullYear() + i);
+        
+        plan.push({
+            round: i + 1,
+            date: d.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: '2-digit'}),
+            amount: amountPer,
+            saved: 0
+        });
+    }
+    return plan;
 }
+
+async function deleteGoal(id) {
+    if (!currentUser) return;
+    try {
+        await deleteDoc(doc(db, 'users', currentUser.uid, 'goals', id));
+    } catch (error) {
+        console.error("Error deleting goal: ", error);
+        alert("เกิดข้อผิดพลาดในการลบเป้าหมาย");
+    }
+}
+
+addSavingsForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    const goalId = savingsGoalId.value;
+    const index = parseInt(savingsInstallmentIndex.value);
+    const amountToAdd = parseFloat(savingsAmountInput.value);
+
+    if (isNaN(amountToAdd) || amountToAdd <= 0) {
+        alert("กรุณาใส่จำนวนเงินที่ถูกต้อง");
+        return;
+    }
+
+    const goalRef = doc(db, 'users', currentUser.uid, 'goals', goalId);
+    try {
+        await runTransaction(db, async (transaction) => {
+            const goalDoc = await transaction.get(goalRef);
+            if (!goalDoc.exists()) throw "Goal does not exist!";
+
+            const goalData = goalDoc.data();
+            const plan = [...goalData.plan];
+            const installment = plan[index];
+
+            const alreadySaved = installment.saved || 0;
+            const installmentTarget = installment.amount;
+            const remainingNeeded = installmentTarget - alreadySaved;
+
+            if (remainingNeeded <= 0) {
+                alert("งวดนี้ชำระเงินครบแล้ว");
+                throw new Error("Installment already paid.");
+            }
+
+            const actualAmountToSave = Math.min(amountToAdd, remainingNeeded);
+
+            installment.saved = alreadySaved + actualAmountToSave;
+
+            const newTotalSavings = (goalData.currentSavings || 0) + actualAmountToSave;
+            
+            transaction.update(goalRef, { 
+                plan: plan,
+                currentSavings: newTotalSavings
+            });
+
+            if (amountToAdd > remainingNeeded) {
+                 setTimeout(() => alert(`คุณใส่จำนวนเงินเกินกว่าที่ต้องชำระในงวดนี้ ระบบได้ปรับลดเงินออมเป็น ${actualAmountToSave.toLocaleString('th-TH', {maximumFractionDigits: 2})} บาท`), 100);
+            }
+        });
+        closeAddSavingsModal();
+    } catch (error) {
+        if (error.message !== "Installment already paid.") {
+            console.error("Error adding savings: ", error);
+            alert("เกิดข้อผิดพลาดในการเพิ่มเงินออม: " + error);
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    goalDateInput.setAttribute('min', today);
+});

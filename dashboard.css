@@ -1,31 +1,40 @@
-/* ตัวแปรสีพื้นฐาน */
 :root {
-  --primary-color: #26A69A;
-  --primary-darker: #00796B;
-  --background-color: #f4f7f6;
+  /* Colors from Logo */
+  --primary-color: #00877F;      /* สีเขียวอมฟ้าหลักจากโลโก้ */
+  --primary-darker: #006A64;     /* สีเขียวอมฟ้าเข้มขึ้น */
+  --accent-gold: #FFC107;        /* สีเหลืองทองตัว M และเหรียญ */
+  --accent-yellow: #E0E751;      /* สีเหลืองอ่อนจากคำว่า Skillz */
+
+  /* UI Colors based on Logo */
+  --background-color: #E8F5E9;    /* เปลี่ยนเป็นสีพื้นหลังเขียวพาสเทล */
   --card-background: #ffffff;
-  --text-color: #333;
-  --text-secondary: #666;
-  --border-color: #e0e0e0;
+  --text-color: #003D3A;          /* สีตัวอักษรเขียวเข้ม */
+  --text-secondary: #005A55;      /* สีตัวอักษรรอง */
+  --border-color: #A0D9D4;        /* สีขอบอ่อนๆ */
+  --highlight-color: #26A69A;     /* สีสำหรับ hover หรือเน้น */
+  --shadow-color: rgba(0, 135, 127, 0.15);
+
+  /* Status Colors */
   --danger-color: #ef5350;
-  --success-color: #66BB6A;
-  --shadow-color: rgba(0, 100, 100, 0.08); /* Lighter shadow for cleaner look */
-  --highlight-color: #80CBC4;
-  --badge-gold: #f39c12; /* Gold color for trophy icon */
-  --badge-light-bg: #ecf0f1; /* Light background for badges */
-  --badge-border: #bdc3c7; /* Border for badges */
+  --success-color: #4CAF50;
+
+  /* Badge Colors */
+  --badge-gold: #FFC107;
+  --badge-light-bg: #fffde7;
+  --badge-border: #ffd54f;
 }
 
 /* Dark Mode */
 body.dark-mode {
-  --background-color: #1a1a1a;
-  --card-background: #282828;
-  --text-color: #e0e0e0;
-  --text-secondary: #aaaaaa;
-  --border-color: #444;
-  --shadow-color: rgba(0, 0, 0, 0.4);
-  --badge-light-bg: #3a3a3a;
-  --badge-border: #555;
+  --background-color: #001a18;
+  --card-background: #002a27;
+  --text-color: #F0FFF0;
+  --text-secondary: #B0C4B1;
+  --border-color: #004d40;
+  --shadow-color: rgba(0,0,0,0.40);
+  --highlight-color: #00695c;
+  --badge-light-bg: #282c1c;
+  --badge-border: #FFC107;
 }
 
 body {
@@ -91,12 +100,12 @@ body {
     color: var(--primary-darker);
 }
 .user-level {
-    font-size: 1em; color: var(--primary-darker); background: #e0f7fa;
+    font-size: 1em; color: var(--primary-darker); background: #e0f2f1; /* Lighter teal background */
     border-radius: 20px; display: inline-block; padding: 6px 18px;
     box-shadow: 0 2px 8px var(--shadow-color); font-weight: 500; margin: 5px 0;
     margin-top: 10px; /* Spacing below username */
 }
-body.dark-mode .user-level { background: #23413a; color: #7de1cf; }
+body.dark-mode .user-level { background: #004d40; color: #b2dfdb; }
 .quote { margin: 15px auto; color: var(--text-secondary); font-style: italic; font-size: 0.95em; }
 
 /* Progress Bar */
@@ -107,7 +116,7 @@ body.dark-mode .user-level { background: #23413a; color: #7de1cf; }
     overflow: hidden; /* Ensure inner bar stays within bounds */
 }
 .progress-inner {
-    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    background: linear-gradient(90deg, var(--success-color), #8BC34A);
     height: 100%; border-radius: 12px; width: 0%;
     transition: width 0.8s ease-out;
     display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
@@ -192,9 +201,11 @@ body.dark-mode .summary-item { background: transparent; } /* No background hover
     color: white; /* Text color change on hover */
 }
 .menu-card:hover span { color: white; } /* Icon color change on hover */
+.menu-card:hover p { color: white; } /* Text color change on hover */
 
-.menu-card span { font-size: 2.8em; color: var(--primary-color); margin-bottom: 10px; display: block; }
-.menu-card p { margin: 0; font-weight: 600; font-size: 1.1em; }
+
+.menu-card span { font-size: 2.8em; color: var(--primary-color); margin-bottom: 10px; display: block; transition: color 0.2s ease; }
+.menu-card p { margin: 0; font-weight: 600; font-size: 1.1em; color: var(--text-color); transition: color 0.2s ease;}
 
 
 /* Transactions List */
