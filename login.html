@@ -123,15 +123,29 @@
     </div>
   </div>
 
-  <!-- Firebase SDK Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  
-  <script>
-    // ✅ Firebase Configuration
+  <!-- 🔄 [UPDATED] Firebase SDK Scripts (using modern modular v9+ syntax) -->
+  <script type="module">
+    // Import functions from the Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      signInWithEmailAndPassword, 
+      GoogleAuthProvider, 
+      signInWithPopup 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ✅ Your web app's Firebase configuration
+    // IMPORTANT: Keep this secure and do not expose it publicly in production
     const firebaseConfig = {
-      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4", // Replace with your actual API key
       authDomain: "myapplication-bd04c034.firebaseapp.com",
       databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "myapplication-bd04c034",
@@ -142,93 +156,95 @@
     };
 
     // Initialize Firebase
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
+    // --- Main Application Logic ---
     document.addEventListener('DOMContentLoaded', () => {
       const loginForm = document.getElementById('loginForm');
       const googleSignInBtn = document.getElementById('googleSignIn');
       const messageDiv = document.getElementById('messageDiv');
 
-      // ตรวจสอบสถานะการล็อกอิน (จะทำงานทั้งตอนเปิดหน้าเว็บและหลังจาก redirect กลับมา)
-      auth.onAuthStateChanged(user => {
+      // Observer for authentication state changes
+      onAuthStateChanged(auth, user => {
           if (user) {
               console.log("ผู้ใช้ล็อกอินอยู่ กำลังเปลี่ยนเส้นทางไป dashboard...");
-              window.location.href = "dashboard.html";
+              // Use a slight delay to ensure Firestore operations can complete
+              setTimeout(() => {
+                window.location.href = "dashboard.html";
+              }, 500);
+          } else {
+              console.log("ไม่มีผู้ใช้ล็อกอินอยู่");
           }
       });
 
-      // จัดการการล็อกอินด้วยอีเมลและรหัสผ่าน (เหมือนเดิม)
+      // Handle Email & Password Login
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
+        messageDiv.textContent = "";
 
-        auth.signInWithEmailAndPassword(email, password)
+        signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             console.log("เข้าสู่ระบบด้วยอีเมลสำเร็จ:", userCredential.user);
-            window.location.href = "dashboard.html"; 
+            // onAuthStateChanged will handle the redirect
           })
           .catch(error => { 
             console.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ:", error);
-            messageDiv.textContent = "อีเมลหรือรหัสผ่านไม่ถูกต้อง"; 
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                messageDiv.textContent = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+            } else {
+                messageDiv.textContent = "เกิดข้อผิดพลาด: " + error.message;
+            }
           });
       });
 
-      // --- 🔄 [แก้ไข] จัดการการล็อกอินด้วย Google โดยกลับไปใช้ Popup ---
-      googleSignInBtn.addEventListener('click', () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        
-        console.log("กำลังเริ่มกระบวนการล็อกอินด้วย Google (Popup)...");
+      // Handle Google Sign-In with Popup
+      googleSignInBtn.addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
         messageDiv.textContent = "";
+        console.log("กำลังเริ่มกระบวนการล็อกอินด้วย Google (Popup)...");
 
-        // กลับมาใช้ signInWithPopup เพราะเข้ากันได้กับสภาพแวดล้อมนี้
-        auth.signInWithPopup(provider)
-          .then((result) => {
-            console.log("ล็อกอินด้วย Google สำเร็จ:", result);
-            const user = result.user;
-            const userRef = db.collection('users').doc(user.uid);
+        try {
+          const result = await signInWithPopup(auth, provider);
+          console.log("ล็อกอินด้วย Google สำเร็จ:", result);
+          const user = result.user;
+          const userRef = doc(db, 'users', user.uid);
 
-            // ตรวจสอบว่าเป็นผู้ใช้ใหม่หรือไม่
-            return userRef.get().then(doc => {
-              if (!doc.exists) {
-                // ถ้าเป็นผู้ใช้ใหม่ ให้สร้างข้อมูลใน Firestore
-                console.log(`ผู้ใช้ใหม่ (UID: ${user.uid}) กำลังสร้างข้อมูลใน Firestore...`);
-                return userRef.set({
-                  displayName: user.displayName,
-                  email: user.email,
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                  level: 1,
-                  xp: 0,
-                  nextLevelXP: 100,
-                  quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
-                  badges: [],
-                  coins: 0,
-                  inventory: [],
-                  lastLoginReward: '',
-                  completedLessons: []
-                });
-              } else {
-                console.log(`ผู้ใช้เก่า (UID: ${user.uid}) กลับมาล็อกอิน`);
-              }
+          // Check if the user is new
+          const userDoc = await getDoc(userRef);
+          
+          if (!userDoc.exists()) {
+            // If it's a new user, create their data in Firestore
+            console.log(`ผู้ใช้ใหม่ (UID: ${user.uid}) กำลังสร้างข้อมูลใน Firestore...`);
+            await setDoc(userRef, {
+              displayName: user.displayName,
+              email: user.email,
+              createdAt: serverTimestamp(),
+              level: 1,
+              xp: 0,
+              nextLevelXP: 100,
+              quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
+              badges: [],
+              coins: 0,
+              inventory: [],
+              lastLoginReward: '',
+              completedLessons: []
             });
-          })
-          .then(() => {
-            // เมื่อทุกอย่างเรียบร้อย ให้เปลี่ยนไปหน้า dashboard
-            // (onAuthStateChanged จะจัดการเรื่องนี้อยู่แล้ว แต่ใส่ไว้เผื่อ)
-            window.location.href = "dashboard.html";
-          })
-          .catch(error => {
-            // จัดการข้อผิดพลาดที่อาจเกิดขึ้น
-            console.error("เกิดข้อผิดพลาดกับ Google Sign-In (Popup):", error);
-            messageDiv.textContent = "เกิดข้อผิดพลาดกับ Google Sign-In: " + error.message; 
-          });
+            console.log("สร้างข้อมูลผู้ใช้ใหม่สำเร็จ");
+          } else {
+            console.log(`ผู้ใช้เก่า (UID: ${user.uid}) กลับมาล็อกอิน`);
+          }
+          // Redirect is handled by onAuthStateChanged
+        } catch (error) {
+          console.error("เกิดข้อผิดพลาดกับ Google Sign-In (Popup):", error);
+          messageDiv.textContent = "เกิดข้อผิดพลาดกับ Google Sign-In: " + error.message; 
+        }
       });
 
-      // Logic สำหรับแสดง/ซ่อนรหัสผ่าน (เหมือนเดิม)
+      // Toggle password visibility
       document.querySelector('.toggle-password').addEventListener('click', function() {
           const passwordInput = document.getElementById('password');
           const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
