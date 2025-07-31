@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💼 หน้าหลัก - MoneySkillz</title>
+  <title> หน้าหลัก - MoneySkillz</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -206,6 +206,26 @@
         from { transform: translateY(0); }
         to { transform: translateY(-10px); }
     }
+
+    /* Styles for the new "Add Savings" button */
+    .add-savings-btn {
+        background-color: var(--accent-color); /* Use a suitable accent color */
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9em;
+        margin-top: 15px;
+        display: block; /* Make it a block element */
+        width: fit-content; /* Adjust width to content */
+        margin-left: auto; /* Center the button */
+        margin-right: auto; /* Center the button */
+        transition: background-color 0.3s ease;
+    }
+    .add-savings-btn:hover {
+        background-color: var(--primary-dark-color); /* Darken on hover */
+    }
   </style>
 </head>
 <body>
@@ -214,7 +234,8 @@
       <h1>MoneySkillz</h1>
       <p>ออมวันนี้ เก่งการเงินวันหน้า!</p>
       <div class="avatar-box">
-        <img id="profilePicture" src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Avatar">
+        <!-- MODIFIED: Changed the profile picture URL to a black user icon -->
+        <img id="profilePicture" src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" alt="Avatar">
       </div>
     </header>
 
@@ -248,7 +269,7 @@
 
     <!-- ส่วนร้านค้า (ซ่อนไว้) -->
     <div class="container card-section" style="display: none;">
-      <h2><span class="icon">🛒</span> ร้านค้า</h2>
+      <h2><span class="icon"></span> ร้านค้า</h2>
       <div id="shopItemsRow" class="shop-items-grid">
          <!-- ไอเท็มในร้านค้าจะถูกสร้างโดย JavaScript -->
       </div>
@@ -256,7 +277,7 @@
 
 
     <div class="container card-section">
-      <h2><span class="icon">💰</span> ภาพรวมการเงิน</h2>
+      <h2><span class="icon"></span> ภาพรวมการเงิน</h2>
       <div class="summary-item income">
         <strong>รายรับ:</strong> <span class="amount" id="income">0.00 ฿</span>
       </div>
@@ -300,7 +321,7 @@
     </div>
 
     <div id="goalDisplay" class="container card-section">
-      <h2><span class="icon">🎯</span> เป้าหมายการออมของฉัน</h2>
+      <h2><span class="icon"></span> เป้าหมายการออมของฉัน</h2>
       <div class="goal-navigation">
         <button id="prevGoal" class="goal-nav-btn">&#8249;</button>
         <div id="goalDetails">
@@ -315,31 +336,19 @@
         </div>
         <button id="nextGoal" class="goal-nav-btn">&#8250;</button>
       </div>
+      <!-- MODIFIED: Changed button to link to the goal management page -->
+      <button class="add-savings-btn" onclick="location.href='add-goal.html'">จัดการเป้าหมายและเพิ่มเงินออม</button>
     </div>
 
     <div class="container card-section">
-      <h2><span class="icon">🧾</span> รายการล่าสุด</h2>
+      <h2><span class="icon"></span> รายการล่าสุด</h2>
       <div id="transactionsContainer">
         <p class="no-transactions-message">ไม่มีรายการธุรกรรมในขณะนี้</p>
       </div>
     </div>
   </div>
 
-  <div id="goalModal" class="modal">
-    <div class="modal-content">
-      <span class="close-button" onclick="closeGoalModal()">&times;</span>
-      <h2>ตั้งเป้าหมายใหม่</h2>
-      <form id="goalForm">
-        <input type="text" id="goalNameInput" placeholder="ชื่อเป้าหมาย (เช่น ซื้อจักรยาน)" required>
-        <input type="number" id="goalTargetAmount" placeholder="จำนวนเงินเป้าหมาย" required>
-        <input type="number" id="goalCurrentSavings" placeholder="เงินออมเริ่มต้น (ถ้ามี)" value="0">
-        <label for="goalDueDateInput">วันครบกำหนด (ถ้ามี):</label>
-        <input type="date" id="goalDueDateInput">
-        <button type="submit">สร้างเป้าหมาย</button>
-      </form>
-      <div id="goalMessage" class="message-div"></div>
-    </div>
-  </div>
+  <!-- REMOVED: Goal Creation Modal is not needed on this page -->
 
   <!-- START: เพิ่ม Notification Modal -->
   <div id="notificationModal" class="modal">
@@ -372,7 +381,7 @@
   <div id="levelUpModal" class="modal">
     <div class="modal-content level-up-modal-content">
       <span class="close-button" onclick="closeLevelUpModal()">&times;</span>
-      <div class="level-up-icon">🎉</div>
+      <div class="level-up-icon"></div>
       <h2>ยินดีด้วย!</h2>
       <p>คุณเลเวลอัพเป็น <span id="levelUpModalLevel"></span></p>
       <p><span id="levelUpModalName"></span></p>
@@ -384,6 +393,7 @@
   </div>
   <!-- END: เพิ่ม Level Up Modal -->
 
+  <!-- REMOVED: The Add Savings Modal has been removed to avoid data conflicts. -->
 
   <div class="ai-chat-btn" onclick="document.getElementById('aiChatBox').style.display='flex'">
     <span>🤖</span>

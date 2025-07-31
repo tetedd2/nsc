@@ -160,7 +160,6 @@ let transactions = [];
 let goals = [];
 let currentGoalIndex = 0;
 let unsubscribeListeners = [];
-// window.isSpendingBlocked = false; // REMOVED - Replaced with localStorage
 const allBadges = [ // Define all available badges for the application
     { id: 'first_transaction', name: 'นักบันทึกมือใหม่', description: 'บันทึกธุรกรรมแรกของคุณ', icon: '✍️' },
     { id: 'first_goal', name: 'ผู้ตั้งเป้าหมาย', description: 'สร้างเป้าหมายการออมแรก', icon: '🎯' },
@@ -229,8 +228,22 @@ function attachRealtimeListeners(uid) {
     // --- Goals Listener ---
     const goalsQuery = query(collection(db, 'users', uid, 'goals'), orderBy('createdAt', 'desc'));
     const goalsListener = onSnapshot(goalsQuery, (snapshot) => {
+        console.log("Goals onSnapshot triggered.");
+        const oldCurrentGoalId = goals[currentGoalIndex] ? goals[currentGoalIndex].id : null; // Get ID of currently displayed goal
+
         goals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        currentGoalIndex = 0;
+        console.log("Updated goals array:", goals);
+
+        // Try to maintain the current goal if its ID still exists
+        let newCurrentGoalIndex = 0; // Default to first goal
+        if (oldCurrentGoalId) {
+            const foundIndex = goals.findIndex(g => g.id === oldCurrentGoalId);
+            if (foundIndex !== -1) {
+                newCurrentGoalIndex = foundIndex;
+            }
+        }
+        currentGoalIndex = newCurrentGoalIndex; // Update global currentGoalIndex
+
         displayGoals();
     }, (error) => console.error("Error listening to goals:", error));
 
@@ -408,7 +421,8 @@ function resetUIToLoggedOutState() {
 
 function updateProfileUI(userData, user) {
     console.log("updateProfileUI triggered. UserData:", userData);
-    const defaultAvatar = 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png';
+    // MODIFIED: Changed the default avatar URL to a black user icon
+    const defaultAvatar = 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png';
     document.getElementById('profilePicture').src = user?.photoURL || defaultAvatar;
     document.getElementById('usernameDisplay').textContent = userData?.displayName || user?.displayName || 'ผู้ใช้ใหม่';
 
@@ -571,10 +585,14 @@ function displayGoals() {
     if (currentGoalIndex >= goals.length) currentGoalIndex = 0;
 
     const goal = goals[currentGoalIndex];
+    console.log("Displaying goal:", goal); // Log the goal being displayed
 
     const target = parseFloat(goal.targetAmount || goal.target || 0);
-    const saved = parseFloat(goal.savings || 0);
+    // MODIFIED: Read 'currentSavings' (from add-goal.js) with a fallback to 'savings' for compatibility.
+    const saved = parseFloat(goal.currentSavings || goal.savings || 0);
     const progress = target > 0 ? (saved / target) * 100 : 0;
+
+    console.log(`Goal: ${goal.name}, Target: ${target}, Saved: ${saved}, Progress: ${progress}%`); // Log calculated values
 
     document.getElementById('goalTitle').textContent = goal.name;
     document.getElementById('goalAmount').textContent = `เป้าหมาย: ${target.toFixed(2)} ฿`;
@@ -607,53 +625,17 @@ window.deleteTransaction = async function(transactionId) {
     }
 }
 
+// REMOVED: addSavingsToGoal function is removed to avoid data conflicts.
+// Goal management is now centralized in add-goal.html.
+
 // ================== DOM Event Listeners ==================
 document.addEventListener('DOMContentLoaded', () => {
-    // Goal Form Submission
-    const goalForm = document.getElementById('goalForm');
-    if (goalForm) {
-        goalForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const user = auth.currentUser;
-            if (!user) {
-                showNotificationModal("ข้อผิดพลาด", "กรุณาเข้าสู่ระบบ");
-                return;
-            }
-
-            const name = document.getElementById('goalNameInput').value.trim();
-            const targetAmount = parseFloat(document.getElementById('goalTargetAmount').value);
-            const savings = parseFloat(document.getElementById('goalCurrentSavings').value || 0);
-            const dueDate = document.getElementById('goalDueDateInput').value;
-            const messageDiv = document.getElementById('goalMessage');
-
-            if (!name || isNaN(targetAmount) || targetAmount <= 0) {
-                messageDiv.textContent = "กรุณากรอกชื่อและจำนวนเงินเป้าหมายให้ถูกต้อง";
-                messageDiv.style.color = "red";
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "users", user.uid, "goals"), {
-                    name, targetAmount, savings, dueDate,
-                    createdAt: serverTimestamp()
-                });
-
-                await addXP(user.uid, 50);
-
-                messageDiv.textContent = "สร้างเป้าหมายสำเร็จ! (+50 XP)";
-                messageDiv.style.color = "green";
-                goalForm.reset();
-                setTimeout(closeGoalModal, 1500);
-            } catch (error) {
-                messageDiv.textContent = "เกิดข้อผิดพลาด: " + error.message;
-                messageDiv.style.color = "red";
-                console.error("Error adding goal: ", error);
-            }
-        });
-    }
+    // REMOVED: Goal Form Submission logic is not on this page.
 
     document.getElementById('prevGoal')?.addEventListener('click', () => { currentGoalIndex--; displayGoals(); });
     document.getElementById('nextGoal')?.addEventListener('click', () => { currentGoalIndex++; displayGoals(); });
+
+    // REMOVED: Add Savings Form listener is removed.
 
     const aiChatForm = document.getElementById('aiChatForm');
     if (aiChatForm) {
@@ -673,13 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ================== Modal Control Functions ==================
 
-// Function to open the Goal Creation Modal
-function openGoalModal() { document.getElementById('goalModal').style.display = 'flex'; }
-window.closeGoalModal = function() {
-    document.getElementById('goalModal').style.display = 'none';
-    document.getElementById('goalMessage').textContent = '';
-    document.getElementById('goalForm').reset();
-}
+// REMOVED: Goal Creation Modal functions are not on this page.
 
 // Custom Notification Modal
 window.showNotificationModal = function(title, message) {
@@ -759,6 +735,8 @@ window.showLevelUpModal = function(level, name, reward) {
 window.closeLevelUpModal = function() {
     document.getElementById('levelUpModal').style.display = 'none';
 }
+
+// REMOVED: Add Savings Modal functions are removed.
 
 // ================== AI Chatbot Logic ==================
 function appendMsg(sender, msg) {

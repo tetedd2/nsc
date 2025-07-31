@@ -49,7 +49,7 @@
       padding-bottom: 70px; /* เว้นที่ให้ bottom nav */
     }
     .header {
-      background: linear-gradient(to right, #3ac48c, #48c881); /* สีส้ม */
+      background: linear-gradient(to right, #3db3b1, #208576); /* สีส้ม */
       color: white;
       padding: 25px 20px;
       text-align: center;
@@ -200,11 +200,8 @@
     <p>ปรับแต่งบัญชีของคุณ</p>
   </header>
 
-  <main class="container">
-    <a href="dashboard.html" class="back-link">&larr; กลับไปหน้าหลัก</a>
-
     <section class="settings-section">
-      <h2><span class="icon">🎨</span> การแสดงผล</h2>
+      <h2><span class="icon"></span> การแสดงผล</h2>
       <div class="theme-switch-wrapper">
           <label class="theme-switch" for="dark-mode-toggle">
               <input type="checkbox" id="dark-mode-toggle" />
@@ -215,9 +212,9 @@
     </section>
 
     <section class="settings-section">
-      <h2><span class="icon">👤</span> โปรไฟล์ของคุณ</h2>
+      <h2><span class="icon"></span> โปรไฟล์ของคุณ</h2>
       <div class="profile-header">
-        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Profile Picture" class="profile-picture-settings" id="settingsProfilePicture" onclick="document.getElementById('profilePictureInput').click();">
+        <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" alt="Profile Picture" class="profile-picture-settings" id="settingsProfilePicture" onclick="document.getElementById('profilePictureInput').click();">
         <input type="file" id="profilePictureInput" accept="image/*">
         <div class="profile-details">
             <h3 id="username" style="margin: 0; font-size: 1.5rem; color: var(--text-color);">กำลังโหลด...</h3>
@@ -228,10 +225,10 @@
     </section>
 
     <section class="settings-section">
-        <h2><span class="icon">📊</span> สถิติของฉัน</h2>
+        <h2><span class="icon"></span> สถิติของฉัน</h2>
         <div class="stat-item">
 <div style="display: flex; align-items: center; gap: 10px;">
-    <span class="icon">🔥</span>
+    <span class="icon"></span>
     <div>
         <strong>Saving Streak</strong>
         <p style="margin:0; font-size: 1rem; color: var(--text-secondary);">บันทึกการออมต่อเนื่อง <strong id="saving-streak-days">--</strong> วันแล้ว!</p>
@@ -291,7 +288,7 @@
     </section>
 
     <section class="settings-section" style="display: none;">
-        <h2><span class="icon">🗑️</span> การจัดการข้อมูล (Local)</h2>
+        <h2><span class="icon"></span> การจัดการข้อมูล (Local)</h2>
         <button id="clearDataBtn">ล้างข้อมูลบทเรียนและคะแนน (Local)</button>
         <p style="font-size:0.85em; color:var(--text-secondary); margin-top:10px;">
             การดำเนินการนี้จะล้างข้อมูลบทเรียนและคะแนนแบบทดสอบทั้งหมดที่บันทึกอยู่ในเครื่องของคุณ (Local Storage และ IndexedDB) ซึ่งอาจทำให้คุณออกจากระบบ และต้องล็อกอินใหม่เพื่อดูสถานะปัจจุบันจาก Firebase
@@ -299,7 +296,7 @@
     </section>
 
     <section class="settings-section">
-        <h2><span class="icon">✍️</span> ข้อเสนอแนะถึงผู้พัฒนา</h2>
+        <h2><span class="icon"></span> ข้อเสนอแนะถึงผู้พัฒนา</h2>
         <form id="feedbackForm">
           <textarea id="feedbackText" rows="5" placeholder="มีความคิดเห็น, ข้อเสนอแนะ, หรือเจอปัญหา? บอกเราได้เลย..."></textarea>
           <button id="submitFeedbackBtn" type="submit">ส่งข้อเสนอแนะ</button>
