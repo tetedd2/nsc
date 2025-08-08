@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI อ่านข้อมูลจากสลิป (Auto Pick)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', 'Kanit', sans-serif; }
+        #upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 0.75rem;
+            padding: 2rem; text-align: center; cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #upload-area.highlight { background-color: #f0f9ff; border-color: #3b82f6; }
+        .loader { border-top-color: #3498db; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .copy-button { transition: background-color 0.2s, transform 0.1s; }
+        .copy-button:active { transform: scale(0.98); }
+        /* Overlay ขอการแตะ 1 ครั้งเพื่อเปิดตัวเลือกไฟล์ (กรณีเบราว์เซอร์บล็อกการเปิดอัตโนมัติ) */
+        #tap-overlay { backdrop-filter: blur(2px); }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Tap overlay (จะแสดงในกรณีต้องการ user gesture ครั้งเดียว) -->
+    <div id="tap-overlay" class="hidden fixed inset-0 z-50 bg-black/50 text-white flex items-center justify-center">
+        <div class="text-center px-6">
+            <div class="text-3xl mb-4">📱</div>
+            <p class="text-lg font-semibold">แตะที่หน้าจอเพื่อเปิดรูปอัตโนมัติ</p>
+            <p class="text-sm text-gray-200 mt-1">บางเบราว์เซอร์ไม่อนุญาตให้เปิดตัวเลือกไฟล์เอง จำเป็นต้องแตะ 1 ครั้ง</p>
+            <button id="tap-to-open" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">แตะเพื่อเลือก/ถ่ายรูป</button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-lg mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">AI อ่านข้อมูลจากสลิป</h1>
+            <p class="text-gray-500 mt-2">อัปโหลดรูปสลิปเพื่อดึงข้อมูลสำคัญ</p>
+        </div>
+
+        <!-- File Upload Section -->
+        <div id="upload-container">
+            <label for="file-input" id="upload-area" class="flex flex-col items-center justify-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-600">
+                    <span class="font-semibold text-blue-600">คลิกเพื่อเลือกไฟล์</span> หรือลากมาวาง
+                </p>
+                <p class="text-xs text-gray-500">รองรับไฟล์ PNG, JPG</p>
+                <!-- เพิ่ม capture เพื่อชี้กล้องหลังบนมือถือ และใช้ image/* เพื่อเปิดกว้างทุกชนิดรูป -->
+                <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
+            </label>
+        </div>
+
+        <div id="loading-spinner" class="text-center py-4 hidden" aria-live="polite">
+            <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mx-auto mb-2"></div>
+            กำลังวิเคราะห์รูปภาพ...
+        </div>
+
+        <!-- Result Display Section -->
+        <div id="output-container" class="bg-gray-50 p-4 rounded-lg hidden mt-6">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-bold text-gray-800">ข้อมูลที่อ่านได้:</h2>
+            </div>
+            <div id="output-data" class="space-y-2"></div>
+            <button id="analyze-another-button" class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">วิเคราะห์รูปใหม่</button>
+        </div>
+    </div>
+
+    <script>
+        // ====== อ้างอิง element ======
+        const outputContainer = document.getElementById('output-container');
+        const outputData = document.getElementById('output-data');
+        const fileInput = document.getElementById('file-input');
+        const analyzeAnotherButton = document.getElementById('analyze-another-button');
+        const uploadContainer = document.getElementById('upload-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const uploadArea = document.getElementById('upload-area');
+        const tapOverlay = document.getElementById('tap-overlay');
+        const tapToOpenBtn = document.getElementById('tap-to-open');
+
+        // ====== ฟังก์ชันหลัก: จัดการไฟล์ ======
+        async function handleFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                showModal('กรุณาเลือกไฟล์รูปภาพเท่านั้น (PNG หรือ JPG)');
+                return;
+            }
+
+            uploadContainer.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            outputContainer.classList.add('hidden');
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    const base64Data = event.target.result.split(',')[1];
+                    const prompt = "Extract the following details from this Thai bank slip image and respond with a JSON object. If a field is not found, use an empty string. The field names should be in English:\n- Sender_Name: The name of the sender.\n- Sender_Bank: The bank of the sender.\n- Receiver_Name: The name of the receiver.\n- Receiver_Bank: The bank of the receiver.\n- Transaction_ID: The transaction reference number.\n- Amount: The transaction amount, including the currency symbol (e.g., '120.00 บาท').\n- Date: The transaction date.\n- Time: The transaction time.";
+
+                    // ⚠️ คำเตือน: ไม่ควรฝัง API Key บน client จริง ควรเรียกผ่าน backend proxy
+                    const apiKey = "AIzaSyBZXa3jVaK2LM1SZHgoAEOdB8itrl6WlP4"; // ใช้ของคุณเอง (เดิม)
+
+                    if (!apiKey) {
+                        showModal('กรุณาใส่ API Key ในโค้ดก่อนใช้งาน');
+                        resetUI();
+                        return;
+                    }
+
+                    const payload = {
+                        contents: [
+                            { role: 'user', parts: [ { text: prompt }, { inlineData: { mimeType: file.type, data: base64Data } } ] }
+                        ],
+                        generationConfig: {
+                            responseMimeType: 'application/json',
+                            responseSchema: {
+                                type: 'OBJECT',
+                                properties: {
+                                    Sender_Name: { type: 'STRING' },
+                                    Sender_Bank: { type: 'STRING' },
+                                    Receiver_Name: { type: 'STRING' },
+                                    Receiver_Bank: { type: 'STRING' },
+                                    Transaction_ID: { type: 'STRING' },
+                                    Amount: { type: 'STRING' },
+                                    Date: { type: 'STRING' },
+                                    Time: { type: 'STRING' }
+                                }
+                            }
+                        }
+                    };
+
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                    // Exponential backoff
+                    const maxRetries = 5; let retryCount = 0; let apiResponse = null;
+                    while (retryCount < maxRetries) {
+                        try {
+                            const response = await fetch(apiUrl, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                            apiResponse = await response.json();
+                            break;
+                        } catch (error) {
+                            console.error(`Attempt ${retryCount + 1} failed:`, error);
+                            retryCount++; if (retryCount < maxRetries) { await new Promise(r => setTimeout(r, Math.pow(2, retryCount) * 1000)); } else { throw error; }
+                        }
+                    }
+
+                    if (apiResponse && apiResponse.candidates && apiResponse.candidates.length > 0) {
+                        const jsonString = apiResponse.candidates[0].content.parts[0].text;
+                        const data = JSON.parse(jsonString);
+                        displayResult(data);
+                    } else {
+                        showModal('ไม่พบข้อมูลสำคัญในรูปภาพนี้');
+                        resetUI();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showModal('เกิดข้อผิดพลาดในการวิเคราะห์รูปภาพ');
+                    resetUI();
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ====== แสดงผล ======
+        function displayResult(data) {
+            outputData.innerHTML = '';
+            const row = (label, value) => {
+                const v = value && String(value).trim() !== '' ? value : 'ไม่พบข้อมูล';
+                return `<div class="flex justify-between items-start"><span class="font-medium pr-2">${label}:</span><span class="text-gray-700 text-right break-all">${v}</span></div>`;
+            };
+            outputData.innerHTML += row('ชื่อผู้ส่ง', data.Sender_Name);
+            outputData.innerHTML += row('ธนาคารผู้ส่ง', data.Sender_Bank);
+            outputData.innerHTML += row('ชื่อผู้รับ', data.Receiver_Name);
+            outputData.innerHTML += row('ธนาคารผู้รับ', data.Receiver_Bank);
+            outputData.innerHTML += row('จำนวนเงิน', data.Amount);
+            outputData.innerHTML += row('เลขที่รายการ', data.Transaction_ID);
+            outputData.innerHTML += row('วันที่', data.Date);
+            outputData.innerHTML += row('เวลา', data.Time);
+
+            loadingSpinner.classList.add('hidden');
+            outputContainer.classList.remove('hidden');
+        }
+
+        // ====== Modal ======
+        function showModal(message) {
+            const el = document.createElement('div');
+            el.className = 'fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50';
+            el.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm mx-auto">
+                    <p class="text-lg font-semibold mb-4">${message}</p>
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">ตกลง</button>
+                </div>`;
+            el.querySelector('button').addEventListener('click', () => el.remove());
+            document.body.appendChild(el);
+        }
+
+        // ====== รีเซ็ต UI ======
+        function resetUI() {
+            outputContainer.classList.add('hidden');
+            uploadContainer.classList.remove('hidden');
+            loadingSpinner.classList.add('hidden');
+            fileInput.value = '';
+        }
+
+        // ====== Drag & Drop ======
+        ;['dragenter','dragover','dragleave','drop'].forEach(ev => uploadArea.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+        ;['dragenter','dragover'].forEach(ev => uploadArea.addEventListener(ev, () => uploadArea.classList.add('highlight')));
+        ;['dragleave','drop'].forEach(ev => uploadArea.addEventListener(ev, () => uploadArea.classList.remove('highlight')));
+        uploadArea.addEventListener('drop', (e) => { const f = e.dataTransfer?.files?.[0]; if (f) handleFile(f); });
+
+        // ====== เลือกไฟล์แบบปกติ ======
+        fileInput.addEventListener('change', (e) => { const f = e.target.files?.[0]; if (f) handleFile(f); });
+
+        // ====== Auto Pick Logic ======
+        let attemptedAutoPick = false;
+        const params = new URLSearchParams(location.search);
+        const autoPickEnabled = params.get('autopick') !== '0'; // ปิดได้ด้วย ?autopick=0
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        // ตั้งค่าให้เน้นกล้องหลังบนมือถือเป็นค่าเริ่มต้น
+        if (isMobile) fileInput.setAttribute('capture', 'environment');
+
+        async function openPickerWithGesture() {
+            try {
+                if (typeof fileInput.showPicker === 'function') {
+                    fileInput.showPicker();
+                } else {
+                    fileInput.click();
+                }
+            } catch (err) {
+                // ถ้าเปิดไม่ได้จริงๆ ให้แค่คลิก input
+                try { fileInput.click(); } catch (_) {}
+            }
+        }
+
+        async function tryAutoOpenPicker() {
+            if (attemptedAutoPick || !autoPickEnabled) return;
+            attemptedAutoPick = true;
+            try {
+                // เบราว์เซอร์ส่วนใหญ่จะบล็อก showPicker()/click() หากไม่มี user gesture
+                if (typeof fileInput.showPicker === 'function') {
+                    fileInput.showPicker();
+                } else {
+                    fileInput.click();
+                }
+            } catch (e) {
+                // ถ้าโดนบล็อก ให้ขอแตะ 1 ครั้ง แล้วเปิดให้เอง
+                tapOverlay.classList.remove('hidden');
+            }
+        }
+
+        // กรณีโดนบล็อก ให้แตะ overlay เพื่อสร้าง user gesture แล้วเปิดตัวเลือกไฟล์ทันที
+        tapToOpenBtn.addEventListener('click', async () => {
+            tapOverlay.classList.add('hidden');
+            await openPickerWithGesture();
+        });
+
+        // พยายามเปิดอัตโนมัติหลังโหลดหน้า (จะสำเร็จบนบางเบราว์เซอร์)
+        window.addEventListener('load', () => {
+            if (autoPickEnabled) setTimeout(tryAutoOpenPicker, 250);
+        });
+
+        // เมื่อกด "วิเคราะห์รูปใหม่" ให้พยายามเปิดตัวเลือกอัตโนมัติอีกครั้ง
+        analyzeAnotherButton?.addEventListener('click', () => {
+            resetUI();
+            setTimeout(() => {
+                attemptedAutoPick = false; // อนุญาตให้ลองใหม่อีกรอบ
+                tryAutoOpenPicker();
+            }, 200);
+        });
+
+        // เผื่อผู้ใช้สลับแอปกลับมา และยังไม่ได้เลือกรูป ลองเปิดให้อีกครั้ง (บางเบราว์เซอร์อนุญาต)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && autoPickEnabled && !fileInput.files.length) {
+                tryAutoOpenPicker();
+            }
+        });
+    </script>
+</body>
+</html>
