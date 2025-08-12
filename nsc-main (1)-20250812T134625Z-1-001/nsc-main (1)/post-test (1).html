@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 แบบทดสอบหลังเรียน - MoneySkillz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="test.css">
+    <link rel="stylesheet" href="theme-darkmode.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 แบบทดสอบหลังเรียน</h1>
+            <p>มาดูกันว่าคุณมีความรู้เพิ่มขึ้นแค่ไหน!</p>
+        </header>
+
+        <div class="quiz-container" id="quiz-container">
+            <!-- Questions will be loaded here by JavaScript -->
+        </div>
+
+        <button id="submit-btn">ส่งคำตอบและดูผล</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        // Use the same questions as the pre-test for direct comparison
+        const quizData = [
+            {
+                question: "ข้อใดคือ 'รายจ่ายจำเป็น' สำหรับวัยเรียน?",
+                choices: ["ค่าข้าวกลางวัน", "ซื้อเกมใหม่", "ดูหนังรอบดึก", "ซื้อเสื้อผ้าแฟชั่น"],
+                answer: "ค่าข้าวกลางวัน"
+            },
+            {
+                question: "การจดบันทึกรายรับ-รายจ่ายมีประโยชน์อย่างไร?",
+                choices: ["ทำให้มีเงินมากขึ้นทันที", "ทำให้รู้ว่าเงินหายไปไหน", "เป็นเรื่องเสียเวลา", "ทำให้ใช้เงินได้มากขึ้น"],
+                answer: "ทำให้รู้ว่าเงินหายไปไหน"
+            },
+            {
+                question: "เงินเฟ้อ (Inflation) คืออะไร?",
+                choices: ["ราคาสินค้าถูกลง", "เงินในกระเป๋าเพิ่มขึ้น", "ของแพงขึ้น ค่าเงินลดลง", "เศรษฐกิจดีมาก"],
+                answer: "ของแพงขึ้น ค่าเงินลดลง"
+            },
+            {
+                question: "ข้อใดคือ 'สินทรัพย์' (Asset)?",
+                choices: ["หนี้บัตรเครดิต", "เงินกู้ซื้อบ้าน", "เงินฝากในธนาคาร", "ค่าผ่อนรถ"],
+                answer: "เงินฝากในธนาคาร"
+            },
+            {
+                question: "วิธีใดดีที่สุดในการเก็บเงินเพื่อซื้อของราคาแพง?",
+                choices: ["ขอเงินพ่อแม่เพิ่ม", "เก็บเงินทอนที่เหลือแต่ละวัน", "ตั้งเป้าหมายและแบ่งออมอย่างสม่ำเสมอ", "ใช้บัตรเครดิตผ่อน 0%"],
+                answer: "ตั้งเป้าหมายและแบ่งออมอย่างสม่ำเสมอ"
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const submitButton = document.getElementById('submit-btn');
+
+        function buildQuiz() {
+            quizData.forEach((currentQuestion, questionNumber) => {
+                const choices = [];
+                for (let i = 0; i < currentQuestion.choices.length; i++) {
+                    choices.push(
+                        `<label class="choice">
+                            <input type="radio" name="question${questionNumber}" value="${currentQuestion.choices[i]}">
+                            ${currentQuestion.choices[i]}
+                        </label>`
+                    );
+                }
+
+                const questionHTML = `
+                    <div class="question">
+                        <div class="question-text">${questionNumber + 1}. ${currentQuestion.question}</div>
+                        <div class="choices">${choices.join('')}</div>
+                    </div>
+                `;
+                quizContainer.innerHTML += questionHTML;
+            });
+        }
+
+        function showResults() {
+            const answerContainers = quizContainer.querySelectorAll('.choices');
+            let numCorrect = 0;
+
+            quizData.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = answerContainers[questionNumber];
+                const selector = `input[name=question${questionNumber}]:checked`;
+                const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+
+                if (userAnswer === currentQuestion.answer) {
+                    numCorrect++;
+                }
+            });
+
+            const score = ((numCorrect / quizData.length) * 100).toFixed(0);
+            localStorage.setItem('postTestScore', score);
+
+            // Redirect to the results page
+            window.location.href = 'test-result.html';
+        }
+
+        buildQuiz();
+        submitButton.addEventListener('click', showResults);
+    </script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 โหมดเกม - MoneySkillz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="theme-darkmode.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 1.1em;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .game-menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            max-width: 500px;
+            margin: 120px auto 80px; /* ปรับระยะขอบให้คอนเทนต์อยู่ตรงกลาง */
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .game-card {
+            background: var(--card-background);
+            border-radius: 18px;
+            box-shadow: 0 6px 20px var(--shadow-color);
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            color: var(--text-color);
+            display: block;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow-color-hover);
+        }
+
+        .game-card span {
+            font-size: 3em;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .game-card p {
+            margin: 0;
+            font-weight: 500;
+            font-size: 1.2em;
+        }
+
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--nav-background);
+            padding: 10px 0;
+            box-shadow: 0 -4px 10px var(--shadow-color);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--nav-item-color);
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .bottom-nav-item span {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .bottom-nav-item:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .header p {
+                font-size: 1em;
+            }
+            .game-card p {
+                font-size: 1em;
+            }
+            .game-card span {
+                font-size: 2.5em;
+            }
+            .game-menu-container {
+                margin: 80px auto 80px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>โหมดเกม</h1>
+        <p>สนุกกับการเรียนรู้เรื่องการเงิน!</p>
+    </header>
+
+    <div class="game-menu-container">
+        <a href="game.html" class="game-card">
+            <span class="material-icons">sports_esports</span>
+            <p>เกมหลัก</p>
+        </a>
+        <a href="money-quiz.html" class="game-card">
+            <span class="material-icons">help_outline</span>
+            <p>แบบทดสอบการเงิน</p>
+        </a>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <span class="material-icons">home</span>
+            <div>หน้าหลัก</div>
+        </a>
+        <a href="#" class="bottom-nav-item active">
+            <span class="material-icons">games</span>
+            <div>เกม</div>
+        </a>
+        <a href="settings.html" class="bottom-nav-item">
+            <span class="material-icons">settings</span>
+            <div>ตั้งค่า</div>
+        </a>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="dashboard.js" defer></script>
+    <script src="darkmode-toggle.js"></script>
+</body>
+</html>
