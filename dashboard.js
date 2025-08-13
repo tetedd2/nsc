@@ -624,8 +624,225 @@ window.deleteTransaction = async function(transactionId) {
         showNotificationModal("เกิดข้อผิดพลาด", "เกิดข้อผิดพลาดในการลบ: " + error.message);
     }
 }
+(function(){
+  // ======================== Config ========================
+  const STORAGE_TRANSACTIONS = 'ms_transactions';
+  const STORAGE_ALERT        = 'ms_lastSavingsAlert';
+  const SAVINGS_THRESHOLD    = 30; // เปอร์เซ็นต์เงินออมขั้นต่ำเทียบกับรายรับ
 
-// REMOVED: addSavingsToGoal function is removed to avoid data conflicts.
+  // ======================== State =========================
+  /** @type {{id:string,type:'income'|'expense',amount:number,desc?:string,ts:number}[]} */
+  let transactions = [];
+
+  // ==================== Storage Helpers ===================
+  function loadTransactions(){
+    try {
+      const raw = localStorage.getItem(STORAGE_TRANSACTIONS);
+      transactions = raw ? JSON.parse(raw) : [];
+    } catch {
+      transactions = [];
+    }
+  }
+  function saveTransactions(){
+    try { localStorage.setItem(STORAGE_TRANSACTIONS, JSON.stringify(transactions)); } catch {}
+  }
+
+  // ===================== DOM Utilities ====================
+  function qs(id){ return document.getElementById(id); }
+  function setMoneyText(el, value){ if(!el) return; el.textContent = value.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+  // ================ Modal (Notification) ==================
+  // ใช้ได้ทั้งเรียกตรง showNotificationModal(title, message) และ auto สร้าง DOM หากยังไม่มี
+  function ensureModal(){
+    if (qs('ms-modal')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'ms-modal';
+    wrap.style.cssText = [
+      'position:fixed','inset:0','display:none','align-items:center','justify-content:center','z-index:9999',
+      'background:rgba(0,0,0,.35)'
+    ].join(';');
+
+    wrap.innerHTML = `
+      <div id="ms-modal-card" style="max-width:520px;width:calc(100% - 32px);background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.18);overflow:hidden;font-family:system-ui,\"Kanit\",sans-serif">
+        <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;gap:8px;align-items:center">
+          <span id="ms-modal-title" style="font-size:18px;font-weight:700;">แจ้งเตือน</span>
+        </div>
+        <div style="padding:20px"><div id="ms-modal-msg" style="font-size:15px;line-height:1.6"></div></div>
+        <div style="padding:12px 16px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px">
+          <button id="ms-modal-ok" style="padding:10px 14px;border-radius:10px;border:0;background:#111;color:#fff;font-weight:600;cursor:pointer">โอเค</button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+    qs('ms-modal-ok').addEventListener('click', hideModal);
+    wrap.addEventListener('click', (e)=>{ if(e.target === wrap) hideModal(); });
+  }
+  function showModal(title, msg){
+    ensureModal();
+    qs('ms-modal-title').textContent = title || 'แจ้งเตือน';
+    qs('ms-modal-msg').textContent   = msg || '';
+    const m = qs('ms-modal');
+    m.style.display = 'flex';
+  }
+  function hideModal(){ const m = qs('ms-modal'); if(m) m.style.display = 'none'; }
+  // เปิด API สาธารณะสำหรับโค้ดภายนอก
+  window.showNotificationModal = showModal;
+
+  // ================== Financial Summary ===================
+  function calculateTotals(){
+    let income = 0, expense = 0;
+    for(const tx of transactions){
+      const amt = Number(tx.amount) || 0;
+      if (tx.type === 'income') income += amt; else expense += amt;
+    }
+    const balance = income - expense;
+    return { income, expense, balance };
+  }
+
+  function updateFinancialSummary(){
+    const { income, expense, balance } = calculateTotals();
+    setMoneyText(qs('income'),  income);
+    setMoneyText(qs('expense'), expense);
+    setMoneyText(qs('balance'), balance);
+
+    // เช็คการแจ้งเตือนเงินออมหลังอัปเดต UI
+    showSavingsAlertIfBelow(SAVINGS_THRESHOLD, false);
+  }
+  window.updateFinancialSummary = updateFinancialSummary;
+
+  // =============== Savings Alert (once per day) ===============
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+  function shouldNotify(force){
+    if (force) return true;
+    try {
+      const raw = localStorage.getItem(STORAGE_ALERT);
+      if (!raw) return true;
+      const data = JSON.parse(raw);
+      return data.date !== todayStr();
+    } catch { return true; }
+  }
+  function recordNotified(ratio){
+    try { localStorage.setItem(STORAGE_ALERT, JSON.stringify({ date: todayStr(), ratio: Math.round(ratio) })); } catch {}
+  }
+
+  /**
+   * แสดงแจ้งเตือนถ้าเงินออม (% ของรายรับ) ต่ำกว่า threshold
+   * @param {number} threshold
+   * @param {boolean} force - บังคับเช็ค/แสดงแม้วันนี้เคยเตือนไปแล้ว
+   */
+  function showSavingsAlertIfBelow(threshold = SAVINGS_THRESHOLD, force = false){
+    const { income, balance } = calculateTotals();
+    if (income <= 0) return; // ไม่มีรายรับ ยังไม่คำนวณ
+    const ratio = (balance / income) * 100;
+
+    if (ratio < threshold && shouldNotify(force)){
+      const pct = Math.max(0, Math.round(ratio));
+      const title = 'เงินออมน้อยกว่ากำหนด';
+      const msg = `ตอนนี้เงินออมของคุณอยู่ที่ประมาณ ${pct}% ของรายรับทั้งหมด ซึ่งต่ำกว่าเกณฑ์ ${threshold}% — โปรดระวังการใช้จ่ายนะครับ`;
+      if (typeof window.showNotificationModal === 'function') {
+        window.showNotificationModal(title, msg);
+      } else {
+        alert(`${title}:\n${msg}`);
+      }
+      recordNotified(ratio);
+    }
+  }
+  window.showSavingsAlertIfBelow = showSavingsAlertIfBelow;
+  window.forceSavingsCheck = function(){ showSavingsAlertIfBelow(SAVINGS_THRESHOLD, true); };
+
+  // =================== CRUD: Transactions ===================
+  function addTransaction({type, amount, desc}){
+    if (type !== 'income' && type !== 'expense') throw new Error('type ต้องเป็น income หรือ expense');
+    const amt = Number(amount);
+    if (!isFinite(amt) || amt <= 0) throw new Error('จำนวนเงินไม่ถูกต้อง');
+
+    const tx = { id: crypto.randomUUID(), type, amount: amt, desc: desc||'', ts: Date.now() };
+    transactions.push(tx);
+    saveTransactions();
+    updateFinancialSummary();
+    renderHistoryRow(tx); // ถ้าในหน้าเว็บมีตารางประวัติ
+    return tx;
+  }
+  window.addTransaction = addTransaction;
+
+  function removeTransaction(id){
+    const idx = transactions.findIndex(t => t.id === id);
+    if (idx === -1) return false;
+    transactions.splice(idx, 1);
+    saveTransactions();
+    updateFinancialSummary();
+    const row = qs(`row-${id}`);
+    if (row && row.parentElement) row.parentElement.removeChild(row);
+    return true;
+  }
+  window.removeTransaction = removeTransaction;
+
+  // ============ (Optional) History Table Rendering ============
+  function renderHistory(){
+    const body = qs('history-body');
+    if (!body) return; // หน้าไม่มีตารางประวัติ
+    body.innerHTML = '';
+    const sorted = [...transactions].sort((a,b)=> b.ts - a.ts);
+    for(const tx of sorted){ renderHistoryRow(tx, body); }
+  }
+  function renderHistoryRow(tx, bodyEl){
+    const body = bodyEl || qs('history-body');
+    if (!body) return;
+    const tr = document.createElement('tr');
+    tr.id = `row-${tx.id}`;
+    tr.innerHTML = `
+      <td>${new Date(tx.ts).toLocaleString('th-TH')}</td>
+      <td>${tx.type === 'income' ? 'รายรับ' : 'รายจ่าย'}</td>
+      <td style="text-align:right">${Number(tx.amount).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+      <td>${tx.desc ? escapeHtml(tx.desc) : '-'}</td>
+      <td style="text-align:right">
+        <button data-del="${tx.id}" style="padding:6px 10px;border:0;border-radius:8px;background:#e53935;color:#fff;cursor:pointer">ลบ</button>
+      </td>`;
+    body.appendChild(tr);
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' })[m]);
+  }
+
+  // ติด event ลบแถว ถ้าตารางมีอยู่ในหน้า
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-del]');
+    if (!btn) return;
+    const id = btn.getAttribute('data-del');
+    if (confirm('ลบรายการนี้หรือไม่?')) removeTransaction(id);
+  });
+
+  // =============== (Optional) Simple Form Hook ===============
+  // ถ้ามีฟอร์มเพิ่มรายการในหน้า (id: tx-form)
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const form = qs('tx-form');
+    if (!form) return init();
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const formData = new FormData(form);
+      const type = formData.get('type');
+      const amount = formData.get('amount');
+      const desc = formData.get('desc');
+      try{
+        addTransaction({ type, amount, desc });
+        form.reset();
+      } catch(err){
+        showModal('ผิดพลาด', String(err.message || err));
+      }
+    });
+    init();
+  });
+
+  // ======================= Init Flow ========================
+  function init(){
+    loadTransactions();
+    updateFinancialSummary();
+    renderHistory();
+  }
+
+})();
+
 // Goal management is now centralized in add-goal.html.
 
 // ================== DOM Event Listeners ==================
@@ -841,3 +1058,151 @@ async function getAiResponse(message) {
         }, 500); // หน่วงเวลา 0.5 วินาที
     });
 }
+
+
+/* ================= Savings Guard (40% warn / 30% block) ================= */
+(function(){
+  const incomeEl  = document.getElementById('income');
+  const expenseEl = document.getElementById('expense');
+  const balanceEl = document.getElementById('balance');
+
+  if(!incomeEl || !expenseEl || !balanceEl) return;
+
+  function ensureAlertEl(){
+    let el = document.getElementById('financial-alert');
+    if(!el){
+      const parent = balanceEl.closest('.card-section') || balanceEl.parentElement;
+      el = document.createElement('div');
+      el.id = 'financial-alert';
+      el.className = 'financial-alert';
+      el.style.display = 'none';
+      parent.appendChild(el);
+    }
+    return el;
+  }
+
+  const alertEl = ensureAlertEl();
+
+  function parseAmount(text){
+    if(!text) return 0;
+    const num = (text+"").replace(/[^0-9\-\.]/g, '');
+    const val = parseFloat(num);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function applySavingsGuard(){
+    const income  = parseAmount(incomeEl.textContent);
+    const expense = parseAmount(expenseEl.textContent);
+    const balance = parseAmount(balanceEl.textContent);
+
+    if (income <= 0){
+      alertEl.style.display = 'none';
+      localStorage.setItem('isSpendingBlocked','false');
+      return;
+    }
+
+    const savingsPercent = (balance / income) * 100;
+
+    if (savingsPercent < 30){
+      alertEl.textContent = '🚨 เงินออมต่ำกว่า 30% – ระบบปิดการเพิ่มรายจ่าย (ยกเว้นโหมดฉุกเฉิน)';
+      alertEl.className = 'financial-alert danger';
+      alertEl.style.display = 'block';
+      localStorage.setItem('isSpendingBlocked','true');
+    } else if (savingsPercent < 40){
+      alertEl.textContent = '⚠️ เงินออมน้อยกว่า 40% – ระวังการใช้จ่าย';
+      alertEl.className = 'financial-alert warning';
+      alertEl.style.display = 'block';
+      localStorage.setItem('isSpendingBlocked','false');
+    } else {
+      alertEl.style.display = 'none';
+      localStorage.setItem('isSpendingBlocked','false');
+    }
+  }
+
+  applySavingsGuard();
+  const mo = new MutationObserver(applySavingsGuard);
+  mo.observe(incomeEl,  {subtree:true,childList:true,characterData:true});
+  mo.observe(expenseEl, {subtree:true,childList:true,characterData:true});
+  mo.observe(balanceEl, {subtree:true,childList:true,characterData:true});
+})();
+/* ================= /Savings Guard ================= */
+/* ================= Savings Guard (40% warn / 30% block + Require Reason) ================= */
+(function(){
+  const incomeEl  = document.getElementById('income');
+  const expenseEl = document.getElementById('expense');
+  const balanceEl = document.getElementById('balance');
+
+  if(!incomeEl || !expenseEl || !balanceEl) return;
+
+  function ensureAlertEl(){
+    let el = document.getElementById('financial-alert');
+    if(!el){
+      const parent = balanceEl.closest('.card-section') || balanceEl.parentElement;
+      el = document.createElement('div');
+      el.id = 'financial-alert';
+      el.className = 'financial-alert';
+      el.style.display = 'none';
+      parent.appendChild(el);
+    }
+    return el;
+  }
+
+  const alertEl = ensureAlertEl();
+
+  function parseAmount(text){
+    if(!text) return 0;
+    const num = (text+"").replace(/[^0-9\-\.]/g, '');
+    const val = parseFloat(num);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function applySavingsGuard(){
+    const income  = parseAmount(incomeEl.textContent);
+    const expense = parseAmount(expenseEl.textContent);
+    const balance = parseAmount(balanceEl.textContent);
+
+    if (income <= 0){
+      alertEl.style.display = 'none';
+      localStorage.setItem('isSpendingBlocked','false');
+      return;
+    }
+
+    const savingsPercent = (balance / income) * 100;
+
+    if (savingsPercent < 30){
+      alertEl.textContent = '🚨 เงินออมต่ำกว่า 30% – ระบบปิดการเพิ่มรายจ่าย (ต้องใส่เหตุผลโหมดฉุกเฉิน)';
+      alertEl.className = 'financial-alert danger';
+      alertEl.style.display = 'block';
+      localStorage.setItem('isSpendingBlocked','true');
+    } else if (savingsPercent < 40){
+      alertEl.textContent = '⚠️ เงินออมน้อยกว่า 40% – ระวังการใช้จ่าย';
+      alertEl.className = 'financial-alert warning';
+      alertEl.style.display = 'block';
+      localStorage.setItem('isSpendingBlocked','false');
+    } else {
+      alertEl.style.display = 'none';
+      localStorage.setItem('isSpendingBlocked','false');
+    }
+  }
+
+  applySavingsGuard();
+  const mo = new MutationObserver(applySavingsGuard);
+  mo.observe(incomeEl,  {subtree:true,childList:true,characterData:true});
+  mo.observe(expenseEl, {subtree:true,childList:true,characterData:true});
+  mo.observe(balanceEl, {subtree:true,childList:true,characterData:true});
+
+  // Hook into addTransaction to require reason when blocked
+  const originalAddTransaction = window.addTransaction;
+  window.addTransaction = function({type, amount, desc}){
+    if (type === 'expense' && localStorage.getItem('isSpendingBlocked') === 'true'){
+      const reason = prompt('💡 เงินออมต่ำกว่า 30%! กรุณาใส่เหตุผลการใช้จ่าย (โหมดฉุกเฉิน)');
+      if (!reason || !reason.trim()){
+        alert('❌ ไม่สามารถเพิ่มรายจ่ายได้หากไม่ใส่เหตุผล');
+        return;
+      }
+      desc = (desc ? desc + ' | เหตุผล: ' : 'เหตุผล: ') + reason.trim();
+    }
+    return originalAddTransaction({type, amount, desc});
+  };
+})();
+/* ================= /Savings Guard ================= */
