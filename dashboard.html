@@ -3,229 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title> หน้าหลัก - MoneySkillz</title>
+  <title>หน้าหลัก - MoneySkillz</title>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- ชุดไอคอนเดียวกัน -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+
   <link rel="stylesheet" href="dashboard.css">
   <link rel="stylesheet" href="theme-darkmode.css">
   <style>
-    /* เพิ่มสไตล์สำหรับร้านค้าและไอเท็มที่ซื้อแล้ว */
-    .purchased-items-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-      padding: 10px 0;
-    }
-    .purchased-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: var(--card-bg-color);
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      width: 100px;
-      text-align: center;
-    }
-    .purchased-icon {
-      font-size: 2.5em;
-    }
-    .purchased-name {
-      font-size: 0.9em;
-      margin-top: 5px;
-      font-weight: 500;
-    }
-    .shop-items-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 15px;
-    }
-    .placeholder-message {
-      width: 100%;
-      text-align: center;
-      color: #888;
-      padding: 20px 0;
-    }
-    .shop-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 10px;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        text-align: center;
-        background-color: #fff;
-    }
-    .item-icon { font-size: 2em; margin-bottom: 5px; }
-    .item-name { font-weight: 600; margin-bottom: 5px; }
-    .item-price { margin-bottom: 10px; color: #555; }
-    .shop-item button {
-        width: 100%;
-        padding: 8px;
-        border: none;
-        border-radius: 5px;
-        background-color: #28a745;
-        color: white;
-        cursor: pointer;
-    }
-    .shop-item button.cannot-afford, .shop-item button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-    }
-
-    /* Modal Styles */
-    .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1000; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgba(0,0,0,0.9); /* Black with 90% opacity (slightly transparent) */
-        justify-content: center;
-        align-items: center;
-    }
-    .modal-content {
-        background-color: var(--card-background);
-        margin: auto;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        max-width: 90%;
-        width: 350px;
-        text-align: center;
-        position: relative;
-        animation: fadeIn 0.3s ease-out;
-    }
-    .modal-content h2 {
-        color: var(--text-color); /* ใช้สีข้อความหลัก */
-        margin-bottom: 15px;
-        font-size: 1.5em;
-    }
-    .modal-content p {
-        color: var(--text-color); /* ใช้สีข้อความหลัก */
-        margin-bottom: 20px;
-        line-height: 1.5;
-    }
-    /* บังคับให้สีข้อความใน Modal มีความคมชัดในทุกโหมด */
-    body.dark-mode .modal-content h2,
-    body.dark-mode .modal-content p {
-        color: #e0e0e0 !important; /* สีเทาอ่อนสำหรับ Dark Mode */
-    }
-    body:not(.dark-mode) .modal-content h2,
-    body:not(.dark-mode) .modal-content p {
-        color: #333 !important; /* สีดำเข้มสำหรับ Light Mode */
-    }
-
-    .modal-buttons button {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1em;
-        margin: 0 8px;
-        transition: background-color 0.3s ease;
-    }
-    .modal-buttons button:hover {
-        background-color: var(--primary-dark-color);
-    }
-    .modal-buttons .cancel-btn {
-        background-color: #ccc;
-        color: #333;
-    }
-    .modal-buttons .cancel-btn:hover {
-        background-color: #bbb;
-    }
-    .close-button {
-        color: var(--text-color-light);
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: color 0.3s ease;
-    }
-    .close-button:hover,
-    .close-button:focus {
-        color: var(--primary-color);
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    /* Level Up Modal Specific Styles */
-    .level-up-modal-content {
-        background: linear-gradient(to bottom right, #8aff8a, #4CAF50); /* Green gradient */
-        color: white;
-        padding: 40px 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 20px rgba(0, 128, 0, 0.4);
-        border: 3px solid #66bb6a;
-        animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .level-up-modal-content h2 {
-        font-size: 2.2em;
-        margin-bottom: 10px;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-    .level-up-modal-content p {
-        font-size: 1.3em;
-        margin-bottom: 15px;
-        color: white;
-    }
-    .level-up-modal-content .modal-reward {
-        font-weight: bold;
-        font-size: 1.5em;
-        margin-top: 15px;
-        color: #ffeb3b; /* Gold color for reward */
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-    }
-    .level-up-modal-content .level-up-icon {
-        font-size: 4em;
-        margin-bottom: 20px;
-        animation: bounce 0.8s infinite alternate;
-    }
-
-    /* Keyframe Animations */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.9); }
-        to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes zoomIn {
-        from { transform: scale(0.5); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-    @keyframes bounce {
-        from { transform: translateY(0); }
-        to { transform: translateY(-10px); }
-    }
-
-    /* Styles for the new "Add Savings" button */
-    .add-savings-btn {
-        background-color: var(--accent-color); /* Use a suitable accent color */
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.9em;
-        margin-top: 15px;
-        display: block; /* Make it a block element */
-        width: fit-content; /* Adjust width to content */
-        margin-left: auto; /* Center the button */
-        margin-right: auto; /* Center the button */
-        transition: background-color 0.3s ease;
-    }
-    .add-savings-btn:hover {
-        background-color: var(--primary-dark-color); /* Darken on hover */
-    }
+    /* คงสไตล์เสริมเดิมที่มีในไฟล์ของคุณ (modal/shop ฯลฯ) */
+    .purchased-items-container{display:flex;flex-wrap:wrap;gap:15px;justify-content:center;padding:10px 0;}
+    .purchased-item{display:flex;flex-direction:column;align-items:center;background-color:var(--card-bg-color);padding:10px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,0.05);width:100px;text-align:center;}
+    .purchased-icon{font-size:2.5em;}
+    .purchased-name{font-size:.9em;margin-top:5px;font-weight:500;}
+    .shop-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:15px;}
+    .placeholder-message{width:100%;text-align:center;color:#888;padding:20px 0;}
+    .shop-item{display:flex;flex-direction:column;align-items:center;padding:10px;border:1px solid #e0e0e0;border-radius:8px;text-align:center;background-color:#fff;}
+    .item-icon{font-size:2em;margin-bottom:5px;}
+    .item-name{font-weight:600;margin-bottom:5px;}
+    .item-price{margin-bottom:10px;color:#555;}
+    .shop-item button{width:100%;padding:8px;border:none;border-radius:5px;background-color:#28a745;color:#fff;cursor:pointer;}
+    .shop-item button.cannot-afford,.shop-item button:disabled{background-color:#ccc;cursor:not-allowed;}
+    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.9);justify-content:center;align-items:center;}
+    .modal-content{background-color:var(--card-background);margin:auto;padding:30px;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,0.3);max-width:90%;width:350px;text-align:center;position:relative;animation:fadeIn .3s ease-out;}
+    .modal-content h2{color:var(--text-color);margin-bottom:15px;font-size:1.5em;}
+    .modal-content p{color:var(--text-color);margin-bottom:20px;line-height:1.5;}
+    body.dark-mode .modal-content h2,body.dark-mode .modal-content p{color:#e0e0e0!important;}
+    body:not(.dark-mode) .modal-content h2,body:not(.dark-mode) .modal-content p{color:#333!important;}
+    .modal-buttons button{background-color:var(--primary-color);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:1em;margin:0 8px;transition:background-color .3s ease;}
+    .modal-buttons button:hover{background-color:var(--primary-dark-color);}
+    .modal-buttons .cancel-btn{background-color:#ccc;color:#333;}
+    .modal-buttons .cancel-btn:hover{background-color:#bbb;}
+    .close-button{color:var(--text-color-light);position:absolute;top:15px;right:20px;font-size:28px;font-weight:bold;cursor:pointer;transition:color .3s ease;}
+    .close-button:hover,.close-button:focus{color:var(--primary-color);text-decoration:none;cursor:pointer;}
+    .level-up-modal-content{background:linear-gradient(to bottom right,#8aff8a,#4CAF50);color:#fff;padding:40px 30px;border-radius:20px;box-shadow:0 10px 20px rgba(0,128,0,.4);border:3px solid #66bb6a;animation:zoomIn .4s cubic-bezier(.175,.885,.32,1.275);}
+    .level-up-modal-content h2{font-size:2.2em;margin-bottom:10px;color:#fff;text-shadow:2px 2px 4px rgba(0,0,0,.3);}
+    .level-up-modal-content p{font-size:1.3em;margin-bottom:15px;color:#fff;}
+    .level-up-modal-content .modal-reward{font-weight:700;font-size:1.5em;margin-top:15px;color:#ffeb3b;text-shadow:1px 1px 2px rgba(0,0,0,.4);}
+    .level-up-modal-content .level-up-icon{font-size:4em;margin-bottom:20px;animation:bounce .8s infinite alternate;}
+    @keyframes fadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+    @keyframes zoomIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+    @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+    .add-savings-btn{background-color:var(--accent-color);color:#fff;border:none;padding:10px 15px;border-radius:8px;cursor:pointer;font-size:.9em;margin-top:15px;display:block;width:fit-content;margin-left:auto;margin-right:auto;transition:background-color .3s ease;}
+    .add-savings-btn:hover{background-color:var(--primary-dark-color);}
   </style>
 </head>
 <body>
@@ -234,7 +58,6 @@
       <h1>MoneySkillz</h1>
       <p>ออมวันนี้ เก่งการเงินวันหน้า!</p>
       <div class="avatar-box">
-        <!-- MODIFIED: Changed the profile picture URL to a black user icon -->
         <img id="profilePicture" src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" alt="Avatar">
       </div>
     </header>
@@ -249,125 +72,94 @@
             <span class="progress-text" id="progressValue">0%</span>
           </div>
         </div>
-        <p class="xp-text">
-          คะแนน XP: <span id="currentXP">0</span> / <span id="nextLevelXP">0</span>
-        </p>
+        <p class="xp-text">คะแนน XP: <span id="currentXP">0</span> / <span id="nextLevelXP">0</span></p>
       </div>
     </div>
 
-    <!-- ส่วนแสดงเหรียญรางวัลที่ซื้อแล้ว -->
+    <!-- เหรียญรางวัล -->
     <div class="container card-section">
-      <h2><span class="icon">🏆</span> เหรียญรางวัลของฉัน</h2>
+      <h2><span class="material-symbols-rounded icon">emoji_events</span> เหรียญรางวัลของฉัน</h2>
       <div id="purchasedItemsContainer" class="purchased-items-container">
         <p class="placeholder-message">ยังไม่มีเหรียญรางวัล</p>
       </div>
-      <!-- ย้ายเหรียญคงเหลือมาไว้ที่นี่ -->
-      <div class="summary-item" style="margin-top: 15px; text-align: right; border-top: 1px solid #eee; padding-top: 10px;">
-        <strong>เหรียญคงเหลือ:</strong> <span class="amount" id="userCoins">0</span> 🪙
+      <div class="summary-item" style="margin-top:15px;text-align:right;border-top:1px solid #eee;padding-top:10px;">
+        <strong>เหรียญคงเหลือ:</strong>
+        <span class="amount" id="userCoins">0</span>
+        <span class="material-symbols-rounded" style="font-size:1.2em;vertical-align:-3px;">monetization_on</span>
       </div>
     </div>
 
-    <!-- ส่วนร้านค้า (ซ่อนไว้) -->
-    <div class="container card-section" style="display: none;">
-      <h2><span class="icon"></span> ร้านค้า</h2>
-      <div id="shopItemsRow" class="shop-items-grid">
-         <!-- ไอเท็มในร้านค้าจะถูกสร้างโดย JavaScript -->
-      </div>
-    </div>
-
-
+    <!-- ภาพรวมการเงิน -->
     <div class="container card-section">
-      <h2><span class="icon"></span> ภาพรวมการเงิน</h2>
-      <div class="summary-item income">
-        <strong>รายรับ:</strong> <span class="amount" id="income">0.00 ฿</span>
-      </div>
-      <div class="summary-item expense">
-        <strong>รายจ่าย:</strong> <span class="amount" id="expense">0.00 ฿</span>
-      </div>
-      <div class="summary-item balance">
-        <strong>คงเหลือ:</strong> <span class="amount" id="balance">0.00 ฿</span>
-      </div>
+      <h2><span class="material-symbols-rounded icon">account_balance_wallet</span> ภาพรวมการเงิน</h2>
+      <div class="summary-item income"><strong>รายรับ:</strong> <span class="amount" id="income">0.00 ฿</span></div>
+      <div class="summary-item expense"><strong>รายจ่าย:</strong> <span class="amount" id="expense">0.00 ฿</span></div>
+      <div class="summary-item balance"><strong>คงเหลือ:</strong> <span class="amount" id="balance">0.00 ฿</span></div>
     </div>
 
+    <!-- เมนูหลัก (รวม "ร้านค้า" แล้ว) -->
     <div class="container main-menu-grid">
       <div class="menu-card" onclick="location.href='add-transaction.html'">
-        <span style="font-size:2.1em;">📝</span>
-        <p>บันทึกรายจ่าย</p>
+        <span class="material-symbols-rounded">edit_note</span><p>บันทึกรายจ่าย</p>
       </div>
       <div class="menu-card" onclick="location.href='history.html'">
-        <span style="font-size:2.1em;">📜</span>
-        <p>ประวัติรายการ</p>
+        <span class="material-symbols-rounded">receipt_long</span><p>ประวัติรายการ</p>
       </div>
       <div class="menu-card" onclick="location.href='add-goal.html'">
-        <span style="font-size:2.1em;">🎯</span>
-        <p>เป้าหมาย</p>
+        <span class="material-symbols-rounded">flag</span><p>เป้าหมาย</p>
       </div>
       <div class="menu-card" onclick="location.href='graph.html'">
-        <span style="font-size:2.1em;">📈</span>
-        <p>กราฟการเงิน</p>
+        <span class="material-symbols-rounded">show_chart</span><p>กราฟการเงิน</p>
       </div>
       <div class="menu-card" onclick="location.href='lesson.html'">
-        <span style="font-size:2.1em;">📚</span>
-        <p>บทเรียน</p>
+        <span class="material-symbols-rounded">menu_book</span><p>บทเรียน</p>
       </div>
       <div class="menu-card" onclick="location.href='friend.html'">
-        <span style="font-size:2.1em;">🧑‍🤝‍🧑</span>
-        <p>เพื่อน</p>
+        <span class="material-symbols-rounded">group</span><p>เพื่อน</p>
       </div>
       <div class="menu-card" onclick="location.href='chat.html'">
-        <span style="font-size:2.1em;">💬</span>
-        <p>เเชทกับเพื่อน</p>
+        <span class="material-symbols-rounded">chat</span><p>แชทกับเพื่อน</p>
+      </div>
+      <div class="menu-card" onclick="location.href='shop.html'">
+        <span class="material-symbols-rounded">shopping_cart</span><p>ร้านค้า</p>
       </div>
     </div>
-    <div class="menu-card" onclick="location.href='shop.html'">
-        <span style="font-size:2.1em;">🛒</span>
-        <p>ร้านค้า</p>
-    </div>
 
+    <!-- เป้าหมายการออม -->
     <div id="goalDisplay" class="container card-section">
-      <h2><span class="icon"></span> เป้าหมายการออมของฉัน</h2>
+      <h2><span class="material-symbols-rounded icon">flag</span> เป้าหมายการออมของฉัน</h2>
       <div class="goal-navigation">
-        <button id="prevGoal" class="goal-nav-btn">&#8249;</button>
+        <button id="prevGoal" class="goal-nav-btn" aria-label="ก่อนหน้า"><span class="material-symbols-rounded">chevron_left</span></button>
         <div id="goalDetails">
           <p class="no-goal-message" id="noGoalMsg">- ยังไม่มีเป้าหมายที่ตั้งไว้ -</p>
           <h3 id="goalTitle" style="display:none;">-</h3>
-          <div class="goal-progress-bar-container" style="display:none;">
-            <div id="goalProgressBar" class="goal-progress-bar">0%</div>
-          </div>
+          <div class="goal-progress-bar-container" style="display:none;"><div id="goalProgressBar" class="goal-progress-bar">0%</div></div>
           <p id="goalAmount" style="display:none;">เป้าหมาย: 0.00 ฿</p>
           <p id="goalSavings" style="display:none;">ออมแล้ว: 0.00 ฿</p>
           <p id="goalDueDate" style="display:none;">กำหนด: -</p>
         </div>
-        <button id="nextGoal" class="goal-nav-btn">&#8250;</button>
+        <button id="nextGoal" class="goal-nav-btn" aria-label="ถัดไป"><span class="material-symbols-rounded">chevron_right</span></button>
       </div>
-      <!-- MODIFIED: Changed button to link to the goal management page -->
       <button class="add-savings-btn" onclick="location.href='add-goal.html'">จัดการเป้าหมายและเพิ่มเงินออม</button>
     </div>
 
+    <!-- รายการล่าสุด -->
     <div class="container card-section">
-      <h2><span class="icon"></span> รายการล่าสุด</h2>
-      <div id="transactionsContainer">
-        <p class="no-transactions-message">ไม่มีรายการธุรกรรมในขณะนี้</p>
-      </div>
+      <h2><span class="material-symbols-rounded icon">receipt_long</span> รายการล่าสุด</h2>
+      <div id="transactionsContainer"><p class="no-transactions-message">ไม่มีรายการธุรกรรมในขณะนี้</p></div>
     </div>
   </div>
 
-  <!-- REMOVED: Goal Creation Modal is not needed on this page -->
-
-  <!-- START: เพิ่ม Notification Modal -->
+  <!-- Modals (เดิม) -->
   <div id="notificationModal" class="modal">
     <div class="modal-content">
       <span class="close-button" onclick="closeNotificationModal()">&times;</span>
       <h2 id="notificationModalTitle"></h2>
       <p id="notificationModalMessage"></p>
-      <div class="modal-buttons">
-        <button onclick="closeNotificationModal()">ตกลง</button>
-      </div>
+      <div class="modal-buttons"><button onclick="closeNotificationModal()">ตกลง</button></div>
     </div>
   </div>
-  <!-- END: เพิ่ม Notification Modal -->
 
-  <!-- START: เพิ่ม Confirmation Modal -->
   <div id="confirmationModal" class="modal">
     <div class="modal-content">
       <span class="close-button" onclick="closeConfirmationModal()">&times;</span>
@@ -379,55 +171,40 @@
       </div>
     </div>
   </div>
-  <!-- END: เพิ่ม Confirmation Modal -->
 
-  <!-- START: เพิ่ม Level Up Modal -->
   <div id="levelUpModal" class="modal">
     <div class="modal-content level-up-modal-content">
       <span class="close-button" onclick="closeLevelUpModal()">&times;</span>
-      <div class="level-up-icon"></div>
+      <div class="level-up-icon"><span class="material-symbols-rounded" style="font-size:1em;">workspace_premium</span></div>
       <h2>ยินดีด้วย!</h2>
       <p>คุณเลเวลอัพเป็น <span id="levelUpModalLevel"></span></p>
       <p><span id="levelUpModalName"></span></p>
       <p class="modal-reward" id="levelUpModalReward"></p>
-      <div class="modal-buttons">
-        <button onclick="closeLevelUpModal()">ยอดเยี่ยม!</button>
-      </div>
+      <div class="modal-buttons"><button onclick="closeLevelUpModal()">ยอดเยี่ยม!</button></div>
     </div>
   </div>
-  <!-- END: เพิ่ม Level Up Modal -->
 
-  <!-- REMOVED: The Add Savings Modal has been removed to avoid data conflicts. -->
-
+  <!-- AI Chat -->
   <div class="ai-chat-btn" onclick="document.getElementById('aiChatBox').style.display='flex'">
-    <span>🤖</span>
+    <span class="material-symbols-rounded">smart_toy</span>
   </div>
   <div id="aiChatBox">
     <div class="chat-header">
       <b>AI ผู้ช่วยโค้ชการเงิน</b>
       <span class="chat-close-btn" onclick="document.getElementById('aiChatBox').style.display='none'">✖️</span>
     </div>
-    <div id="aiChatHistory">
-      <div class="chat-message ai">สวัสดีครับ! ผมคือ AI ผู้ช่วยโค้ชการเงิน มีอะไรให้ช่วยไหมครับ?</div>
-    </div>
-    <form id="aiChatForm">
-      <input id="aiChatInput" autocomplete="off" placeholder="พิมพ์คำถาม..." />
-      <button type="submit">ส่ง</button>
-    </form>
+    <div id="aiChatHistory"><div class="chat-message ai">สวัสดีครับ! ผมคือ AI ผู้ช่วยโค้ชการเงิน มีอะไรให้ช่วยไหมครับ?</div></div>
+    <form id="aiChatForm"><input id="aiChatInput" autocomplete="off" placeholder="พิมพ์คำถาม..." /><button type="submit">ส่ง</button></form>
   </div>
 
+  <!-- Bottom Nav -->
   <nav class="bottom-nav">
-    <a href="#" class="bottom-nav-item active">
-      <span>🏠</span><p>หน้าหลัก</p>
-    </a>
-    <a href="game-mode.html" class="bottom-nav-item">
-      <span>🎮</span><p>เกม</p>
-    </a>
-    <a href="settings.html" class="bottom-nav-item">
-      <span>⚙️</span><p>ตั้งค่า</p>
-    </a>
+    <a href="#" class="bottom-nav-item active"><span class="material-symbols-rounded">home</span><p>หน้าหลัก</p></a>
+    <a href="game-mode.html" class="bottom-nav-item"><span class="material-symbols-rounded">sports_esports</span><p>เกม</p></a>
+    <a href="settings.html" class="bottom-nav-item"><span class="material-symbols-rounded">settings</span><p>ตั้งค่า</p></a>
   </nav>
 
+  <!-- Firebase -->
   <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>

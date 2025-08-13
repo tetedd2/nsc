@@ -7,12 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="theme-darkmode.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        /* สไตล์สำหรับหน้า game-mode.html */
         body {
             font-family: 'Kanit', sans-serif;
-            background-color: var(--background-color); /* ใช้ตัวแปรจาก theme-darkmode.css */
-            color: var(--text-color); /* ใช้ตัวแปรจาก theme-darkmode.css */
+            background-color: var(--background-color);
+            color: var(--text-color);
             margin: 0;
             padding: 0;
             display: flex;
@@ -21,17 +21,16 @@
         }
 
         .header {
-            background: var(--header-background); /* ใช้ตัวแปรจาก theme-darkmode.css */
-            color: var(--header-text-color); /* ใช้ตัวแปรจาก theme-darkmode.css */
+            background: var(--primary-color);
+            color: #fff;
             padding: 20px;
             text-align: center;
             box-shadow: 0 4px 10px var(--shadow-color);
-            position: fixed; /* ทำให้ header อยู่ด้านบนเสมอ */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             z-index: 1000;
-            box-sizing: border-box; /* รวม padding ในความกว้าง */
         }
 
         .header h1 {
@@ -53,32 +52,31 @@
             gap: 20px;
             padding: 20px;
             max-width: 500px;
-            margin: 100px auto 100px; /* ปรับระยะขอบสำหรับส่วนหัวและแถบนำทางด้านล่าง */
+            margin: 120px auto 80px; /* ปรับระยะขอบให้คอนเทนต์อยู่ตรงกลาง */
             text-align: center;
-            flex-grow: 1; /* ทำให้ container ขยายเต็มพื้นที่ที่เหลือ */
-            justify-content: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
+            flex-grow: 1;
         }
 
         .game-card {
-            background: var(--card-background); /* ใช้ตัวแปรจาก theme-darkmode.css */
+            background: var(--card-background);
             border-radius: 18px;
             box-shadow: 0 6px 20px var(--shadow-color);
             padding: 25px;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
-            text-decoration: none; /* ลบขีดเส้นใต้ของลิงก์ */
-            color: var(--text-color); /* ใช้สีข้อความหลัก */
-            display: block; /* ทำให้ card เป็นบล็อกเพื่อใช้ padding ได้ */
+            text-decoration: none;
+            color: var(--text-color);
+            display: block;
         }
 
         .game-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px var(--shadow-color-hover); /* เพิ่มเงาเมื่อโฮเวอร์ */
+            box-shadow: 0 8px 25px var(--shadow-color-hover);
         }
 
         .game-card span {
             font-size: 3em;
-            color: var(--primary-color); /* ใช้สีหลักจาก theme-darkmode.css */
+            color: var(--primary-color);
             display: block;
             margin-bottom: 10px;
         }
@@ -93,10 +91,10 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            background: var(--nav-background); /* ใช้ตัวแปรจาก theme-darkmode.css */
+            background: var(--nav-background);
             padding: 10px 0;
             box-shadow: 0 -4px 10px var(--shadow-color);
-            position: fixed; /* ทำให้ nav อยู่ด้านล่างเสมอ */
+            position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
@@ -108,26 +106,25 @@
             flex-direction: column;
             align-items: center;
             text-decoration: none;
-            color: var(--nav-item-color); /* ใช้ตัวแปรจาก theme-darkmode.css */
+            color: var(--nav-item-color);
             font-size: 0.9em;
             font-weight: 500;
             transition: color 0.2s;
         }
 
         .bottom-nav-item span {
-            font-size: 1.8em;
+            font-size: 2em;
             margin-bottom: 5px;
         }
 
         .bottom-nav-item.active {
-            color: var(--primary-color); /* สีเน้นสำหรับเมนูที่ใช้งานอยู่ */
+            color: var(--primary-color);
         }
 
         .bottom-nav-item:hover {
             color: var(--primary-color);
         }
 
-        /* Responsive adjustments */
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 1.8em;
@@ -142,7 +139,7 @@
                 font-size: 2.5em;
             }
             .game-menu-container {
-                margin: 80px auto 80px; /* ปรับ margin สำหรับมือถือ */
+                margin: 80px auto 80px;
                 padding: 15px;
             }
         }
@@ -156,26 +153,26 @@
 
     <div class="game-menu-container">
         <a href="game.html" class="game-card">
-            <span>🕹️</span>
+            <span class="material-icons">sports_esports</span>
             <p>เกมหลัก</p>
         </a>
         <a href="money-quiz.html" class="game-card">
-            <span>💰</span>
+            <span class="material-icons">help_outline</span>
             <p>แบบทดสอบการเงิน</p>
         </a>
     </div>
 
     <nav class="bottom-nav">
         <a href="dashboard.html" class="bottom-nav-item">
-            <span>🏠</span>
+            <span class="material-icons">home</span>
             <div>หน้าหลัก</div>
         </a>
         <a href="#" class="bottom-nav-item active">
-            <span>🎮</span>
+            <span class="material-icons">games</span>
             <div>เกม</div>
         </a>
         <a href="settings.html" class="bottom-nav-item">
-            <span>⚙️</span>
+            <span class="material-icons">settings</span>
             <div>ตั้งค่า</div>
         </a>
     </nav>

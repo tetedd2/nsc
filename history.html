@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>รายการและประวัติ - MoneySkillz (เวอร์ชันแก้ไข)</title>
+    <meta charset="UTF-8">
+    <title>รายการและประวัติ - MoneySkillz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
+        /* =================================
+           รวมสไตล์จาก add-transaction.css และ history.html
+           ================================= */
         :root {
             --primary-color: #26A69A;
             --primary-darker: #00796B;
@@ -21,511 +25,655 @@
             --highlight-color: rgba(38, 166, 154, 0.2);
             --danger-color: #f44336;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Kanit', sans-serif; background: var(--background-color); color: var(--text-color); line-height: 1.6; }
-        .header { background: linear-gradient(135deg, var(--primary-color), var(--primary-darker)); color: #fff; padding: 40px 20px 80px; text-align: center; position: relative; }
-        .header h1 { font-size: 2.3rem; font-weight: 700; }
-        .header p { opacity: .9; }
-        .back-btn { position: absolute; top: 35px; left: 25px; background: rgba(255,255,255,.9); color:#00796B; border:none; border-radius: 50%; width: 45px; height: 45px; cursor:pointer; box-shadow: 0 3px 10px rgba(0,0,0,.15); display:flex; align-items:center; justify-content:center; text-decoration:none; }
-        .back-btn:hover { background: #fff; transform: scale(1.05); }
 
-        .container { max-width: 900px; width: 92%; margin: -50px auto 40px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        .card { background: var(--card-background); border-radius: 16px; box-shadow: 0 8px 28px var(--shadow-color); padding: 22px; margin-bottom: 22px; }
-        .card h2 { color: var(--primary-darker); font-size: 1.4rem; margin-bottom: 14px; }
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
 
-        /* อัปโหลดสลิปเดิม */
-        #upload-slip-btn { display:flex; align-items:center; justify-content:center; width:100%; padding:14px; border:2px dashed var(--border-color); border-radius: 12px; background:#f8f8f8; color: var(--text-secondary); font-size: 1.05rem; font-weight: 600; cursor:pointer; }
-        #upload-slip-btn:hover { background:#f0f0f0; border-color: var(--primary-color); color: var(--primary-color); }
-        #upload-slip-btn i { margin-right: 10px; }
-        #upload-slip-loading { display:none; text-align:center; padding: 10px; color: var(--primary-darker); font-weight: 500; }
-        .spinner { border: 4px solid rgba(0,0,0,.1); border-top:4px solid var(--primary-color); border-radius:50%; width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 0 auto 8px; }
-        @keyframes spin { to { transform: rotate(360deg) } }
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-darker));
+            color: white;
+            padding: 40px 20px 80px;
+            text-align: center;
+            position: relative;
+        }
 
-        /* ดึงรูปจากเครื่องโดยตรง */
-        .picker-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 8px; }
-        .btn { border: none; border-radius: 10px; padding: 12px 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px var(--shadow-color); background: var(--primary-color); color: #fff; }
-        .btn.secondary { background: #455a64; }
-        .btn.ghost { background: #eef6f5; color: #0b675d; border: 1px solid #cde7e4; }
-        .hint { font-size: .95rem; color: var(--text-secondary); margin-top: 8px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
 
-        .queue { margin-top: 14px; border: 1px dashed var(--border-color); border-radius: 12px; padding: 12px; background: #fafafa; max-height: 360px; overflow: auto; }
-        .queue-item { display:flex; gap: 10px; align-items:center; border-bottom:1px solid #eee; padding: 8px 0; }
-        .queue-item:last-child { border-bottom: none; }
-        .thumb { width: 56px; height:56px; object-fit: cover; border-radius: 8px; border:1px solid #eee; }
-        .meta { flex: 1; }
-        .meta .name { font-weight: 600; font-size: .98rem; }
-        .meta .sub { font-size: .85rem; color: var(--text-secondary); }
-        .status { font-size: .85rem; min-width: 92px; text-align: right; }
+        .header p {
+            font-size: 1.1em;
+            font-weight: 300;
+            opacity: 0.9;
+        }
 
-        .progress-wrap { margin-top: 10px; }
-        progress { width: 100%; height: 12px; }
-        .controls { display: flex; gap: 10px; margin-top: 12px; }
+        .back-btn {
+            position: absolute;
+            top: 35px;
+            left: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #00796B;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            z-index: 10;
+        }
 
-        /* รายการประวัติ */
-        .transaction-list { list-style: none; padding: 0; margin: 0; }
-        .transaction-item { display:flex; align-items:center; padding: 14px 0; border-bottom:1px solid var(--border-color); }
-        .transaction-item:last-child { border-bottom: none; }
-        .transaction-icon { font-size: 1.1rem; width: 28px; text-align:center; margin-right: 12px; }
-        .transaction-item.expense .transaction-icon { color: var(--danger-color); }
-        .transaction-item.income .transaction-icon { color: #4CAF50; }
-        .details { flex:1; padding-right:10px; }
-        .category { font-weight: 700; display:flex; align-items:center; gap: 8px; }
-        .date-label { font-weight: 400; font-size: .85rem; color: var(--text-secondary); }
-        .description { font-size: .9rem; color: var(--text-secondary); margin-top: 4px; }
-        .amount-and-type { display:flex; flex-direction:column; align-items:flex-end; }
-        .type-label { font-size: .8rem; color: var(--text-secondary); }
-        .amount { font-weight: 800; font-size: 1.1rem; }
-        .no-data-message, .loading-message { text-align: center; color: var(--text-secondary); margin-top: 24px; }
+        .back-btn:hover {
+            background: #ffffff;
+            transform: scale(1.05);
+        }
 
-        /* Message Box */
-        .message-box { display:none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 1000; justify-content:center; align-items:center; opacity: 0; transition: opacity .25s ease; }
-        .message-box.show { display:flex; opacity:1; }
-        .message-box-content { background:#fff; padding: 22px; border-radius: 14px; box-shadow: 0 8px 28px rgba(0,0,0,.22); width: 90%; max-width: 420px; transform: scale(.95); opacity: 0; transition: all .25s ease; }
-        .message-box.show .message-box-content { transform: scale(1); opacity:1; }
-        .message-box-content.success { border-top: 5px solid #4CAF50; }
-        .message-box-content.error { border-top: 5px solid var(--danger-color); }
-        .message-box-content.warn { border-top: 5px solid #FF9800; }
-        .message-box-content p { margin-bottom: 16px; }
-        .message-box-content button { background: var(--primary-color); color: #fff; padding: 10px 18px; border:none; border-radius: 10px; cursor:pointer; }
+        .back-btn .arrow {
+            font-size: 1.8em;
+            font-weight: bold;
+            line-height: 1;
+        }
 
-        .cap { font-size: .9rem; color: var(--text-secondary); margin-top: 6px; }
+        .container {
+            max-width: 600px;
+            width: 90%;
+            margin: 80px auto 30px;
+            padding: 20px;
+        }
+        
+        /* สไตล์สำหรับกล่องอัปโหลดสลิป */
+        .upload-section {
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 5px 25px var(--shadow-color);
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .upload-section h2 {
+            text-align: center;
+            color: var(--primary-darker);
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+        #upload-slip-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            background-color: #f8f8f8;
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #upload-slip-btn:hover {
+            background-color: #f0f0f0;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        #upload-slip-btn i {
+            margin-right: 10px;
+        }
+        #upload-slip-loading {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            color: var(--primary-darker);
+            font-weight: 500;
+        }
+        #upload-slip-loading .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* สไตล์สำหรับรายการประวัติ */
+        .history-card {
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 5px 25px var(--shadow-color);
+            padding: 25px;
+        }
+
+        .history-card h2 {
+            text-align: center;
+            color: var(--primary-darker);
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+
+        .transaction-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        /* สไตล์สำหรับไอคอนประเภทรายการ */
+        .transaction-icon {
+            font-size: 1.2em;
+            width: 30px;
+            text-align: center;
+            margin-right: 15px;
+        }
+        .transaction-item.expense .transaction-icon {
+            color: var(--danger-color);
+        }
+        .transaction-item.income .transaction-icon {
+            color: #4CAF50;
+        }
+        
+        .transaction-item .details {
+            flex-grow: 1;
+            padding-right: 10px;
+        }
+
+        .transaction-item .category {
+            font-weight: 600;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .transaction-item .category .date-label {
+            font-size: 0.8em;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-left: 10px;
+        }
+        
+        .transaction-item .description {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .transaction-item .amount-and-type {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-left: auto;
+        }
+
+        .transaction-item .type-label {
+            font-size: 0.8em;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .transaction-item .amount {
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .transaction-item.income .amount {
+            color: #4CAF50; /* สีเขียวสำหรับรายรับ */
+        }
+        
+        .transaction-item.expense .amount {
+            color: var(--danger-color); /* สีแดงสำหรับรายจ่าย */
+        }
+
+        .no-data-message, .loading-message {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 50px;
+        }
+        
+        .loading-message .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        /* กล่องข้อความแจ้งเตือน */
+        .message-box {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .message-box.show {
+            display: flex;
+            opacity: 1;
+        }
+        .message-box-content {
+            background-color: var(--card-background);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
+        .message-box.show .message-box-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .message-box-content p {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            color: var(--text-color);
+        }
+        .message-box-content button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .message-box-content.success {
+            border-top: 5px solid #4CAF50;
+        }
+        .message-box-content.error {
+            border-top: 5px solid var(--danger-color);
+        }
     </style>
 </head>
 <body>
-    <header class="header">
-        <a class="back-btn" href="dashboard.html" aria-label="กลับ">
-            <span class="arrow">&larr;</span>
-        </a>
-        <h1>MoneySkillz</h1>
-        <p>ประวัติรายรับ-รายจ่ายของคุณ</p>
-    </header>
 
-    <div class="container">
-        <!-- 1) วิธีเดิม: อัปโหลดสลิปภาพเดียว -->
-        <section class="card">
-            <h2>อัปโหลดสลิป (วิธีเดิม)</h2>
-            <input type="file" id="slipFileInput" accept="image/*" style="display:none;" />
-            <button id="upload-slip-btn"><i class="fas fa-camera"></i>อัปโหลดรูปภาพสลิป</button>
-            <div id="upload-slip-loading">
-                <div class="spinner"></div>
-                กำลังประมวลผลสลิป...
-            </div>
-            <div class="cap">คำแนะนำ: ใช้กับสลิปเดี่ยว, ถ้าต้องการเลือกหลายรูปหรือสแกนอัตโนมัติจากโฟลเดอร์ ให้ดูส่วนถัดไป</div>
-        </section>
+<header class="header">
+    <a href="dashboard.html" class="back-btn">
+      <span class="arrow">&larr;</span>
+    </a>
+    <h1>MoneySkillz</h1>
+    <p>ประวัติรายรับ-รายจ่ายของคุณ</p>
+</header>
 
-        <!-- 2) ใหม่: ดึงรูปจากเครื่องโดยตรง -->
-        <section class="card">
-            <h2>ดึงรูปจากเครื่องโดยตรง (หลายรูป/ทั้งโฟลเดอร์)</h2>
-            <div class="picker-row">
-                <button id="btnPickFolder" class="btn"><i class="fa-solid fa-folder-open"></i> อนุญาตโฟลเดอร์รูป</button>
-                <button id="btnPickMany" class="btn secondary"><i class="fa-solid fa-images"></i> เลือกหลายรูป</button>
-                <button id="btnToggleWatch" class="btn ghost" disabled><i class="fa-solid fa-rotate"></i> ดูโฟลเดอร์อัตโนมัติ</button>
-            </div>
-            <div class="hint">
-                ระบบจะใช้ API ที่รองรับในเบราว์เซอร์อัตโนมัติ (Directory Picker / Open File Picker) และมี <b>input multiple</b> เป็นทางเลือกสำรอง
-            </div>
-            <!-- ฟอลแบ็กที่ซ่อนไว้ -->
-            <input type="file" id="fallbackMulti" accept="image/*" multiple style="display:none;" />
-            <input type="file" id="fallbackDir" accept="image/*" webkitdirectory style="display:none;" />
-
-            <!-- คิวรายการภาพที่เลือก -->
-            <div class="queue" id="queue"></div>
-            <div class="controls">
-                <button id="btnStartScan" class="btn" disabled><i class="fa-solid fa-wand-magic-sparkles"></i> เริ่มสแกนคิว</button>
-                <button id="btnClearQueue" class="btn secondary" disabled><i class="fa-solid fa-trash"></i> ล้างคิว</button>
-            </div>
-            <div class="progress-wrap">
-                <progress id="scanProgress" max="100" value="0"></progress>
-                <div class="hint" id="progressText">พร้อมสแกน</div>
-            </div>
-            <div class="cap">หมายเหตุ: ไฟล์ HEIC/HEIF บางเบราว์เซอร์เปิดไม่ได้ แนะนำ JPG/PNG หรือแคปหน้าจอสลิป</div>
-        </section>
-
-        <!-- 3) ประวัติทั้งหมด -->
-        <section class="card">
-            <h2>📜 ประวัติรายการทั้งหมด</h2>
-            <div id="loading-message" class="loading-message">
-                <div class="spinner"></div>
-                กำลังโหลดประวัติรายการ...
-            </div>
-            <ul id="transaction-list" class="transaction-list"></ul>
-            <div id="no-data-message" class="no-data-message" style="display:none;">
-                <p>ยังไม่มีรายการธุรกรรม</p>
-                <p>ลองอัปโหลดสลิปหรือเลือกภาพจากเครื่องของคุณ!</p>
-            </div>
-        </section>
-    </div>
-
-    <!-- Message Box -->
-    <div id="messageBox" class="message-box" role="dialog" aria-modal="true">
-        <div id="messageBoxContent" class="message-box-content">
-            <p id="messageBoxText"></p>
-            <button id="messageBoxBtn">ตกลง</button>
+<div class="container">
+    <!-- ส่วนอัปโหลดสลิป -->
+    <div class="upload-section">
+        <h2>อัปโหลดสลิปเพื่อบันทึก</h2>
+        <input type="file" id="slipFileInput" accept="image/*" style="display: none;">
+        <button id="upload-slip-btn">
+            <i class="fas fa-camera"></i>
+            อัปโหลดรูปภาพสลิป
+        </button>
+        <div id="upload-slip-loading">
+            <div class="spinner"></div>
+            กำลังประมวลผลสลิป...
         </div>
     </div>
+    
+    <!-- ส่วนแสดงประวัติรายการ -->
+    <div class="history-card">
+        <h2>📜 ประวัติรายการทั้งหมด</h2>
+        
+        <!-- แสดงข้อความโหลดข้อมูล -->
+        <div id="loading-message" class="loading-message">
+            <div class="spinner"></div>
+            กำลังโหลดประวัติรายการ...
+        </div>
 
-    <script type="module">
-        /* ================= Firebase Setup ================= */
-        // นำเข้าโมดูล Firebase ที่จำเป็น
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, getDocs, doc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        <!-- แสดงรายการธุรกรรม -->
+        <ul id="transaction-list" class="transaction-list">
+            <!-- รายการจะถูกเพิ่มด้วย JavaScript -->
+        </ul>
+        
+        <!-- แสดงข้อความเมื่อไม่มีรายการ -->
+        <div id="no-data-message" class="no-data-message" style="display: none;">
+            <p>ยังไม่มีรายการธุรกรรม</p>
+            <p>ลองอัปโหลดสลิปเพื่อบันทึกรายการแรกของคุณ!</p>
+        </div>
+    </div>
+</div>
 
-        // ใช้ Global Variables ที่จัดเตรียมไว้ให้ในสภาพแวดล้อมนี้
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+<!-- Message Box -->
+<div id="messageBox" class="message-box">
+    <div id="messageBoxContent" class="message-box-content">
+        <p id="messageBoxText"></p>
+        <button id="messageBoxBtn">ตกลง</button>
+    </div>
+</div>
 
-        // ตั้งค่า Firebase โดยตรงตามที่ผู้ใช้ให้มา
-        const firebaseConfig = {
-            apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
-            authDomain: "myapplication-bd04c034.firebaseapp.com",
-            databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "myapplication-bd04c034",
-            storageBucket: "myapplication-bd04c034.firebasestorage.app",
-            messagingSenderId: "49782830313",
-            appId: "1:49782830313:web:c81b5d86a937f22d296c78",
-            measurementId: "G-Z2ZBWGB245"
+<script type="module">
+    // นำเข้า Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+    // ================== Firebase Configuration ==================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.firebasestorage.app",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78",
+      measurementId: "G-Z2ZBWGB245"
+    };
+
+    // ================== Firebase Initialization ==================
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let currentUser = null;
+
+    // ================== DOM Elements ==================
+    const transactionList = document.getElementById('transaction-list');
+    const loadingMessage = document.getElementById('loading-message');
+    const noDataMessage = document.getElementById('no-data-message');
+    const uploadSlipBtn = document.getElementById('upload-slip-btn');
+    const slipFileInput = document.getElementById('slipFileInput');
+    const uploadSlipLoading = document.getElementById('upload-slip-loading');
+    const messageBox = document.getElementById('messageBox');
+    const messageBoxContent = document.getElementById('messageBoxContent');
+    const messageBoxText = document.getElementById('messageBoxText');
+    const messageBoxBtn = document.getElementById('messageBoxBtn');
+
+    /**
+     * แสดงกล่องข้อความแจ้งเตือนแบบกำหนดเอง
+     * @param {string} message - ข้อความที่ต้องการแสดง
+     * @param {string} type - ประเภทของข้อความ ('success', 'error', 'info')
+     * @param {function} [callback] - ฟังก์ชันที่จะทำงานหลังจากปิดกล่อง
+     */
+    function showMessageBox(message, type = 'info', callback = null) {
+        messageBoxText.textContent = message;
+        messageBoxContent.className = 'message-box-content ' + type;
+        messageBox.classList.add('show');
+        
+        messageBoxBtn.onclick = () => {
+            messageBox.classList.remove('show');
+            if (callback) {
+                callback();
+            }
         };
-        
-
-        let app;
-        let auth;
-        let db;
-        let currentUser = null;
-        let isAuthReady = false;
-        
-        // เข้าถึง DOM Elements เมื่อ DOM โหลดเสร็จแล้ว
-        document.addEventListener('DOMContentLoaded', () => {
-            setupFirebase();
+    }
+    
+    /**
+     * แปลงไฟล์รูปภาพเป็น Base64
+     * @param {File} file - ไฟล์รูปภาพที่ต้องการแปลง
+     * @returns {Promise<string>} - Base64 string ของไฟล์รูปภาพ
+     */
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
         });
+    }
 
-
-        // ฟังก์ชันสำหรับเตรียมการ Firebase
-        async function setupFirebase() {
-            try {
-                // ตรวจสอบว่า Firebase config ถูกต้อง
-                if (!firebaseConfig.apiKey) {
-                    throw new Error("Firebase config is missing API key.");
-                }
-
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                // แก้ไข: ใช้การลงชื่อเข้าใช้แบบไม่ระบุชื่อโดยตรงเพื่อหลีกเลี่ยงข้อผิดพลาดเรื่องโทเค็น
-                await signInAnonymously(auth);
-
-                // รอให้ Auth state พร้อมก่อนดำเนินการต่อ
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user || null;
-                    isAuthReady = true;
-                    if (currentUser) {
-                        flushPending();
-                        displayTransactionsRealtime();
-                    } else {
-                        // ถ้า Auth ไม่สำเร็จ ให้แสดงข้อมูล Pending
-                        const pending = loadPending();
-                        renderTransactions(pending);
-                        loadingMessage.style.display = 'none';
-                    }
-                });
-
-            } catch (e) {
-                console.error("Error setting up Firebase:", e);
-                const loadingMessage = el('loading-message');
-                if (loadingMessage) loadingMessage.style.display = 'none';
-                showMessageBox('เกิดข้อผิดพลาดในการเชื่อมต่อกับฐานข้อมูล: ' + e.message, 'error');
-            }
-        }
-        
-        /* ================= DOM Elements ================= */
-        const el = (id) => document.getElementById(id);
-        const transactionList = el('transaction-list');
-        const loadingMessage   = el('loading-message');
-        const noDataMessage    = el('no-data-message');
-
-        const uploadSlipBtn    = el('upload-slip-btn');
-        const slipFileInput    = el('slipFileInput');
-        const uploadSlipLoading= el('upload-slip-loading');
-
-        const btnPickFolder    = el('btnPickFolder');
-        const btnPickMany      = el('btnPickMany');
-        const btnToggleWatch   = el('btnToggleWatch');
-        const btnStartScan     = el('btnStartScan');
-        const btnClearQueue    = el('btnClearQueue');
-        const fallbackMulti    = el('fallbackMulti');
-        const fallbackDir      = el('fallbackDir');
-
-        const queueWrap        = el('queue');
-        const scanProgress     = el('scanProgress');
-        const progressText     = el('progressText');
-
-        const messageBox       = el('messageBox');
-        const messageBoxContent= el('messageBoxContent');
-        const messageBoxText   = el('messageBoxText');
-        const messageBoxBtn    = el('messageBoxBtn');
-
-        /* =============== Helpers =============== */
-        function showMessageBox(message, type='info', cb=null) {
-            messageBoxText.textContent = message;
-            messageBoxContent.className = 'message-box-content ' + type;
-            messageBox.classList.add('show');
-            messageBoxBtn.onclick = () => { messageBox.classList.remove('show'); cb && cb(); };
+    /**
+     * บันทึกรายการธุรกรรมลงใน Firestore
+     * @param {Object} transactionData - ข้อมูลรายการธุรกรรม
+     */
+    async function saveTransaction(transactionData) {
+        if (!currentUser) {
+            showMessageBox("ไม่สามารถบันทึกได้, โปรดลองเข้าสู่ระบบอีกครั้ง", "error");
+            return;
         }
 
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
+        try {
+            const docRef = await addDoc(collection(db, 'users', currentUser.uid, 'transactions'), transactionData);
+            console.log("Document written with ID: ", docRef.id);
+            // แสดงข้อความว่าบันทึกสำเร็จ (ไม่ใช้ alert)
+            showMessageBox("บันทึกรายการจากสลิปสำเร็จ!", "success");
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            showMessageBox("เกิดข้อผิดพลาดในการบันทึก: " + error.message, "error");
+        }
+    }
+
+    /**
+     * แสดงรายการธุรกรรมในหน้าเว็บ
+     * @param {Array} transactions - อาร์เรย์ของรายการธุรกรรม
+     */
+    function displayTransactions(transactions) {
+        transactionList.innerHTML = ''; // ล้างรายการเก่า
+        loadingMessage.style.display = 'none'; // ซ่อนข้อความกำลังโหลด
+
+        if (transactions.length === 0) {
+            noDataMessage.style.display = 'block';
+            return;
+        }
+
+        noDataMessage.style.display = 'none';
+
+        transactions.forEach(transaction => {
+            const listItem = document.createElement('li');
+            listItem.className = `transaction-item ${transaction.type}`;
+
+            // กำหนดไอคอนและป้ายชื่อสำหรับประเภทรายการ
+            const iconClass = transaction.type === 'expense' ? 'fas fa-minus-circle' : 'fas fa-plus-circle';
+            const typeLabel = transaction.type === 'expense' ? 'รายจ่าย' : 'รายรับ';
+            const amountColor = transaction.type === 'expense' ? '#f44336' : '#4CAF50';
+            const formattedAmount = `${parseFloat(transaction.amount).toLocaleString('th-TH')}`;
+            const formattedDate = new Date(transaction.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+            
+            listItem.innerHTML = `
+                <div class="transaction-icon">
+                    <i class="${iconClass}"></i>
+                </div>
+                <div class="details">
+                    <div class="category">${transaction.category} <span class="date-label">${formattedDate}</span></div>
+                    <div class="description">${transaction.description}</div>
+                </div>
+                <div class="amount-and-type">
+                    <div class="type-label">${typeLabel}</div>
+                    <div class="amount" style="color: ${amountColor};">${formattedAmount}</div>
+                </div>
+            `;
+            transactionList.appendChild(listItem);
+        });
+    }
+
+    /**
+     * รับข้อมูลธุรกรรมจาก Firestore แบบเรียลไทม์
+     */
+    function fetchTransactions() {
+        if (!currentUser) {
+            console.log("ผู้ใช้ยังไม่ได้เข้าสู่ระบบ, ไม่สามารถดึงข้อมูลได้");
+            return;
+        }
+
+        const transactionsColRef = collection(db, 'users', currentUser.uid, 'transactions');
+        // เนื่องจาก firestore อาจต้องสร้าง index เพิ่มเติมหากใช้ orderBy() เราจะดึงข้อมูลทั้งหมดแล้วมาเรียงลำดับเองใน client
+        const unsubscribe = onSnapshot(transactionsColRef, (querySnapshot) => {
+            const transactions = [];
+            querySnapshot.forEach((doc) => {
+                transactions.push({ ...doc.data(), id: doc.id });
             });
-        }
 
-        /* ===== Pending local cache (ออฟไลน์/ยังไม่ล็อกอิน) ===== */
-        const PENDING_KEY = 'msk_pending_transactions';
-        function loadPending() { try { return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]'); } catch { return []; } }
-        function savePending(list) { localStorage.setItem(PENDING_KEY, JSON.stringify(list)); }
-
-        async function flushPending() {
-            if (!currentUser || !isAuthReady) return;
-            const list = loadPending(); if (!list.length) return;
-            const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions');
-            for (const t of list) {
-                try {
-                    await addDoc(collectionRef, t);
-                } catch (err) {
-                    console.error("Failed to add pending transaction:", err);
-                }
-            }
-            localStorage.removeItem(PENDING_KEY);
-        }
-
-        async function saveTransaction(transactionData) {
-            if (!currentUser || !isAuthReady) {
-                const list = loadPending(); list.push(transactionData); savePending(list);
-                showMessageBox('ยังไม่ได้ล็อกอิน ระบบบันทึกแบบออฟไลน์ไว้ให้ก่อน และจะอัปขึ้นคลาวด์อัตโนมัติเมื่อเชื่อมต่อได้', 'warn');
-                return;
-            }
-            try {
-                const collectionRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions');
-                await addDoc(collectionRef, transactionData);
-            }
-            catch (err) {
-                console.error(err);
-                showMessageBox('บันทึกล้มเหลว: ' + (err.message || ''), 'error');
-            }
-        }
-
-        function renderTransactions(items) {
-            transactionList.innerHTML = '';
+            // เรียงลำดับรายการตามวันที่ล่าสุดก่อนแสดงผล
+            transactions.sort((a, b) => {
+              const dateA = new Date(a.date);
+              const dateB = new Date(b.date);
+              return dateB - dateA;
+            });
+            
+            displayTransactions(transactions);
+        }, (error) => {
+            console.error("Error fetching transactions: ", error);
             loadingMessage.style.display = 'none';
-            if (items.length === 0) { noDataMessage.style.display = 'block'; return; }
-            noDataMessage.style.display = 'none';
-
-            // เรียงลำดับข้อมูลด้วย JavaScript แทนการใช้ orderBy ใน Firestore query
-            items.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            for (const t of items) {
-                const li = document.createElement('li');
-                li.className = `transaction-item ${t.type}`;
-                const iconClass = t.type === 'expense' ? 'fas fa-minus-circle' : 'fas fa-plus-circle';
-                const typeLabel = t.type === 'expense' ? 'รายจ่าย' : 'รายรับ';
-                const amountColor= t.type === 'expense' ? '#f44336' : '#4CAF50';
-                const thAmount   = `${parseFloat(t.amount).toLocaleString('th-TH')}`;
-                const thDate     = new Date(t.date).toLocaleDateString('th-TH',{day:'numeric',month:'short'});
-                li.innerHTML = `
-                    <div class="transaction-icon"><i class="${iconClass}"></i></div>
-                    <div class="details">
-                        <div class="category">${t.category} <span class="date-label">${thDate}</span></div>
-                        <div class="description">${t.description}</div>
-                    </div>
-                    <div class="amount-and-type">
-                        <div class="type-label">${typeLabel}</div>
-                        <div class="amount" style="color:${amountColor};">${thAmount}</div>
-                    </div>`;
-                transactionList.appendChild(li);
-            }
-        }
-
-        function displayTransactionsRealtime() {
-            if (!currentUser || !isAuthReady) return;
-            const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions');
-            // ลบ orderBy ออกเพื่อป้องกันข้อผิดพลาดเรื่อง index และเรียงลำดับด้วย JavaScript แทน
-            const q = query(colRef);
-            onSnapshot(q, snap => {
-                const items = [];
-                snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-                const pending = loadPending();
-                const merged = [...pending.map(p=>({ ...p, id: 'pending_'+Math.random() })) , ...items];
-                renderTransactions(merged);
-            }, err => {
-                console.error(err);
-                loadingMessage.style.display = 'none';
-                noDataMessage.style.display = 'block';
-                noDataMessage.querySelector('p').textContent = 'โหลดข้อมูลไม่สำเร็จ';
-            });
-        }
-
-        // จัดการโฟลเดอร์/ไฟล์
-        const supports = { dirPicker: 'showDirectoryPicker' in window, openPicker: 'showOpenFilePicker' in window };
-
-        const queue = []; // {file, name, size, lastModified, status}
-        const seenKeys = new Set();
-        let scanning = false;
-        let watchTimer = null;
-        let savedDirHandle = null;
-
-        const keyOf = (file) => `${file.name}_${file.lastModified}`;
-        function pushToQueue(file) {
-            const key = keyOf(file); if (seenKeys.has(key)) return; seenKeys.add(key);
-            queue.push({ file, name: file.name, size: file.size, lastModified: file.lastModified, status: 'รอคิว' });
-        }
-        function renderQueue() {
-            queueWrap.innerHTML = '';
-            if (!queue.length) {
-                queueWrap.innerHTML = '<div class="hint">ยังไม่มีรูปในคิว</div>';
-                btnStartScan.disabled = true; btnClearQueue.disabled = true;
-                return;
-            }
-            btnStartScan.disabled = false; btnClearQueue.disabled = false;
-            for (const item of queue) {
-                const row = document.createElement('div'); row.className = 'queue-item';
-                const img = new Image(); img.className = 'thumb'; img.alt = 'thumb';
-                const objectUrl = URL.createObjectURL(item.file); img.src = objectUrl;
-                if (URL && typeof URL.revokeObjectURL === 'function') { img.addEventListener('load', () => URL.revokeObjectURL(objectUrl)); }
-                const meta = document.createElement('div'); meta.className = 'meta';
-                const name = document.createElement('div'); name.className = 'name'; name.textContent = item.name;
-                const sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = `${(item.size/1024).toFixed(0)} KB • ${new Date(item.lastModified).toLocaleString('th-TH')}`;
-                meta.appendChild(name); meta.appendChild(sub);
-                const status = document.createElement('div'); status.className = 'status'; status.dataset.name = item.name; status.textContent = item.status;
-                row.appendChild(img); row.appendChild(meta); row.appendChild(status);
-                queueWrap.appendChild(row);
-            }
-        }
-        function updateStatus(name, text) {
-            const el = queueWrap.querySelector(`.status[data-name="${CSS.escape(name)}"]`); if (el) el.textContent = text;
-            const it = queue.find(x => x.name === name); if (it) it.status = text;
-        }
-
-        async function chooseFolder() {
-            if (supports.dirPicker) {
-                const handle = await window.showDirectoryPicker({ id: 'photos', mode: 'read' });
-                const perm = await handle.requestPermission({ mode: 'read' });
-                if (perm !== 'granted') throw new Error('ผู้ใช้ไม่อนุญาต');
-                savedDirHandle = handle; btnToggleWatch.disabled = false; await scanFolderOnce();
-            } else { fallbackDir.click(); }
-        }
-        async function pickManyFiles() {
-            if (supports.openPicker) {
-                try {
-                    const handles = await window.showOpenFilePicker({ multiple: true, types: [{ description: 'Images', accept: { 'image/*': ['.png','.jpg','.jpeg','.webp','.gif'] } }] });
-                    const files = await Promise.all(handles.map(h => h.getFile())); addFilesToQueue(files);
-                } catch(_){}
-            } else { fallbackMulti.click(); }
-        }
-        function addFilesToQueue(files) {
-            const list = Array.from(files).filter(f => f.type.startsWith('image/') && !/heic|heif/i.test(f.type));
-            list.sort((a,b)=> b.lastModified - a.lastModified);
-            for (const f of list) pushToQueue(f);
-            if (files.length && list.length === 0) showMessageBox('ไฟล์ HEIC/HEIF ไม่รองรับในเบราว์เซอร์นี้', 'error');
-            renderQueue();
-        }
-        async function scanFolderOnce(limit=100) {
-            if (!savedDirHandle) return; const files = [];
-            for await (const entry of savedDirHandle.values()) {
-                if (entry.kind === 'file') {
-                    const f = await entry.getFile(); if (f.type.startsWith('image/') && !/heic|heif/i.test(f.type)) files.push(f);
-                }
-            }
-            files.sort((a,b)=> b.lastModified - a.lastModified); addFilesToQueue(files.slice(0, limit));
-        }
-        function toggleWatchFolder() {
-            if (!savedDirHandle) return;
-            if (watchTimer) { clearInterval(watchTimer); watchTimer = null; btnToggleWatch.textContent = 'ดูโฟลเดอร์อัตโนมัติ'; showMessageBox('ปิดโหมดดูโฟลเดอร์แล้ว','success'); return; }
-            watchTimer = setInterval(() => scanFolderOnce(50), 10_000);
-            btnToggleWatch.textContent = 'ปิดโหมดดูโฟลเดอร์'; showMessageBox('เริ่มดูโฟลเดอร์ทุก 10 วินาทีแล้ว','success');
-        }
-
-        /* =============== Gemini OCR =============== */
-        // แก้ไข: ใส่ Gemini API Key ที่คุณให้มา
-        const GEMINI_API_KEY = 'AIzaSyBZXa3jVaK2LM1SZHgoAEOdB8itrl6WlP4'; 
-        const GEMINI_MODEL = 'gemini-1.5-flash'; // รุ่นเสถียร
-        const hasGeminiKey = typeof GEMINI_API_KEY === 'string' && GEMINI_API_KEY.trim() && !/PASTE_/i.test(GEMINI_API_KEY);
-        const prompt = "Extract the following information from the receipt image in Thai, and format it as a JSON object. The keys should be 'amount' (number), 'date' (ISO 8601 format 'YYYY-MM-DD'), 'category' (string), and 'description' (string). If a value cannot be extracted, use an empty string or 0 for amount. Always return a JSON object, never a string.";
-
-        async function callGemini(base64, mime) {
-            const payload = { contents: [{ parts: [ { text: prompt }, { inlineData: { mimeType: mime, data: base64 } } ] }] };
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
-                method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
-            });
-            if (!res.ok) throw new Error('Gemini API status ' + res.status);
-            const data = await res.json();
-            const parts = data?.candidates?.[0]?.content?.parts; if (!parts?.length) throw new Error('ผลลัพธ์ว่าง');
-            const text = parts[0].text || '';
-            const m = text.match(/\{[\s\S]*\}/); if (!m) throw new Error('หา JSON ไม่เจอ');
-            return JSON.parse(m[0]);
-        }
-
-        async function processQueue() {
-            if (!hasGeminiKey) { showMessageBox('ยังไม่ได้ตั้งค่า Gemini API Key จึงไม่สามารถส่งรูปเข้า AI ได้\nไปตั้งค่าก่อนแล้วกดสแกนอีกครั้ง', 'warn'); return; }
-            if (scanning) return; scanning = true;
-            btnStartScan.disabled = true; progressText.textContent = 'กำลังสแกน...';
-            const total = queue.length; let done = 0;
-            const retry = async (fn, tries=2, delay=800) => { try { return await fn(); } catch(e){ if(tries<=0) throw e; await new Promise(r=>setTimeout(r,delay)); return retry(fn, tries-1, delay*2); } };
-            while (queue.length) {
-                const item = queue.shift();
-                updateStatus(item.name, 'อัปโหลด → AI');
-                try {
-                    const base64 = await fileToBase64(item.file);
-                    const parsed = await retry(() => callGemini(base64, item.file.type));
-                    const data = {
-                        amount: Number(parsed.amount) || 0,
-                        date: parsed.date || new Date().toISOString().slice(0,10),
-                        category: parsed.category || 'อื่นๆ',
-                        description: parsed.description || item.name,
-                        type: 'expense'
-                    };
-                    await saveTransaction(data);
-                    updateStatus(item.name, 'บันทึกแล้ว ✓');
-                } catch(e){ console.error(e); updateStatus(item.name, 'ผิดพลาด'); }
-                done++; scanProgress.value = Math.round(done/total*100); progressText.textContent = `เสร็จ ${done}/${total}`;
-            }
-            scanning = false; btnStartScan.disabled = false; progressText.textContent = 'พร้อมสแกน'; renderQueue(); showMessageBox('สแกนคิวเสร็จแล้ว', 'success');
-        }
-
-        /* =============== Events =============== */
-        uploadSlipBtn.addEventListener('click', () => slipFileInput.click());
-        slipFileInput.addEventListener('change', async (ev) => {
-            const file = ev.target.files?.[0]; if (!file) return;
-            if (!hasGeminiKey) { showMessageBox('ยังไม่ได้ตั้งค่า Gemini API Key จึงยังประมวลผลสลิปไม่ได้', 'warn'); return; }
-            uploadSlipBtn.style.display = 'none'; uploadSlipLoading.style.display = 'block';
-            const retry = async (fn, tries=2, delay=800) => { try { return await fn(); } catch(e){ if(tries<=0) throw e; await new Promise(r=>setTimeout(r,delay)); return retry(fn, tries-1, delay*2); } };
-            try {
-                const base64 = await fileToBase64(file);
-                const parsed = await retry(() => callGemini(base64, file.type));
-                const data = { amount: Number(parsed.amount) || 0, date: parsed.date || new Date().toISOString().slice(0,10), category: parsed.category || 'อื่นๆ', description: parsed.description || 'รายการจากสลิป', type: 'expense' };
-                await saveTransaction(data);
-                showMessageBox('บันทึกจากสลิปสำเร็จ!', 'success');
-            } catch (e) {
-                console.error(e); showMessageBox('ประมวลผลสลิปล้มเหลว', 'error');
-            } finally {
-                uploadSlipBtn.style.display = 'flex'; uploadSlipLoading.style.display = 'none'; slipFileInput.value = '';
-            }
+            noDataMessage.style.display = 'block';
+            noDataMessage.querySelector('p').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
         });
 
-        btnPickFolder.addEventListener('click', async () => { try { await chooseFolder(); } catch(e){ console.warn(e); showMessageBox('ไม่สามารถเข้าถึงโฟลเดอร์ได้', 'error'); } });
-        btnPickMany.addEventListener('click', pickManyFiles);
-        btnToggleWatch.addEventListener('click', toggleWatchFolder);
-        btnStartScan.addEventListener('click', processQueue);
-        btnClearQueue.addEventListener('click', () => { queue.length = 0; queueWrap.innerHTML=''; btnStartScan.disabled = true; btnClearQueue.disabled = true; seenKeys.clear(); });
-        fallbackMulti.addEventListener('change', (e)=> addFilesToQueue(e.target.files || []));
-        fallbackDir.addEventListener('change', (e)=> addFilesToQueue(e.target.files || []));
+        // คืนค่า unsubscribe function หากต้องการหยุดการฟังในอนาคต
+        return unsubscribe;
+    }
 
-        if (!('showDirectoryPicker' in window)) btnPickFolder.title = 'เบราว์เซอร์นี้ยังไม่รองรับ Directory Picker จะใช้วิธีเลือกโฟลเดอร์แบบสำรองให้แทน';
-        if (!('showOpenFilePicker' in window)) btnPickMany.title    = 'เบราว์เซอร์นี้ยังไม่รองรับ Open File Picker API จะใช้ input multiple แทน';
+    // ================== Event Listeners & Initial Setup ==================
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            console.log("ผู้ใช้เข้าสู่ระบบแล้ว: ", user.uid);
+            fetchTransactions();
+        } else {
+            currentUser = null;
+            console.log("ผู้ใช้ยังไม่ได้ล็อกอิน, กำลังพยายามล็อกอินแบบไม่ระบุตัวตน...");
+            try {
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.error("การล็อกอินแบบไม่ระบุตัวตนล้มเหลว:", err);
+                showMessageBox("ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่อีกครั้ง", "error");
+            }
+        }
+    });
 
-    </script>
+    uploadSlipBtn.addEventListener('click', () => {
+        slipFileInput.click();
+    });
+
+    slipFileInput.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        // แสดงสถานะโหลด
+        uploadSlipBtn.style.display = 'none';
+        uploadSlipLoading.style.display = 'block';
+
+        // สร้างฟังก์ชันสำหรับ exponential backoff
+        const retryWithBackoff = async (func, retries = 3, delay = 1000) => {
+          try {
+            return await func();
+          } catch (error) {
+            if (retries > 0) {
+              console.warn(`Retrying after ${delay / 1000}s...`, error);
+              await new Promise(res => setTimeout(res, delay));
+              return retryWithBackoff(func, retries - 1, delay * 2);
+            }
+            throw error;
+          }
+        };
+
+        try {
+            // แปลงรูปภาพเป็น Base64
+            const base64Image = await fileToBase64(file);
+            
+            // เรียก Gemini API เพื่อประมวลผลรูปภาพ
+            const prompt = "Extract the following information from the receipt image in Thai, and format it as a JSON object. The keys should be 'amount' (number), 'date' (ISO 8601 format 'YYYY-MM-DD'), 'category' (string, e.g., 'อาหาร', 'เดินทาง', 'ช้อปปิ้ง', 'บิล'), and 'description' (string, e.g., 'Starbucks', 'BTS', 'เสื้อผ้า'). The amount must be a number. If a value cannot be extracted, use an empty string or 0 for amount. Example: { \"amount\": 150.00, \"date\": \"2023-10-27\", \"category\": \"อาหาร\", \"description\": \"ซื้อของที่ 7-Eleven\" }. Always return a JSON object, never a string."
+            
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: file.type,
+                                data: base64Image
+                            }
+                        }
+                    ]
+                }]
+            };
+
+            const apiKey = "AIzaSyBZXa3jVaK2LM1SZHgoAEOdB8itrl6WlP4";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            const response = await retryWithBackoff(() => fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }));
+            
+            if (!response.ok) {
+              throw new Error(`API responded with status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                let jsonText = result.candidates[0].content.parts[0].text;
+                // ** การแก้ไขใหม่: ใช้ Regular Expression เพื่อดึง JSON object ที่ถูกต้อง **
+                const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) {
+                    throw new Error("ไม่พบข้อมูล JSON ที่ถูกต้องในคำตอบจาก AI");
+                }
+                const cleanJsonText = jsonMatch[0];
+                
+                const parsedData = JSON.parse(cleanJsonText);
+
+                // ตรวจสอบและกำหนดค่าเริ่มต้นหากข้อมูลบางอย่างขาดหาย
+                const transactionData = {
+                    amount: parsedData.amount || 0,
+                    date: parsedData.date || new Date().toISOString().slice(0, 10),
+                    category: parsedData.category || "อื่นๆ",
+                    description: parsedData.description || "รายการจากสลิป",
+                    type: (parsedData.amount > 0) ? "expense" : "income" // ตั้งค่า default เป็น expense ถ้าไม่ระบุ
+                };
+                
+                await saveTransaction(transactionData);
+
+            } else {
+                showMessageBox("ไม่สามารถประมวลผลสลิปได้ กรุณาลองใหม่อีกครั้ง", "error");
+            }
+        } catch (error) {
+            console.error("Error processing slip: ", error);
+            // แสดงข้อความที่เหมาะสมกับข้อผิดพลาด
+            if (error instanceof SyntaxError) {
+                showMessageBox("ข้อมูลจากสลิปไม่สมบูรณ์ กรุณาลองสลิปอื่น", "error");
+            } else {
+                showMessageBox("เกิดข้อผิดพลาดในการประมวลผลสลิป", "error");
+            }
+        } finally {
+            // ซ่อนสถานะโหลดและแสดงปุ่มกลับมา
+            uploadSlipBtn.style.display = 'flex';
+            uploadSlipLoading.style.display = 'none';
+            // รีเซ็ต input file เพื่อให้อัปโหลดไฟล์เดิมซ้ำได้
+            slipFileInput.value = '';
+        }
+    });
+
+</script>
 </body>
 </html>
