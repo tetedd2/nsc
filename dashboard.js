@@ -531,6 +531,19 @@ function updateFinancialSummary() {
         localStorage.setItem('isSpendingBlocked', 'false'); // Use localStorage
     }
 }
+// ฟังก์ชันสำหรับการเช็คจำนวนธุรกรรมที่ทำในวันนี้
+async function checkTransactionQuota(uid) {
+    const today = new Date().toISOString().split('T')[0]; // ค่าปัจจุบันในรูปแบบ YYYY-MM-DD
+    const tomorrow = new Date(new Date(today).setDate(new Date(today).getDate() + 1)).toISOString();
+    const transactionsQuery = query(
+        collection(db, 'users', uid, 'transactions'),
+        where('date', '>=', today),
+        where('date', '<', tomorrow)
+    );
+    
+    const snapshot = await getDocs(transactionsQuery);
+    return snapshot.docs.length; // คืนค่าจำนวนธุรกรรมในวันนั้น
+}
 
 function displayTransactions() {
     const container = document.getElementById('transactionsContainer');

@@ -596,7 +596,95 @@
             }
         }
     }
+function showMessageBox(message, type = "info", onConfirm = null) {
+    const box = document.getElementById("messageBox");
+    const content = document.getElementById("messageBoxContent");
+    const text = document.getElementById("messageText");
+    const closeBtn = document.getElementById("messageCloseBtn");
 
+    text.textContent = message;
+    content.className = 'message-box-content ' + type;
+    box.classList.add("show");
+
+    const closeHandler = () => {
+        box.classList.remove("show");
+        if (onConfirm) onConfirm();
+    };
+
+    closeBtn.addEventListener('click', closeHandler, { once: true });
+}
+async function saveTransaction(event) {
+    event.preventDefault();
+    
+    if (!currentUser) {
+        showMessageBox("กรุณาเข้าสู่ระบบก่อนบันทึกรายการ", "info");
+        return;
+    }
+
+    // ตรวจสอบจำนวนธุรกรรมในวันนั้น
+    const transactionCount = await checkTransactionQuota(currentUser.uid);
+
+    // จำกัดธุรกรรมไม่เกิน 10 รอบต่อวัน
+    if (transactionCount >= 10) {
+        showMessageBox('คุณทำธุรกรรมครบ 10 รอบแล้วในวันนี้', 'error');
+        return;
+    }
+
+    const isBlocked = localStorage.getItem('isSpendingBlocked') === 'true';
+    const isEmergency = isEmergencyMode();
+    
+    if (isBlocked && typeSelect.value === 'expense' && !isEmergency) {
+        showMessageBox('ไม่สามารถเพิ่มรายจ่ายได้ เนื่องจากเงินออมต่ำกว่า 30%', 'error');
+        return;
+    }
+
+    const transaction = {
+        type: typeSelect.value,
+        category: categorySelect.value,
+        amount: parseFloat(amountInput.value),
+        date: dateInput.value,
+        description: descriptionInput.value.trim(),
+        createdAt: serverTimestamp(),
+        isEmergency: isEmergency,
+        emergencyReason: isEmergency ? (sessionStorage.getItem('emergencyReason') || '') : ''
+    };
+    
+    if (!transaction.type || !transaction.category || !transaction.amount || 
+        transaction.amount <= 0 || !transaction.date || !transaction.description) {
+        showMessageBox("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง", "error");
+        return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'กำลังบันทึก...';
+
+    try {
+        await addDoc(collection(db, 'users', currentUser.uid, 'transactions'), transaction);
+        
+        const userRef = doc(db, 'users', currentUser.uid);
+        await updateDoc(userRef, {
+            xp: increment(10),
+            lastActivity: serverTimestamp()
+        });
+
+        await checkAndAwardBadge(currentUser.uid, 'first_transaction');
+
+        // Clear emergency mode after successful transaction
+        if (isEmergency) {
+            clearEmergencyMode();
+        }
+
+        showMessageBox("บันทึกรายการสำเร็จ! ได้รับ 10 XP!", "success", () => {
+            window.location.href = "dashboard.html";
+        });
+
+    } catch (error) {
+        console.error("Error adding document: ", error);
+        showMessageBox("เกิดข้อผิดพลาดในการบันทึก: " + error.message, "error");
+        submitButton.disabled = false;
+        submitButton.textContent = 'บันทึกรายการ';
+    }
+}
     async function saveTransaction(event) {
         event.preventDefault();
         
