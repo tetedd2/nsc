@@ -1,545 +1,589 @@
 <!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบเพื่อน - MoneySkillz</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ระบบเพื่อน - MoneySkillz</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="theme-darkmode.css">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Tailwind (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <style>
-        /* ใช้ฟอนต์ Kanit เป็นหลัก */
-        body {
-            font-family: 'Kanit', sans-serif;
-            background-color: #E0F2F7; /* A slightly lighter, more subtle teal-ish background for the very outside */
-            -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-        }
-        /* --- Dark Mode --- */
-        body.dark {
-            background-color: #0F172A; /* Deeper dark background for the very outside */
-            color: #e2e8f0; /* Lighter text for contrast */
-        }
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet"/>
 
-        /* Styles for elements within the main frame */
-        /* The main frame itself changes background via its own classes: bg-white dark:bg-gray-800 */
-        .dark .card {
-            background-color: #2D3748; /* Darker card background */
-            border: 1px solid #4A5568; /* Slightly darker border */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Subtle shadow */
-        }
-        .dark .main-text-color {
-            color: #4FD1C5; /* Brighter teal for dark mode */
-        }
-        .dark .input-field {
-            background-color: #4A5568; /* Darker input background */
-            color: #E2E8F0; /* Light text in dark input */
-            border-color: #616E7F; /* Darker input border */
-        }
-        .dark .list-item-bg {
-            /* This class is used on <li> elements which are inside .card.
-               The .card background might already handle it, but explicit
-               setting here ensures it works if .list-item-bg is used elsewhere. */
-            background-color: #2D3748; /* Darker list item background */
-        }
-        .dark .text-gray-800 { color: #F7FAFC; } /* White for headings */
-        .dark .text-gray-500 { color: #A0AEC0; } /* Lighter gray for subtext */
-        .dark .text-teal-700 { color: #6EE7B7; } /* Brighter teal for dark mode IDs (used on userIdDisplay) */
-        
-        /* Specific override for the search result div when it shows bg-teal-50 in light mode */
-        .dark .bg-teal-50 { 
-            background-color: #2D3748 !important; /* Force darker background in dark mode */
-            color: #E2E8F0; /* Ensure text inside is light */
-        } 
+  <!-- ใช้ไฟล์ธีมเดิมของคุณ (หากมีตัวแปรสีอื่น ๆ) -->
+  <link rel="stylesheet" href="theme-darkmode.css" />
 
-        .dark .text-amber-500 { color: #FBD38D; } /* Adjusted warning text */
-        .dark .text-rose-500 { color: #FEB2B2; } /* Adjusted error text */
-        .dark .text-emerald-500 { color: #68D391; } /* Adjusted success text */
-        .dark .text-blue-500 { color: #63B3ED; } /* Adjusted info text */
+  <style>
+    :root{
+      --primary: #00877F;
+      --primary-600:#00746D;
+      --primary-700:#006A64;
+      --page-bg:#E8F5E9;       /* พื้นหลังนุ่มๆ */
+      --card-bg:#ffffff;
+      --text:#003D3A;
+      --muted:#005A55;
+      --border:#A0D9D4;
+      --ring: rgba(0,135,127,0.28);
+      --shadow: rgba(0,0,0,0.08);
+      --shadow-strong: rgba(0,0,0,0.18);
+    }
 
-        /* Header specific dark mode styles */
-        .dark .fixed {
-            background-color: #111827E6; /* Slightly darker header for contrast against frame */
-            border-bottom-color: #374151;
-        }
+    body{ font-family:'Kanit',sans-serif; background:var(--page-bg); color:var(--text); -webkit-tap-highlight-color:transparent; }
 
+    /* Dark */
+    body.dark{
+      --page-bg:#0F172A;
+      --card-bg:#111827;
+      --text:#E2E8F0;
+      --muted:#93C5FD;
+      --border:#1F2937;
+      --ring: rgba(99,102,241,0.32);
+      --shadow: rgba(0,0,0,0.35);
+      --shadow-strong: rgba(0,0,0,0.6);
+      background:var(--page-bg);
+      color:var(--text);
+    }
 
-        /* ซ่อน scrollbar (Keep for clean mobile look) */
-        ::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-        }
+    /* Header fixed bar */
+    .app-header{
+      background:linear-gradient(90deg, var(--primary), #26A69A);
+      color:#fff;
+      box-shadow:0 6px 18px var(--shadow);
+      border-bottom:1px solid rgba(255,255,255,0.1);
+    }
+    body.dark .app-header{
+      background:linear-gradient(90deg, #0B4C49, #0F7C75);
+      border-bottom-color:#1F2937;
+      box-shadow:0 8px 22px var(--shadow);
+    }
 
-        /* สไตล์สำหรับปุ่ม - Optimized for touch */
-        .btn {
-            @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 active:scale-95; /* Added active:scale-95 for touch feedback */
-        }
-        .btn-primary {
-            @apply bg-teal-600 hover:bg-teal-700 focus:ring-teal-500;
-        }
-        .btn-secondary {
-            @apply bg-gray-500 hover:bg-gray-600 focus:ring-gray-500 text-white;
-        }
-        .btn-danger {
-            @apply bg-rose-500 hover:bg-rose-600 focus:ring-rose-500;
-        }
-        .btn-success {
-            @apply bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-500;
-        }
-        /* การ์ดสำหรับแสดงข้อมูล - More subtle shadow and rounded corners */
-        .card {
-            @apply bg-white rounded-xl shadow-md p-5 mb-5 transition-all duration-300; /* Smaller shadow, slightly less padding, smaller mb */
-        }
-        /* สไตล์สำหรับ input - Clearer focus, slightly larger padding for touch */
-        .input-field {
-            @apply block w-full px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors; /* Slightly thicker border for clarity, larger py */
-        }
-        .input-field:focus {
-            @apply ring-opacity-50;
-        }
-        /* --- สีข้อความหลัก (Teal) --- */
-        .main-text-color {
-            @apply text-teal-700; /* Slightly darker teal for better contrast in light mode */
-        }
-        .list-item-bg {
-            @apply bg-white;
-        }
-    </style>
+    /* Outer frame */
+    .app-frame{
+      background:var(--card-bg);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:0 10px 30px var(--shadow);
+    }
+
+    /* Card (คงคลาส .card เดิม + ปรับสไตล์ให้ไม่ต้องใช้ @apply) */
+    .card{
+      background:var(--card-bg);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:20px;
+      margin-bottom:16px;
+      box-shadow:0 6px 18px var(--shadow);
+      transition:box-shadow .2s ease, transform .2s ease;
+    }
+    .card:hover{ box-shadow:0 10px 26px var(--shadow-strong); transform:translateY(-2px); }
+
+    /* Title สีธีม */
+    .main-text-color{ color:var(--primary-700); }
+    body.dark .main-text-color{ color:#6EE7B7; }
+
+    /* Input field */
+    .input-field{
+      width:100%;
+      padding:12px 14px;
+      border:1.5px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      color:#111827;
+      transition:border-color .2s ease, box-shadow .2s ease;
+    }
+    body.dark .input-field{
+      background:#1F2937;
+      color:#E5E7EB;
+      border-color:#374151;
+    }
+    .input-field:focus{
+      outline:none;
+      border-color:var(--primary);
+      box-shadow:0 0 0 4px var(--ring);
+    }
+
+    /* Buttons (แทน .btn .btn-* ที่เคยใช้ @apply) */
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 16px; border:0; border-radius:12px;
+      font-weight:600; font-size:0.95rem; cursor:pointer;
+      box-shadow:0 4px 12px var(--shadow); transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+      user-select:none;
+    }
+    .btn:active{ transform:scale(.98); }
+
+    .btn-primary{ background:linear-gradient(135deg, var(--primary), #26A69A); color:#fff; }
+    .btn-primary:hover{ filter:brightness(1.05); box-shadow:0 8px 20px var(--shadow-strong); }
+
+    .btn-secondary{ background:#6B7280; color:#fff; }
+    .btn-secondary:hover{ filter:brightness(1.05); box-shadow:0 8px 20px var(--shadow-strong); }
+
+    .btn-danger{ background:#EF4444; color:#fff; }
+    .btn-danger:hover{ filter:brightness(1.05); box-shadow:0 8px 20px var(--shadow-strong); }
+
+    .btn-success{ background:#10B981; color:#fff; }
+    .btn-success:hover{ filter:brightness(1.05); box-shadow:0 8px 20px var(--shadow-strong); }
+
+    /* Icon-only buttons (วงกลม) */
+    .icon-btn{
+      width:40px; height:40px; padding:0; border-radius:999px; display:inline-flex; align-items:center; justify-content:center;
+    }
+
+    /* List background */
+    .list-item-bg{ background:var(--card-bg); border:1px solid var(--border); }
+
+    /* Avatar-like วงกลมตัวอักษรแรก */
+    .initial-avatar{
+      width:42px; height:42px; border-radius:999px;
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-weight:700; font-size:1rem;
+      background:linear-gradient(135deg, var(--primary), #26A69A);
+      box-shadow:0 4px 12px var(--shadow);
+    }
+
+    /* Search result chip */
+    .result-chip{
+      padding:12px; border:1px solid var(--border); border-radius:12px;
+      background:#F0FFFC;  /* เขียวอ่อน */
+    }
+    body.dark .result-chip{ background:#243447; border-color:#374151; }
+
+    /* Modal */
+    #modal{ backdrop-filter: blur(3px); }
+    #modal-content{
+      background:var(--card-bg); border:1px solid var(--border); border-radius:18px;
+      box-shadow:0 18px 40px var(--shadow-strong);
+    }
+
+    /* Utility */
+    .text-muted{ color:var(--muted); }
+    .section-title{ display:flex; align-items:center; gap:.5rem; }
+    .section-title svg{ color:var(--primary); }
+    .help-text{ font-size:.875rem; color:#64748B; }
+    body.dark .help-text{ color:#94A3B8; }
+
+    /* Hide scrollbar (mobile clean) */
+    ::-webkit-scrollbar{ width:0; height:0; }
+  </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
-    <!-- Header (Dark Mode Toggle Removed) -->
-    <div class="fixed top-0 left-0 right-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg z-20 shadow-sm border-b border-gray-100 dark:border-gray-700">
-        <div class="container mx-auto px-4 max-w-full sm:max-w-lg flex items-center justify-between h-16">
-            <a href="dashboard.html" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-200 font-medium inline-flex items-center gap-1 transition-colors text-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-                กลับ
-            </a>
-            <h1 class="text-xl font-bold main-text-color absolute left-1/2 -translate-x-1/2">ระบบเพื่อน</h1>
-            <!-- Dark Mode Toggle Button Removed -->
-        </div>
+  <!-- Header -->
+  <div class="app-header fixed top-0 left-0 right-0 z-20">
+    <div class="mx-auto px-4 max-w-full sm:max-w-lg flex items-center justify-between h-16">
+      <a href="dashboard.html" class="text-white/90 hover:text-white inline-flex items-center gap-1 font-medium transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+        กลับ
+      </a>
+      <h1 class="text-lg sm:text-xl font-bold">ระบบเพื่อน</h1>
+      <div class="w-6 h-6"></div> <!-- spacer -->
+    </div>
+  </div>
+
+  <!-- Outer Frame -->
+  <div class="relative w-full mx-auto max-w-md sm:max-w-lg app-frame my-6 mt-24 p-4">
+
+    <!-- Header text in frame -->
+    <header class="text-center mb-6">
+      <h2 class="sr-only">ระบบเพื่อน</h2>
+      <p class="help-text">เชื่อมต่อกับเพื่อนและเติบโตไปด้วยกัน</p>
+    </header>
+
+    <!-- User ID Card -->
+    <div id="user-info-card" class="card text-center opacity-0 -translate-y-1 transition-all duration-500">
+      <h2 class="text-xl font-bold mb-3 section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h4a2 2 0 012 2v1m-4 0h4"/>
+        </svg>
+        <span class="main-text-color">User ID ของคุณ</span>
+      </h2>
+
+      <div class="flex items-center gap-2 bg-white dark:bg-[#1F2937] border border-[var(--border)] p-3 rounded-xl">
+        <p id="userIdDisplay" class="text-base font-mono text-muted break-all flex-1 pr-1"></p>
+        <button id="copyIdButton" class="btn btn-primary icon-btn" title="คัดลอก ID">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+        </button>
+      </div>
+      <p class="help-text mt-3">แชร์ ID นี้เพื่อให้เพื่อนของคุณเพิ่มคุณได้</p>
     </div>
 
-    <!-- Outer Frame Container -->
-    <div class="relative w-full mx-auto max-w-lg lg:max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl my-6 mt-20 p-4">
-
-        <!-- Main Content Container -->
-        <div class="container mx-auto px-0 pt-0 pb-4 max-w-full">
-            <header class="text-center mb-6">
-                <h2 class="text-4xl font-bold main-text-color sr-only">ระบบเพื่อน</h2>
-                <p class="text-gray-500 mt-2 text-base">เชื่อมต่อกับเพื่อนและเติบโตไปด้วยกัน</p>
-            </header>
-
-            <!-- User ID Section - Slightly adjusted padding and text size -->
-            <div id="user-info-card" class="card text-center opacity-0 transform -translate-y-4 transition-all duration-500">
-                <h2 class="text-xl font-bold mb-3 text-gray-800 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h4a2 2 0 012 2v1m-4 0h4" /></svg>
-                    User ID ของคุณ
-                </h2>
-                <div class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-                    <p class="text-lg text-teal-700 dark:text-teal-400 font-mono flex-grow break-all pr-2" id="userIdDisplay"></p>
-                    <button id="copyIdButton" class="btn btn-primary p-2 ml-2 flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                    </button>
-                </div>
-                <p class="text-sm text-gray-500 mt-3">แชร์ ID นี้เพื่อให้เพื่อนของคุณเพิ่มคุณได้</p>
-            </div>
-
-            <!-- Search Section -->
-            <div class="card">
-                <h2 class="text-2xl font-bold mb-4 main-text-color">ค้นหาเพื่อน</h2>
-                <div class="relative">
-                    <input type="text" id="searchInput" class="input-field !pl-10" placeholder="ป้อน User ID หรืออีเมลของเพื่อน">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    </span>
-                </div>
-                <div id="searchResult" class="mt-4 min-h-[72px]"></div>
-            </div>
-
-            <!-- Friend Requests Section -->
-            <div class="card">
-                <h2 class="text-2xl font-bold mb-4 main-text-color flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                    คำขอเป็นเพื่อน
-                </h2>
-                <ul id="friendRequestsList" class="space-y-3"></ul>
-            </div>
-
-            <!-- Friends List Section -->
-            <div class="card">
-                <h2 class="text-2xl font-bold mb-4 main-text-color flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    รายชื่อเพื่อน
-                </h2>
-                <ul id="friendsList" class="space-y-3"></ul>
-            </div>
-        </div>
-    </div> <!-- End of Outer Frame Container -->
-
-    <!-- Modal - Enhanced for mobile experience -->
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden z-50 transition-opacity duration-300">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-xs w-full text-center transform transition-all scale-95 opacity-0 duration-300 ease-out" id="modal-content">
-            <p id="modalMessage" class="mb-5 text-lg text-gray-700 dark:text-gray-200 font-medium"></p>
-            <div id="modal-buttons" class="flex justify-center gap-4">
-                <button id="modalConfirm" class="btn btn-primary w-full sm:w-auto">ยืนยัน</button>
-                <button id="modalCancel" class="btn btn-secondary w-full sm:w-auto">ยกเลิก</button>
-                <button id="modalOk" class="btn btn-primary w-full sm:w-auto">ตกลง</button>
-            </div>
-        </div>
+    <!-- Search -->
+    <div class="card">
+      <h2 class="text-xl font-bold mb-4 section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <span class="main-text-color">ค้นหาเพื่อน</span>
+      </h2>
+      <div class="relative">
+        <input id="searchInput" type="text" class="input-field pl-10" placeholder="ป้อน User ID หรืออีเมลของเพื่อน" />
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+      </div>
+      <p class="help-text mt-2">กด Enter เพื่อค้นหา</p>
+      <div id="searchResult" class="mt-4 min-h-[72px]"></div>
     </div>
 
-    <!-- Firebase SDK (Version 9 - Modular) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, writeBatch, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    <!-- Friend Requests -->
+    <div class="card">
+      <h2 class="text-xl font-bold mb-4 section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+        </svg>
+        <span class="main-text-color">คำขอเป็นเพื่อน</span>
+      </h2>
+      <ul id="friendRequestsList" class="space-y-3"></ul>
+    </div>
 
-        // ==== 1. Firebase Configuration ====
-        const firebaseConfig = {
-            apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
-            authDomain: "myapplication-bd04c034.firebaseapp.com",
-            projectId: "myapplication-bd04c034",
-            storageBucket: "myapplication-bd04c034.appspot.com",
-            messagingSenderId: "49782830313",
-            appId: "1:49782830313:web:c81b5d86a937f22d296c78",
-        };
+    <!-- Friends List -->
+    <div class="card">
+      <h2 class="text-xl font-bold mb-4 section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span class="main-text-color">รายชื่อเพื่อน</span>
+      </h2>
+      <ul id="friendsList" class="space-y-3"></ul>
+    </div>
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+  </div> <!-- /app-frame -->
 
-        // ==== 2. Global Variables & DOM Elements ====
-        let currentUserId = null;
-        let currentUserData = null;
-        let unsubscribeUser = null; // Function to stop listening to user data changes
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 hidden z-50 opacity-0 transition-opacity duration-300">
+    <div id="modal-content" class="p-6 max-w-xs w-full text-center transform transition-all scale-95 opacity-0 duration-300 ease-out rounded-xl">
+      <p id="modalMessage" class="mb-5 text-lg font-medium"></p>
+      <div id="modal-buttons" class="flex justify-center gap-3">
+        <button id="modalConfirm" class="btn btn-primary w-full sm:w-auto">ยืนยัน</button>
+        <button id="modalCancel"  class="btn btn-secondary w-full sm:w-auto">ยกเลิก</button>
+        <button id="modalOk"      class="btn btn-primary w-full sm:w-auto">ตกลง</button>
+      </div>
+    </div>
+  </div>
 
-        const searchInput = document.getElementById('searchInput');
-        const searchResult = document.getElementById('searchResult');
-        const friendRequestsList = document.getElementById('friendRequestsList');
-        const friendsList = document.getElementById('friendsList');
-        const userIdDisplay = document.getElementById('userIdDisplay');
-        const userInfoCard = document.getElementById('user-info-card');
-        const copyIdButton = document.getElementById('copyIdButton');
-        const modal = document.getElementById('modal');
-        const modalContent = document.getElementById('modal-content');
-        const modalMessage = document.getElementById('modalMessage');
-        const modalConfirm = document.getElementById('modalConfirm');
-        const modalCancel = document.getElementById('modalCancel');
-        const modalOk = document.getElementById('modalOk');
+  <!-- Firebase SDK (v9 Modular) + Script เดิม (ไม่เปลี่ยน logic) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, writeBatch, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-        // ==== 3. Authentication & User Data Handling ====
-        onAuthStateChanged(auth, user => {
-            if (unsubscribeUser) unsubscribeUser(); // Stop listening to old user data
+    // ==== 1. Firebase Configuration ====
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.appspot.com",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78",
+    };
 
-            if (user) {
-                currentUserId = user.uid;
-                setupUser(user);
-            } else {
-                // For demonstration, sign in anonymously if no user is found
-                signInAnonymously(auth).catch(error => {
-                    console.error("Anonymous sign-in failed:", error);
-                    showAlert("การเชื่อมต่อล้มเหลว กรุณาลองใหม่อีกครั้ง");
-                });
-            }
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ==== 2. Globals & DOM ====
+    let currentUserId = null;
+    let currentUserData = null;
+    let unsubscribeUser = null;
+
+    const searchInput = document.getElementById('searchInput');
+    const searchResult = document.getElementById('searchResult');
+    const friendRequestsList = document.getElementById('friendRequestsList');
+    const friendsList = document.getElementById('friendsList');
+    const userIdDisplay = document.getElementById('userIdDisplay');
+    const userInfoCard = document.getElementById('user-info-card');
+    const copyIdButton = document.getElementById('copyIdButton');
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modal-content');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalOk = document.getElementById('modalOk');
+
+    // ==== 3. Auth ====
+    onAuthStateChanged(auth, user => {
+      if (unsubscribeUser) unsubscribeUser();
+      if (user) {
+        currentUserId = user.uid;
+        setupUser(user);
+      } else {
+        signInAnonymously(auth).catch(err=>{
+          console.error("Anonymous sign-in failed:", err);
+          showAlert("การเชื่อมต่อล้มเหลว กรุณาลองใหม่อีกครั้ง");
         });
+      }
+    });
 
-        async function setupUser(user) {
-            const userDocRef = doc(db, "users", user.uid);
+    async function setupUser(user){
+      const userDocRef = doc(db,"users", user.uid);
+      unsubscribeUser = onSnapshot(userDocRef, async (snap)=>{
+        if(snap.exists()){
+          currentUserData = { id:snap.id, ...snap.data() };
+          updateUI();
+        }else{
+          const newUser = {
+            email: user.email || `anon-${user.uid.substring(0,5)}@moneyskillz.app`,
+            name:  user.displayName || `นักออมนิรนาม ${user.uid.substring(0,4)}`,
+            friends:[],
+            friendRequests:[],
+            createdAt: new Date()
+          };
+          await setDoc(userDocRef, newUser);
+        }
+      }, (error)=>{
+        console.error("Error fetching user data:", error);
+        showAlert("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
+      });
+    }
 
-            // Listen for realtime updates on the user's document
-            unsubscribeUser = onSnapshot(userDocRef, async (docSnap) => {
-                if (docSnap.exists()) {
-                    currentUserData = { id: docSnap.id, ...docSnap.data() };
-                    updateUI();
-                } else {
-                    // If user document doesn't exist, create it (first time sign-in)
-                    const newUser = {
-                        email: user.email || `anon-${user.uid.substring(0,5)}@moneyskillz.app`,
-                        name: user.displayName || `นักออมนิรนาม ${user.uid.substring(0, 4)}`,
-                        friends: [],
-                        friendRequests: [],
-                        createdAt: new Date()
-                    };
-                    await setDoc(userDocRef, newUser);
-                    // The onSnapshot listener will automatically pick up the new data
-                }
-            }, (error) => {
-                console.error("Error fetching user data:", error);
-                showAlert("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้");
-            });
+    function updateUI(){
+      if(!currentUserData) return;
+      userIdDisplay.textContent = currentUserId;
+      userInfoCard.classList.remove('opacity-0','-translate-y-1');
+      loadFriendRequests();
+      loadFriends();
+    }
+
+    // ==== 4. UI Helpers ====
+    const createSkeletonLoader = () => {
+      return `
+        <li class="flex items-center justify-between list-item-bg p-3 rounded-lg shadow-sm animate-pulse">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            <div class="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+          <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </li>
+      `.repeat(2);
+    };
+
+    const openModal = () => {
+      modal.classList.remove('hidden');
+      setTimeout(()=>{
+        modal.classList.add('opacity-100');
+        modalContent.classList.remove('scale-95','opacity-0');
+        modalContent.classList.add('scale-100');
+      },10);
+    };
+    const closeModal = ()=>{
+      modalContent.classList.add('scale-95','opacity-0');
+      modalContent.classList.remove('scale-100');
+      modal.classList.remove('opacity-100');
+      setTimeout(()=> modal.classList.add('hidden'),300);
+    };
+
+    const showAlert = (message)=>{
+      modalMessage.textContent = message;
+      modalConfirm.classList.add('hidden');
+      modalCancel.classList.add('hidden');
+      modalOk.classList.remove('hidden');
+      openModal();
+      modalOk.onclick = ()=> closeModal();
+    };
+    const showConfirm = (message, onConfirm)=>{
+      modalMessage.textContent = message;
+      modalConfirm.classList.remove('hidden');
+      modalCancel.classList.remove('hidden');
+      modalOk.classList.add('hidden');
+      openModal();
+      modalConfirm.onclick = ()=>{ closeModal(); onConfirm(true); };
+      modalCancel.onclick  = ()=>{ closeModal(); onConfirm(false); };
+    };
+
+    copyIdButton.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(currentUserId).then(()=>{
+        showAlert('คัดลอก User ID แล้ว!');
+      }).catch(err=>{
+        console.error('Could not copy text: ', err);
+        showAlert('ไม่สามารถคัดลอกได้');
+      });
+    });
+
+    // ==== 5. Search ====
+    const handleSearch = async ()=>{
+      const queryValue = searchInput.value.trim();
+      if(!queryValue){ searchResult.innerHTML=''; return; }
+
+      searchResult.innerHTML = `<div class="flex justify-center items-center p-4"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[var(--primary)]"></div></div>`;
+
+      try{
+        const isEmail = queryValue.includes('@');
+        const q = isEmail
+          ? query(collection(db,"users"), where("email","==",queryValue))
+          : query(collection(db,"users"), where("__name__","==",queryValue));
+
+        const qs = await getDocs(q);
+        if(qs.empty){
+          searchResult.innerHTML = `<p class="text-rose-500 text-center p-4">ไม่พบผู้ใช้</p>`;
+          return;
         }
 
-        function updateUI() {
-            if (!currentUserData) return;
-            // Display User ID
-            userIdDisplay.textContent = currentUserId;
-            userInfoCard.classList.remove('opacity-0', '-translate-y-4');
-
-            // Load friends and requests
-            loadFriendRequests();
-            loadFriends();
+        const userDoc = qs.docs[0];
+        if(userDoc.id === currentUserId){
+          searchResult.innerHTML = `<p class="text-amber-500 text-center p-4">คุณไม่สามารถเพิ่มตัวเองเป็นเพื่อนได้</p>`;
+          return;
         }
 
-        // ==== 4. UI Helper Functions ====
-        const createSkeletonLoader = () => {
-            return `
-                <li class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-3 rounded-lg shadow-sm animate-pulse">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
-                        <div class="w-24 h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                    </div>
-                    <div class="w-20 h-8 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                </li>
-            `.repeat(2); // Show 2 skeleton items
-        };
+        const foundUser = { id:userDoc.id, ...userDoc.data() };
+        const userName = foundUser.name || 'ผู้ใช้ไม่มีชื่อ';
+        const isFriend = currentUserData.friends?.includes(foundUser.id);
+        const hasSentRequest = foundUser.friendRequests?.includes(currentUserId);
+        const hasReceivedRequest = currentUserData.friendRequests?.includes(foundUser.id);
 
-        const openModal = () => {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.add('opacity-100'); // Fade in the modal background
-                modalContent.classList.remove('scale-95', 'opacity-0'); // Scale and fade in the content
-                modalContent.classList.add('scale-100');
-            }, 10);
+        let buttonHtml = '';
+        if(isFriend){
+          buttonHtml = `<span class="text-emerald-600 font-semibold text-sm">เป็นเพื่อนกันแล้ว</span>`;
+        }else if(hasSentRequest){
+          buttonHtml = `<span class="text-blue-600 font-semibold text-sm">ส่งคำขอไปแล้ว</span>`;
+        }else if(hasReceivedRequest){
+          buttonHtml = `<button onclick="window.acceptFriendRequest('${foundUser.id}')" class="btn btn-success text-sm py-1 px-3">ตอบรับ</button>`;
+        }else{
+          buttonHtml = `<button onclick="window.sendFriendRequest('${foundUser.id}')" class="btn btn-primary text-sm py-1 px-3">เพิ่มเพื่อน</button>`;
         }
 
-        const closeModal = () => {
-            modalContent.classList.add('scale-95', 'opacity-0');
-            modalContent.classList.remove('scale-100');
-            modal.classList.remove('opacity-100'); // Fade out the modal background
-            setTimeout(() => modal.classList.add('hidden'), 300); // Hide after animation
+        searchResult.innerHTML = `
+          <div class="result-chip flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="initial-avatar">${userName.charAt(0).toUpperCase()}</div>
+              <p class="font-semibold">${userName}</p>
+            </div>
+            <div>${buttonHtml}</div>
+          </div>`;
+      }catch(err){
+        console.error("Error searching for user:", err);
+        searchResult.innerHTML = `<p class="text-rose-500 text-center p-4">เกิดข้อผิดพลาดในการค้นหา</p>`;
+      }
+    };
+    searchInput.addEventListener('keyup', (e)=>{ if(e.key==='Enter') handleSearch(); });
+
+    // ==== 6. Friend Request Logic ====
+    window.sendFriendRequest = async (friendId)=>{
+      try{
+        const friendRef = doc(db,"users",friendId);
+        await updateDoc(friendRef,{ friendRequests: arrayUnion(currentUserId) });
+        showAlert("ส่งคำขอเป็นเพื่อนสำเร็จ!");
+        handleSearch();
+      }catch(err){
+        console.error("Error sending friend request:", err);
+        showAlert("เกิดข้อผิดพลาดในการส่งคำขอ");
+      }
+    };
+    window.acceptFriendRequest = async (friendId)=>{
+      try{
+        const batch = writeBatch(db);
+        const userRef = doc(db,"users",currentUserId);
+        const friendRef = doc(db,"users",friendId);
+        batch.update(userRef,{ friends: arrayUnion(friendId), friendRequests: arrayRemove(friendId) });
+        batch.update(friendRef,{ friends: arrayUnion(currentUserId) });
+        await batch.commit();
+        showAlert("คุณเป็นเพื่อนกันแล้ว!");
+      }catch(err){
+        console.error("Error accepting friend request:", err);
+        showAlert("เกิดข้อผิดพลาดในการตอบรับคำขอ");
+      }
+    };
+    window.declineFriendRequest = async (friendId)=>{
+      try{
+        const userRef = doc(db,"users",currentUserId);
+        await updateDoc(userRef,{ friendRequests: arrayRemove(friendId) });
+        showAlert("ปฏิเสธคำขอแล้ว");
+      }catch(err){
+        console.error("Error declining friend request:", err);
+        showAlert("เกิดข้อผิดพลาดในการปฏิเสธคำขอ");
+      }
+    };
+    window.removeFriend = (friendId)=>{
+      showConfirm("คุณแน่ใจหรือไม่ว่าต้องการลบเพื่อนคนนี้?", async (ok)=>{
+        if(!ok) return;
+        try{
+          const batch = writeBatch(db);
+          const userRef = doc(db,"users",currentUserId);
+          const friendRef = doc(db,"users",friendId);
+          batch.update(userRef,{ friends: arrayRemove(friendId) });
+          batch.update(friendRef,{ friends: arrayRemove(currentUserId) });
+          await batch.commit();
+          showAlert("ลบเพื่อนสำเร็จ");
+        }catch(err){
+          console.error("Error removing friend:", err);
+          showAlert("เกิดข้อผิดพลาดในการลบเพื่อน");
         }
+      });
+    };
 
-        const showAlert = (message) => {
-            modalMessage.textContent = message;
-            modalConfirm.classList.add('hidden');
-            modalCancel.classList.add('hidden');
-            modalOk.classList.remove('hidden');
-            openModal();
-            modalOk.onclick = () => closeModal();
-        };
+    // ==== 7. Load lists ====
+    const createListItemHTML = (id, name, buttons)=>{
+      const initial = (name?.charAt(0) || '?').toUpperCase();
+      return `
+        <li class="flex items-center justify-between list-item-bg p-3 rounded-lg shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="initial-avatar">${initial}</div>
+            <p class="font-semibold">${name}</p>
+          </div>
+          <div class="flex gap-2">${buttons}</div>
+        </li>`;
+    };
 
-        const showConfirm = (message, onConfirmCallback) => {
-            modalMessage.textContent = message;
-            modalConfirm.classList.remove('hidden');
-            modalCancel.classList.remove('hidden');
-            modalOk.classList.add('hidden');
-            openModal();
+    const loadFriendRequests = async ()=>{
+      friendRequestsList.innerHTML = createSkeletonLoader();
+      const requests = currentUserData.friendRequests || [];
+      if(requests.length===0){
+        friendRequestsList.innerHTML = `<li class="text-center py-2 help-text">ไม่มีคำขอเป็นเพื่อน</li>`;
+        return;
+      }
+      const docs = await Promise.all(requests.map(id => getDoc(doc(db,"users",id))));
+      friendRequestsList.innerHTML = docs.map(snap=>{
+        if(!snap.exists()) return '';
+        const friendId = snap.id;
+        const friendName = snap.data().name || 'ผู้ใช้ไม่มีชื่อ';
+        const buttons = `
+          <button onclick="window.acceptFriendRequest('${friendId}')" class="btn btn-success icon-btn" title="ตอบรับ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </button>
+          <button onclick="window.declineFriendRequest('${friendId}')" class="btn btn-danger icon-btn" title="ปฏิเสธ">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>`;
+        return createListItemHTML(friendId, friendName, buttons);
+      }).join('');
+    };
 
-            modalConfirm.onclick = () => { closeModal(); onConfirmCallback(true); };
-            modalCancel.onclick = () => { closeModal(); onConfirmCallback(false); };
-        };
+    const loadFriends = async ()=>{
+      friendsList.innerHTML = createSkeletonLoader();
+      const friends = currentUserData.friends || [];
+      if(friends.length===0){
+        friendsList.innerHTML = `<li class="text-center py-2 help-text">ยังไม่มีเพื่อน ลองค้นหาและเพิ่มเพื่อนดูสิ!</li>`;
+        return;
+      }
+      const docs = await Promise.all(friends.map(id => getDoc(doc(db,"users",id))));
+      friendsList.innerHTML = docs.map(snap=>{
+        if(!snap.exists()) return '';
+        const friendId = snap.id;
+        const friendName = snap.data().name || 'ผู้ใช้ไม่มีชื่อ';
+        const buttons = `
+          <button onclick="window.removeFriend('${friendId}')" class="btn btn-danger icon-btn" title="ลบเพื่อน">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>`;
+        return createListItemHTML(friendId, friendName, buttons);
+      }).join('');
+    };
 
-        copyIdButton.addEventListener('click', () => {
-            navigator.clipboard.writeText(currentUserId).then(() => {
-                showAlert('คัดลอก User ID แล้ว!');
-            }).catch(err => {
-                console.error('Could not copy text: ', err);
-                showAlert('ไม่สามารถคัดลอกได้');
-            });
-        });
+    /* Theme by system */
+    const applyTheme = (theme)=>{ document.body.classList.toggle('dark', theme==='dark'); };
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => applyTheme(e.matches ? 'dark':'light'));
+  </script>
 
-        // ==== 5. Search for Users ====
-        const handleSearch = async () => {
-            const queryValue = searchInput.value.trim();
-            if (!queryValue) {
-                searchResult.innerHTML = ''; // Clear previous search if input is empty
-                return;
-            }
-
-            searchResult.innerHTML = `<div class="flex justify-center items-center p-4"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500"></div></div>`;
-
-            try {
-                const isEmail = queryValue.includes('@');
-                const q = isEmail
-                    ? query(collection(db, "users"), where("email", "==", queryValue))
-                    : query(collection(db, "users"), where("__name__", "==", queryValue));
-
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    searchResult.innerHTML = `<p class="text-rose-500 dark:text-rose-300 text-center p-4">ไม่พบผู้ใช้</p>`;
-                    return;
-                }
-
-                const userDoc = querySnapshot.docs[0];
-                if (userDoc.id === currentUserId) {
-                    searchResult.innerHTML = `<p class="text-amber-500 dark:text-amber-300 text-center p-4">คุณไม่สามารถเพิ่มตัวเองเป็นเพื่อนได้</p>`;
-                    return;
-                }
-
-                const foundUser = { id: userDoc.id, ...userDoc.data() };
-                const userName = foundUser.name || 'ผู้ใช้ไม่มีชื่อ';
-                const isFriend = currentUserData.friends?.includes(foundUser.id);
-                const hasSentRequest = foundUser.friendRequests?.includes(currentUserId);
-                const hasReceivedRequest = currentUserData.friendRequests?.includes(foundUser.id);
-
-                let buttonHtml = '';
-                if (isFriend) {
-                    buttonHtml = `<span class="text-emerald-600 dark:text-emerald-400 font-semibold text-sm">เป็นเพื่อนกันแล้ว</span>`;
-                } else if (hasSentRequest) {
-                    buttonHtml = `<span class="text-blue-600 dark:text-blue-400 font-semibold text-sm">ส่งคำขอไปแล้ว</span>`;
-                } else if (hasReceivedRequest) {
-                    buttonHtml = `<button onclick="window.acceptFriendRequest('${foundUser.id}')" class="btn btn-success text-sm py-1 px-3">ตอบรับ</button>`;
-                } else {
-                    buttonHtml = `<button onclick="window.sendFriendRequest('${foundUser.id}')" class="btn btn-primary text-sm py-1 px-3">เพิ่มเพื่อน</button>`;
-                }
-
-                searchResult.innerHTML = `
-                    <div class="flex items-center justify-between bg-teal-50 dark:bg-gray-700 p-3 rounded-lg">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-lg">${userName.charAt(0).toUpperCase()}</div>
-                            <p class="font-semibold text-gray-800 dark:text-gray-100 text-base">${userName}</p>
-                        </div>
-                        <div>${buttonHtml}</div>
-                    </div>`;
-            } catch (error) {
-                console.error("Error searching for user:", error);
-                searchResult.innerHTML = `<p class="text-rose-500 dark:text-rose-300 text-center p-4">เกิดข้อผิดพลาดในการค้นหา</p>`;
-            }
-        };
-
-        searchInput.addEventListener('keyup', (event) => {
-            if (event.key === 'Enter') handleSearch();
-        });
-
-        // ==== 6. Friend Request Logic ====
-        window.sendFriendRequest = async (friendId) => {
-            try {
-                const friendRef = doc(db, "users", friendId);
-                await updateDoc(friendRef, { friendRequests: arrayUnion(currentUserId) });
-                showAlert("ส่งคำขอเป็นเพื่อนสำเร็จ!");
-                handleSearch(); // Refresh search result
-            } catch (error) {
-                console.error("Error sending friend request:", error);
-                showAlert("เกิดข้อผิดพลาดในการส่งคำขอ");
-            }
-        };
-
-        window.acceptFriendRequest = async (friendId) => {
-            try {
-                const batch = writeBatch(db);
-                const userRef = doc(db, "users", currentUserId);
-                const friendRef = doc(db, "users", friendId);
-                batch.update(userRef, { friends: arrayUnion(friendId), friendRequests: arrayRemove(friendId) });
-                batch.update(friendRef, { friends: arrayUnion(currentUserId) });
-                await batch.commit();
-                showAlert("คุณเป็นเพื่อนกันแล้ว!");
-            } catch (error) {
-                console.error("Error accepting friend request:", error);
-                showAlert("เกิดข้อผิดพลาดในการตอบรับคำขอ");
-            }
-        };
-
-        window.declineFriendRequest = async (friendId) => {
-            try {
-                const userRef = doc(db, "users", currentUserId);
-                await updateDoc(userRef, { friendRequests: arrayRemove(friendId) });
-                showAlert("ปฏิเสธคำขอแล้ว");
-            } catch (error) {
-                console.error("Error declining friend request:", error);
-                showAlert("เกิดข้อผิดพลาดในการปฏิเสธคำขอ");
-            }
-        };
-
-        window.removeFriend = (friendId) => {
-            showConfirm("คุณแน่ใจหรือไม่ว่าต้องการลบเพื่อนคนนี้?", async (confirmed) => {
-                if (confirmed) {
-                    try {
-                        const batch = writeBatch(db);
-                        const userRef = doc(db, "users", currentUserId);
-                        const friendRef = doc(db, "users", friendId);
-                        batch.update(userRef, { friends: arrayRemove(friendId) });
-                        batch.update(friendRef, { friends: arrayRemove(currentUserId) });
-                        await batch.commit();
-                        showAlert("ลบเพื่อนสำเร็จ");
-                    } catch (error) {
-                        console.error("Error removing friend:", error);
-                        showAlert("เกิดข้อผิดพลาดในการลบเพื่อน");
-                    }
-                }
-            });
-        };
-
-        // ==== 7. Load Data from Firestore ====
-        const createListItemHTML = (id, name, buttons) => {
-            const initial = name.charAt(0).toUpperCase() || '?';
-            return `
-                <li class="flex items-center justify-between list-item-bg dark:bg-gray-800 p-3 rounded-lg shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-lg">${initial}</div>
-                        <p class="font-semibold text-gray-800 dark:text-gray-100 text-base">${name}</p>
-                    </div>
-                    <div class="flex gap-2">${buttons}</div>
-                </li>`;
-        };
-
-        const loadFriendRequests = async () => {
-            friendRequestsList.innerHTML = createSkeletonLoader();
-            const requests = currentUserData.friendRequests || [];
-            if (requests.length === 0) {
-                friendRequestsList.innerHTML = `<li class="text-gray-500 dark:text-gray-400 text-center py-2 text-base">ไม่มีคำขอเป็นเพื่อน</li>`;
-                return;
-            }
-            const requestPromises = requests.map(id => getDoc(doc(db, "users", id)));
-            const requestDocs = await Promise.all(requestPromises);
-
-            friendRequestsList.innerHTML = requestDocs.map(friendDoc => {
-                if (!friendDoc.exists()) return '';
-                const friendId = friendDoc.id;
-                const friendName = friendDoc.data().name || 'ผู้ใช้ไม่มีชื่อ';
-                const buttons = `
-                    <button onclick="window.acceptFriendRequest('${friendId}')" class="btn btn-success p-2 h-9 w-9 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></button>
-                    <button onclick="window.declineFriendRequest('${friendId}')" class="btn btn-danger p-2 h-9 w-9 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>`;
-                return createListItemHTML(friendId, friendName, buttons);
-            }).join('');
-        };
-
-        const loadFriends = async () => {
-            friendsList.innerHTML = createSkeletonLoader();
-            const friends = currentUserData.friends || [];
-            if (friends.length === 0) {
-                friendsList.innerHTML = `<li class="text-gray-500 dark:text-gray-400 text-center py-2 text-base">ยังไม่มีเพื่อน ลองค้นหาและเพิ่มเพื่อนดูสิ!</li>`;
-                return;
-            }
-            const friendPromises = friends.map(id => getDoc(doc(db, "users", id)));
-            const friendDocs = await Promise.all(friendPromises);
-
-            friendsList.innerHTML = friendDocs.map(friendDoc => {
-                if (!friendDoc.exists()) return '';
-                const friendId = friendDoc.id;
-                const friendName = friendDoc.data().name || 'ผู้ใช้ไม่มีชื่อ';
-                const buttons = `<button onclick="window.removeFriend('${friendId}')" class="btn btn-danger p-2 h-9 w-9 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
-                return createListItemHTML(friendId, friendName, buttons);
-            }).join('');
-        };
-
-        // Dark mode is now controlled by system preference or external means.
-        // The dark mode toggle button and its related JS are removed.
-        const applyTheme = (theme) => {
-            if (theme === 'dark') {
-                document.body.classList.add('dark');
-            } else {
-                document.body.classList.remove('dark');
-            }
-        };
-
-        // Apply theme based on system preference on load
-        const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(prefersDarkMode ? 'dark' : 'light');
-
-        // Optional: Listen for system theme changes (if you want it to automatically switch)
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            applyTheme(event.matches ? 'dark' : 'light');
-        });
-
-    </script>
-    <script src="darkmode-toggle.js"></script>
+  <!-- (ตัวสลับโหมดมืดของคุณ ถ้ามี logic อื่นในไฟล์นี้) -->
+  <script src="darkmode-toggle.js"></script>
 </body>
 </html>

@@ -2,102 +2,1829 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>🎯 เป้าหมายของฉัน - MoneySkillz</title>
+  <title> เป้าหมายการเงิน - MoneySkillz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="add-goal.css">
-  <link rel="stylesheet" href="theme-darkmode.css">
+  <style>
+    /* Root variables for theming */
+    :root {
+      --primary-color: #00877F;
+      --primary-darker: #006A64;
+      --accent-gold: #FFC107;
+      --background-color: #F0F8F7;
+      --card-background: #FFFFFF;
+      --text-color: #003D3A;
+      --text-secondary: #005A55;
+      --border-color: #D4E9E7;
+      --danger-color: #ef5350;
+      --success-color: #15bd98;
+      --warning-color: #ff9800;
+      --info-color: #2196F3;
+      --shadow-color: rgba(0, 135, 127, 0.1);
+      --shadow-hover-color: rgba(0, 135, 127, 0.2);
+    }
+
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+/* ===== HOTFIX: กันป้ายสำเร็จซ้อนปุ่ม และเปลี่ยน FAB เป็นสีเขียว ===== */
+
+/* ย้ายป้ายสำเร็จไปซ้ายบน + จัดลำดับซ้อน */
+.achievement-badge{
+  position: absolute !important;
+  top: 15px !important;
+  left: 15px !important;
+  right: auto !important;
+  z-index: 2 !important;          /* ต่ำกว่าปุ่มขวา */
+  background: #ffc107 !important; /* สีเดิม */
+  color: #fff !important;
+  padding: 6px 12px !important;
+  border-radius: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* กันหัวข้อชนป้ายซ้ายบน */
+.goal-card-header{
+  padding-left: 95px !important;
+}
+
+/* เผื่อบางหน้าจอ ปุ่มมุมขวาให้อยู่เหนือป้ายแน่ ๆ */
+.goal-actions{
+  position: relative;
+  z-index: 3;
+}
+
+/* FAB เป็นสีเขียว */
+.fab{
+  background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
+}
+.fab:hover{
+  transform: scale(1.15);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+    body {
+      font-family: 'Kanit', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header Styling */
+    .header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-darker));
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 4px 20px var(--shadow-color);
+      border-bottom-left-radius: 25px;
+      border-bottom-right-radius: 25px;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 1.1em;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 10px 18px;
+      font-size: 1em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    /* Stats Overview */
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: var(--card-background);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px var(--shadow-color);
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .stat-icon {
+      font-size: 2em;
+      margin-bottom: 10px;
+      opacity: 0.8;
+    }
+
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9em;
+    }
+
+    /* Filter and Sort Controls */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-btn {
+      background: var(--card-background);
+      border: 2px solid var(--border-color);
+      color: var(--text-color);
+      padding: 8px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .filter-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .sort-select {
+      background: var(--card-background);
+      border: 2px solid var(--border-color);
+      color: var(--text-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Goals Grid Layout */
+    .goals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 25px;
+    }
+
+    /* Goal Card Styling */
+    .goal-card {
+      background: var(--card-background);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 6px 20px var(--shadow-color);
+      transition: all 0.3s ease;
+      position: relative;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .goal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      
+    }
+
+    .goal-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px var(--shadow-hover-color);
+    }
+
+    .goal-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .goal-title {
+      font-size: 1.4em;
+      font-weight: 600;
+      color: var(--primary-darker);
+      margin: 0;
+      flex: 1;
+    }
+
+    .goal-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.1em;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: all 0.3s;
+      padding: 5px;
+      border-radius: 50%;
+    }
+
+    .action-btn:hover {
+      opacity: 1;
+      background: var(--background-color);
+    }
+
+    .action-btn.edit:hover {
+      color: var(--info-color);
+    }
+
+    .action-btn.delete:hover {
+      color: var(--danger-color);
+    }
+
+    .goal-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+      color: var(--text-secondary);
+    }
+
+    .goal-category {
+      background: var(--primary-color);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 0.8em;
+      font-weight: 500;
+    }
+
+    .goal-priority {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+    }
+
+    .priority-high { color: var(--danger-color); }
+    .priority-medium { color: var(--warning-color); }
+    .priority-low { color: var(--success-color); }
+
+    .goal-amounts {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .current-amount {
+      font-size: 1.3em;
+      font-weight: 600;
+      color: var(--success-color);
+    }
+
+    .target-amount {
+      font-size: 1.1em;
+      color: var(--text-secondary);
+    }
+
+    .progress-container {
+      margin-bottom: 20px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9em;
+    }
+
+    .progress-percentage {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .progress-bar-container {
+      background: var(--background-color);
+      border-radius: 10px;
+      height: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.8s ease-out;
+      position: relative;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 33%, rgba(255,255,255,0.3) 33%, rgba(255,255,255,0.3) 66%, transparent 66%);
+      background-size: 20px 20px;
+      animation: progress-animation 2s linear infinite;
+    }
+
+    @keyframes progress-animation {
+      0% { background-position: 0 0; }
+      100% { background-position: 20px 20px; }
+    }
+
+    .goal-timeline {
+      background: var(--background-color);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .timeline-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.9em;
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-label {
+      color: var(--text-secondary);
+    }
+
+    .timeline-value {
+      font-weight: 500;
+    }
+
+    .days-left {
+      color: var(--warning-color);
+      font-weight: 600;
+    }
+
+    .days-left.urgent {
+      color: var(--danger-color);
+    }
+
+    .days-left.completed {
+      color: var(--success-color);
+    }
+
+    .goal-actions-footer {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-darker);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--card-background);
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--background-color);
+      transform: translateY(-2px);
+    }
+
+    /* Floating Action Button */
+    .fab {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 65px;
+      height: 65px;
+      background: linear-gradient(135deg, var(--accent-gold), #ffb400);
+      color: white;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fab:hover {
+      transform: scale(1.15);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s;
+    }
+
+    .modal-content {
+      background: var(--card-background);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      animation: slideIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { 
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to { 
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: var(--primary-darker);
+      margin: 0;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: var(--background-color);
+      color: var(--text-color);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 1em;
+      background: var(--background-color);
+      color: var(--text-color);
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 135, 127, 0.2);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .quick-amounts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .quick-amount-btn {
+      padding: 8px;
+      background: var(--background-color);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .quick-amount-btn:hover {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .plan-preview {
+      background: linear-gradient(135deg, var(--background-color), var(--card-background));
+      border-left: 4px solid var(--primary-color);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 15px;
+      font-size: 1em;
+    }
+
+    .plan-preview.warning {
+      border-left-color: var(--danger-color);
+      background: linear-gradient(135deg, #ffebee, var(--card-background));
+    }
+
+    .savings-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .savings-item {
+      text-align: center;
+      padding: 15px;
+      background: var(--background-color);
+      border-radius: 10px;
+    }
+
+    .savings-amount {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .savings-label {
+      font-size: 0.8em;
+      color: var(--text-secondary);
+      margin-top: 5px;
+    }
+
+    /* Placeholder State */
+    .placeholder-card {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--card-background);
+      border: 3px dashed var(--border-color);
+      border-radius: 20px;
+      color: var(--text-secondary);
+    }
+
+    .placeholder-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .placeholder-title {
+      font-size: 1.3em;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .placeholder-text {
+      font-size: 1.1em;
+      margin-bottom: 25px;
+    }
+
+    .spinner {
+      border: 4px solid var(--border-color);
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Achievement badges */
+    .achievement-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--accent-gold);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.8em;
+      font-weight: 600;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      .header {
+        padding: 20px 15px;
+        margin-bottom: 20px;
+      }
+
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .stats-overview {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+
+      .goals-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group {
+        justify-content: center;
+      }
+
+      .fab {
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-amounts {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-overview {
+        grid-template-columns: 1fr;
+      }
+
+      .goal-amounts {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .goal-actions-footer {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="header">
-    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> กลับ</a>
-    <h1>เป้าหมายของฉัน</h1>
+    <a href="dashboard.html" class="back-btn">
+      <i class="fas fa-arrow-left"></i>
+      <span>กลับ</span>
+    </a>
+    <h1> เป้าหมายการเงิน</h1>
     <p>วางแผนและติดตามความฝันของคุณ</p>
   </header>
 
   <div class="container">
-    <!-- Section for displaying current goals in a grid -->
-    <div class="goals-grid-container">
-      <div id="goalsGrid" class="goals-grid">
-        <!-- Goal cards will be inserted here by JavaScript -->
-        <div class="placeholder-card" id="loading-goals">
-            <div class="spinner"></div>
-            <p>กำลังโหลดเป้าหมาย...</p>
-        </div>
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+      <div class="stat-card">
+        <div class="stat-icon"></div>
+        <div class="stat-value" id="totalGoals">0</div>
+        <div class="stat-label">เป้าหมายทั้งหมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"></div>
+        <div class="stat-value" id="totalSavings">0 ฿</div>
+        <div class="stat-label">เงินออมทั้งหมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"></div>
+        <div class="stat-value" id="completedGoals">0</div>
+        <div class="stat-label">สำเร็จแล้ว</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"></div>
+        <div class="stat-value" id="avgProgress">0%</div>
+        <div class="stat-label">ความคืบหน้าเฉลี่ย</div>
       </div>
     </div>
 
-    <!-- Floating Action Button to add a new goal -->
-    <button id="addGoalFab" class="fab">+</button>
+    <!-- Filter and Sort Controls -->
+    <div class="controls">
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
+        <button class="filter-btn" data-filter="active">กำลังดำเนิน</button>
+        <button class="filter-btn" data-filter="completed">สำเร็จแล้ว</button>
+        <button class="filter-btn" data-filter="urgent">เร่งด่วน</button>
+      </div>
+      <select class="sort-select" id="sortSelect">
+        <option value="dueDate">เรียงตามวันครบกำหนด</option>
+        <option value="progress">เรียงตามความคืบหน้า</option>
+        <option value="amount">เรียงตามจำนวนเงิน</option>
+        <option value="created">เรียงตามวันที่สร้าง</option>
+      </select>
+    </div>
+
+    <!-- Goals Grid -->
+    <div class="goals-grid" id="goalsGrid">
+      <!-- Loading state -->
+      <div class="placeholder-card" id="loadingState">
+        <div class="spinner"></div>
+        <div class="placeholder-title">กำลังโหลดเป้าหมาย...</div>
+      </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="addGoalFab" title="เพิ่มเป้าหมายใหม่">
+      <i class="fas fa-plus"></i>
+    </button>
   </div>
 
-  <!-- Modal for adding a new goal -->
-  <div id="goalModal" class="modal">
+  <!-- Add/Edit Goal Modal -->
+  <div class="modal" id="goalModal">
     <div class="modal-content">
-      <button class="close-button">&times;</button>
-      <h2 id="modalTitle">สร้างเป้าหมายใหม่</h2>
-      <form id="addGoalForm">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">สร้างเป้าหมายใหม่</h2>
+        <button class="close-btn" id="closeModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="goalForm">
+        <input type="hidden" id="editingGoalId">
+        
         <div class="form-group">
-          <label for="goalName">ชื่อเป้าหมาย</label>
-          <input type="text" id="goalName" placeholder="เช่น เก็บเงินเที่ยวญี่ปุ่น" required>
+          <label class="form-label" for="goalName">
+            <i class="fas fa-bullseye"></i> ชื่อเป้าหมาย
+          </label>
+          <input type="text" class="form-input" id="goalName" 
+                 placeholder="เช่น เก็บเงินเที่ยวญี่ปุ่น" required>
         </div>
 
-        <div class="form-group">
-          <label for="goalAmount">จำนวนเงินทั้งหมด (บาท)</label>
-          <input type="number" id="goalAmount" placeholder="50000" min="1" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="goalCategory">
+              <i class="fas fa-tag"></i> หมวดหมู่
+            </label>
+            <select class="form-input" id="goalCategory" required>
+              <option value="">เลือกหมวดหมู่</option>
+              <option value="travel">ท่องเที่ยว</option>
+              <option value="education">การศึกษา</option>
+              <option value="property">ที่อยู่อาศัย</option>
+              <option value="vehicle">ยานพาหนะ</option>
+              <option value="emergency">เงินฉุกเฉิน</option>
+              <option value="investment">การลงทุน</option>
+              <option value="gadget">เครื่องใช้</option>
+              <option value="other">อื่นๆ</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="goalPriority">
+              <i class="fas fa-flag"></i> ลำดับความสำคัญ
+            </label>
+            <select class="form-input" id="goalPriority" required>
+              <option value="low">ต่ำ</option>
+              <option value="medium" selected>กลาง</option>
+              <option value="high">สูง</option>
+            </select>
+          </div>
         </div>
 
-        <div class="form-group">
-            <label for="currentAmount">มีเงินออมเริ่มต้นเท่าไหร่?</label>
-            <input type="number" id="currentAmount" placeholder="0" min="0" value="0" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="targetAmount">
+              <i class="fas fa-coins"></i> จำนวนเงินเป้าหมาย (บาท)
+            </label>
+            <input type="number" class="form-input" id="targetAmount" 
+                   placeholder="50,000" min="1" step="0.01" required>
+            <div class="quick-amounts">
+              <button type="button" class="quick-amount-btn" data-amount="10000">10K</button>
+              <button type="button" class="quick-amount-btn" data-amount="50000">50K</button>
+              <button type="button" class="quick-amount-btn" data-amount="100000">100K</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="currentAmount">
+              <i class="fas fa-piggy-bank"></i> มีเงินออมอยู่แล้ว (บาท)
+            </label>
+            <input type="number" class="form-input" id="currentAmount" 
+                   placeholder="0" min="0" step="0.01" value="0">
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="goalDate">ต้องการให้สำเร็จภายในวันที่</label>
-          <input type="date" id="goalDate" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="dueDate">
+              <i class="fas fa-calendar-alt"></i> วันที่ต้องการให้สำเร็จ
+            </label>
+            <input type="date" class="form-input" id="dueDate" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="planType">
+              <i class="fas fa-chart-line"></i> แผนการออม
+            </label>
+            <select class="form-input" id="planType" required>
+              <option value="">เลือกความถี่</option>
+              <option value="daily">รายวัน</option>
+              <option value="weekly">รายสัปดาห์</option>
+              <option value="monthly">รายเดือน</option>
+              <option value="yearly">รายปี</option>
+            </select>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="planType">เลือกแผนการออม</label>
-          <select id="planType" required>
-            <option value="" disabled selected>-- เลือกความถี่ --</option>
-            <option value="daily">รายวัน</option>
-            <option value="weekly">รายสัปดาห์</option>
-            <option value="monthly">รายเดือน</option>
-            <option value="yearly">รายปี</option>
-          </select>
+        <div class="plan-preview" id="planPreview" style="display: none;">
+          <h4><i class="fas fa-calculator"></i> แผนการออมของคุณ</h4>
+          <div id="planDetails"></div>
+          <div class="savings-summary" id="savingsSummary"></div>
         </div>
 
-        <div id="planPreview" class="plan-preview" style="display: none;"></div>
-
-        <button type="submit" class="primary-button">💾 บันทึกเป้าหมาย</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+          <i class="fas fa-save"></i> บันทึกเป้าหมาย
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- Modal for adding savings to an installment -->
-  <div id="addSavingsModal" class="modal">
-      <div class="modal-content">
-          <button class="close-button">&times;</button>
-          <h2 id="savingsModalTitle">💰 เพิ่มเงินออม</h2>
-          <p>เป้าหมาย: <strong id="savingsGoalName"></strong></p>
-          <form id="addSavingsForm">
-              <input type="hidden" id="savingsGoalId">
-              <input type="hidden" id="savingsInstallmentIndex">
-              <div class="form-group">
-                  <label for="savingsAmount">จำนวนเงินที่จะเพิ่ม</label>
-                  <input type="number" id="savingsAmount" placeholder="0.00" min="0.01" step="0.01" required>
-              </div>
-              <button type="submit" class="primary-button">ยืนยันการออม</button>
-          </form>
+  <!-- Add Savings Modal -->
+  <div class="modal" id="addSavingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">เพิ่มเงินออม</h2>
+        <button class="close-btn" id="closeSavingsModal">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
+
+      <div style="margin-bottom: 20px; padding: 15px; background: var(--background-color); border-radius: 10px;">
+        <div style="font-weight: 600; margin-bottom: 5px;">เป้าหมาย: <span id="savingsGoalName"></span></div>
+        <div style="color: var(--text-secondary);">งวดที่: <span id="savingsInstallmentInfo"></span></div>
+      </div>
+
+      <form id="addSavingsForm">
+        <input type="hidden" id="savingsGoalId">
+        <input type="hidden" id="savingsInstallmentIndex">
+        
+        <div class="form-group">
+          <label class="form-label" for="savingsAmount">
+            <i class="fas fa-money-bill-wave"></i> จำนวนเงินที่จะเพิ่ม (บาท)
+          </label>
+          <input type="number" class="form-input" id="savingsAmount" 
+                 placeholder="0.00" min="0.01" step="0.01" required>
+          <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 5px;">
+            <span id="remainingAmount"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="savingsNote">
+            <i class="fas fa-sticky-note"></i> หมายเหตุ (ไม่บังคับ)
+          </label>
+          <input type="text" class="form-input" id="savingsNote" 
+                 placeholder="เช่น เงินออมจากการทำงานพิเศษ">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i class="fas fa-check"></i> ยืนยันการออม
+        </button>
+      </form>
+    </div>
   </div>
 
-  <!-- All scripts are now loaded from the single JS module -->
-  <script type="module" src="add-goal.js"></script>
-  <script src="darkmode-toggle.js"></script>
+  <script type="module">
+    // Mock data for demonstration
+    let goals = [
+      {
+        id: '1',
+        name: 'เก็บเงินเที่ยวญี่ปุ่น',
+        category: 'travel',
+        priority: 'high',
+        targetAmount: 80000,
+        currentSavings: 45000,
+        dueDate: '2024-12-31',
+        planType: 'monthly',
+        createdAt: new Date('2024-01-15'),
+        plan: [
+          { round: 1, date: '15 ม.ค. 67', amount: 15000, saved: 15000 },
+          { round: 2, date: '15 ก.พ. 67', amount: 15000, saved: 15000 },
+          { round: 3, date: '15 มี.ค. 67', amount: 15000, saved: 15000 },
+          { round: 4, date: '15 เม.ย. 67', amount: 15000, saved: 0 },
+          { round: 5, date: '15 พ.ค. 67', amount: 20000, saved: 0 }
+        ]
+      },
+      {
+        id: '2',
+        name: 'เงินฉุกเฉิน',
+        category: 'emergency',
+        priority: 'high',
+        targetAmount: 100000,
+        currentSavings: 75000,
+        dueDate: '2024-06-30',
+        planType: 'weekly',
+        createdAt: new Date('2023-12-01'),
+        plan: []
+      },
+      {
+        id: '3',
+        name: 'ซื้อแล็ปท็อปใหม่',
+        category: 'gadget',
+        priority: 'medium',
+        targetAmount: 35000,
+        currentSavings: 35000,
+        dueDate: '2024-03-31',
+        planType: 'weekly',
+        createdAt: new Date('2023-11-01'),
+        plan: []
+      }
+    ];
+
+    // DOM Elements
+    const goalsGrid = document.getElementById('goalsGrid');
+    const addGoalFab = document.getElementById('addGoalFab');
+    const goalModal = document.getElementById('goalModal');
+    const addSavingsModal = document.getElementById('addSavingsModal');
+    const goalForm = document.getElementById('goalForm');
+    const addSavingsForm = document.getElementById('addSavingsForm');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const sortSelect = document.getElementById('sortSelect');
+
+    // State
+    let currentFilter = 'all';
+    let currentSort = 'dueDate';
+    let editingGoalId = null;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      updateStats();
+      renderGoals();
+      setupEventListeners();
+      setMinDate();
+    });
+
+    function setMinDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('dueDate').setAttribute('min', today);
+    }
+
+    function setupEventListeners() {
+      // Modal controls
+      addGoalFab.addEventListener('click', () => openGoalModal());
+      document.getElementById('closeModal').addEventListener('click', closeGoalModal);
+      document.getElementById('closeSavingsModal').addEventListener('click', closeSavingsModal);
+      
+      // Close modals on backdrop click
+      goalModal.addEventListener('click', (e) => {
+        if (e.target === goalModal) closeGoalModal();
+      });
+      addSavingsModal.addEventListener('click', (e) => {
+        if (e.target === addSavingsModal) closeSavingsModal();
+      });
+
+      // Filter buttons
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          currentFilter = e.target.dataset.filter;
+          renderGoals();
+        });
+      });
+
+      // Sort select
+      sortSelect.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderGoals();
+      });
+
+      // Form submissions
+      goalForm.addEventListener('submit', handleGoalSubmit);
+      addSavingsForm.addEventListener('submit', handleSavingsSubmit);
+
+      // Quick amount buttons
+      document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.getElementById('targetAmount').value = e.target.dataset.amount;
+          updatePlanPreview();
+        });
+      });
+
+      // Plan preview updates
+      ['targetAmount', 'currentAmount', 'dueDate', 'planType'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePlanPreview);
+        document.getElementById(id).addEventListener('change', updatePlanPreview);
+      });
+    }
+
+    function updateStats() {
+      const totalGoals = goals.length;
+      const totalSavings = goals.reduce((sum, goal) => sum + goal.currentSavings, 0);
+      const completedGoals = goals.filter(goal => goal.currentSavings >= goal.targetAmount).length;
+      const avgProgress = totalGoals > 0 ? 
+        goals.reduce((sum, goal) => sum + (goal.currentSavings / goal.targetAmount * 100), 0) / totalGoals : 0;
+
+      document.getElementById('totalGoals').textContent = totalGoals;
+      document.getElementById('totalSavings').textContent = formatCurrency(totalSavings);
+      document.getElementById('completedGoals').textContent = completedGoals;
+      document.getElementById('avgProgress').textContent = Math.round(avgProgress) + '%';
+    }
+
+    function renderGoals() {
+      const filteredGoals = filterGoals(goals);
+      const sortedGoals = sortGoals(filteredGoals);
+
+      if (sortedGoals.length === 0) {
+        goalsGrid.innerHTML = getEmptyState();
+        return;
+      }
+
+      goalsGrid.innerHTML = sortedGoals.map(goal => createGoalCard(goal)).join('');
+      
+      // Add event listeners to action buttons
+      setupGoalCardListeners();
+    }
+
+    function filterGoals(goals) {
+      switch (currentFilter) {
+        case 'active':
+          return goals.filter(goal => goal.currentSavings < goal.targetAmount);
+        case 'completed':
+          return goals.filter(goal => goal.currentSavings >= goal.targetAmount);
+        case 'urgent':
+          return goals.filter(goal => {
+            const daysLeft = getDaysLeft(goal.dueDate);
+            return daysLeft <= 30 && goal.currentSavings < goal.targetAmount;
+          });
+        default:
+          return goals;
+      }
+    }
+
+    function sortGoals(goals) {
+      return [...goals].sort((a, b) => {
+        switch (currentSort) {
+          case 'progress':
+            return (b.currentSavings / b.targetAmount) - (a.currentSavings / a.targetAmount);
+          case 'amount':
+            return b.targetAmount - a.targetAmount;
+          case 'created':
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          default: // dueDate
+            return new Date(a.dueDate) - new Date(b.dueDate);
+        }
+      });
+    }
+
+    function createGoalCard(goal) {
+      const progress = (goal.currentSavings / goal.targetAmount) * 100;
+      const isCompleted = progress >= 100;
+      const daysLeft = getDaysLeft(goal.dueDate);
+      const urgencyClass = daysLeft <= 7 ? 'urgent' : daysLeft <= 30 ? '' : '';
+      const priorityClass = `priority-${goal.priority}`;
+
+      return `
+        <div class="goal-card ${isCompleted ? 'completed' : ''}" data-goal-id="${goal.id}">
+          ${isCompleted ? '<div class="achievement-badge">สำเร็จ!</div>' : ''}
+          
+          <div class="goal-card-header">
+            <h3 class="goal-title">${goal.name}</h3>
+            <div class="goal-actions">
+              <button class="action-btn edit" title="แก้ไข" data-action="edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete" title="ลบ" data-action="delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="goal-meta">
+            <span class="goal-category">${getCategoryName(goal.category)}</span>
+            <span class="goal-priority ${priorityClass}">
+              <i class="fas fa-flag"></i>
+              ${getPriorityName(goal.priority)}
+            </span>
+          </div>
+
+          <div class="goal-amounts">
+            <div class="current-amount">${formatCurrency(goal.currentSavings)}</div>
+            <div class="target-amount">จาก ${formatCurrency(goal.targetAmount)}</div>
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-header">
+              <span>ความคืบหน้า</span>
+              <span class="progress-percentage">${Math.min(progress, 100).toFixed(1)}%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" style="width: ${Math.min(progress, 100)}%"></div>
+            </div>
+          </div>
+
+          <div class="goal-timeline">
+            <div class="timeline-item">
+              <span class="timeline-label">วันที่เป้าหมาย:</span>
+              <span class="timeline-value">${formatDate(goal.dueDate)}</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-label">เหลืออีก:</span>
+              <span class="timeline-value days-left ${isCompleted ? 'completed' : urgencyClass}">
+                ${isCompleted ? 'สำเร็จแล้ว!' : `${daysLeft} วัน`}
+              </span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-label">ต้องออมอีก:</span>
+              <span class="timeline-value">${formatCurrency(Math.max(0, goal.targetAmount - goal.currentSavings))}</span>
+            </div>
+          </div>
+
+          <div class="goal-actions-footer">
+            ${!isCompleted ? `
+              <button class="btn btn-primary" data-action="add-savings">
+                <i class="fas fa-plus"></i>
+                เพิ่มเงินออม
+              </button>
+              <button class="btn btn-secondary" data-action="view-plan">
+                <i class="fas fa-chart-line"></i>
+                ดูแผน
+              </button>
+            ` : `
+              <button class="btn btn-secondary" style="flex: 1;" data-action="view-plan">
+                <i class="fas fa-trophy"></i>
+                ดูรายละเอียด
+              </button>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    function setupGoalCardListeners() {
+      document.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const action = e.target.closest('[data-action]').dataset.action;
+          const goalCard = e.target.closest('.goal-card');
+          const goalId = goalCard.dataset.goalId;
+          const goal = goals.find(g => g.id === goalId);
+
+          switch (action) {
+            case 'edit':
+              openGoalModal(goal);
+              break;
+            case 'delete':
+              deleteGoal(goalId);
+              break;
+            case 'add-savings':
+              openAddSavingsModal(goal);
+              break;
+            case 'view-plan':
+              viewGoalPlan(goal);
+              break;
+          }
+        });
+      });
+    }
+
+    function openGoalModal(goal = null) {
+      editingGoalId = goal ? goal.id : null;
+      document.getElementById('modalTitle').textContent = goal ? 'แก้ไขเป้าหมาย' : 'สร้างเป้าหมายใหม่';
+      
+      if (goal) {
+        document.getElementById('goalName').value = goal.name;
+        document.getElementById('goalCategory').value = goal.category;
+        document.getElementById('goalPriority').value = goal.priority;
+        document.getElementById('targetAmount').value = goal.targetAmount;
+        document.getElementById('currentAmount').value = goal.currentSavings;
+        document.getElementById('dueDate').value = goal.dueDate;
+        document.getElementById('planType').value = goal.planType;
+        updatePlanPreview();
+      } else {
+        goalForm.reset();
+        document.getElementById('currentAmount').value = 0;
+        document.getElementById('planPreview').style.display = 'none';
+      }
+      
+      goalModal.style.display = 'flex';
+    }
+
+    function closeGoalModal() {
+      goalModal.style.display = 'none';
+      editingGoalId = null;
+    }
+
+    function openAddSavingsModal(goal) {
+      const nextInstallment = goal.plan?.find(p => p.saved < p.amount) || { round: 1, amount: goal.targetAmount - goal.currentSavings };
+      const remaining = nextInstallment.amount - (nextInstallment.saved || 0);
+
+      document.getElementById('savingsGoalName').textContent = goal.name;
+      document.getElementById('savingsInstallmentInfo').textContent = `งวดที่ ${nextInstallment.round}`;
+      document.getElementById('remainingAmount').textContent = `เหลืออีก ${formatCurrency(remaining)}`;
+      document.getElementById('savingsGoalId').value = goal.id;
+      document.getElementById('savingsInstallmentIndex').value = goal.plan?.findIndex(p => p.saved < p.amount) || 0;
+      document.getElementById('savingsAmount').max = remaining;
+      
+      addSavingsForm.reset();
+      addSavingsModal.style.display = 'flex';
+    }
+
+    function closeSavingsModal() {
+      addSavingsModal.style.display = 'none';
+    }
+
+    function updatePlanPreview() {
+      const targetAmount = parseFloat(document.getElementById('targetAmount').value) || 0;
+      const currentAmount = parseFloat(document.getElementById('currentAmount').value) || 0;
+      const dueDate = document.getElementById('dueDate').value;
+      const planType = document.getElementById('planType').value;
+
+      if (!targetAmount || !dueDate || !planType || targetAmount <= currentAmount) {
+        document.getElementById('planPreview').style.display = 'none';
+        return;
+      }
+
+      const remainingAmount = targetAmount - currentAmount;
+      const { text, installments, amountPer, isValid } = calculatePlan(remainingAmount, dueDate, planType);
+      
+      document.getElementById('planDetails').innerHTML = text;
+      
+      if (isValid) {
+        document.getElementById('savingsSummary').innerHTML = `
+          <div class="savings-item">
+            <div class="savings-amount">${installments}</div>
+            <div class="savings-label">งวด</div>
+          </div>
+          <div class="savings-item">
+            <div class="savings-amount">${formatCurrency(amountPer)}</div>
+            <div class="savings-label">ต่องวด</div>
+          </div>
+          <div class="savings-item">
+            <div class="savings-amount">${formatCurrency(remainingAmount)}</div>
+            <div class="savings-label">รวมที่ต้องออม</div>
+          </div>
+        `;
+      }
+
+      document.getElementById('planPreview').className = isValid ? 'plan-preview' : 'plan-preview warning';
+      document.getElementById('planPreview').style.display = 'block';
+    }
+
+    function calculatePlan(amount, dateStr, planType) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endDate = new Date(dateStr);
+      
+      if (endDate <= today) {
+        return { text: '⚠️ กรุณาเลือกวันที่ในอนาคต', isValid: false };
+      }
+
+      const diffTime = endDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      let installments = 0;
+      let periodText = '';
+      
+      switch (planType) {
+        case 'daily':
+          installments = diffDays;
+          periodText = 'วัน';
+          break;
+        case 'weekly':
+          installments = Math.ceil(diffDays / 7);
+          periodText = 'สัปดาห์';
+          break;
+        case 'monthly':
+          installments = Math.ceil(diffDays / 30);
+          periodText = 'เดือน';
+          break;
+        case 'yearly':
+          installments = Math.ceil(diffDays / 365);
+          periodText = 'ปี';
+          break;
+      }
+      
+      const amountPer = amount / installments;
+      
+      return {
+        text: `คุณต้องออม <strong>${formatCurrency(amountPer)}</strong> ทุก${periodText} เป็นเวลา ${installments} ${periodText}`,
+        installments,
+        amountPer,
+        isValid: amountPer > 0
+      };
+    }
+
+    function handleGoalSubmit(e) {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('goalName').value,
+        category: document.getElementById('goalCategory').value,
+        priority: document.getElementById('goalPriority').value,
+        targetAmount: parseFloat(document.getElementById('targetAmount').value),
+        currentSavings: parseFloat(document.getElementById('currentAmount').value),
+        dueDate: document.getElementById('dueDate').value,
+        planType: document.getElementById('planType').value
+      };
+
+      if (editingGoalId) {
+        // Update existing goal
+        const goalIndex = goals.findIndex(g => g.id === editingGoalId);
+        if (goalIndex !== -1) {
+          goals[goalIndex] = { ...goals[goalIndex], ...formData };
+        }
+      } else {
+        // Create new goal
+        const newGoal = {
+          id: Date.now().toString(),
+          ...formData,
+          createdAt: new Date(),
+          plan: generatePlan(formData)
+        };
+        goals.push(newGoal);
+      }
+
+      updateStats();
+      renderGoals();
+      closeGoalModal();
+      
+      // Show success message
+      showNotification('✅ บันทึกเป้าหมายเรียบร้อยแล้ว', 'success');
+    }
+
+    function handleSavingsSubmit(e) {
+      e.preventDefault();
+      
+      const goalId = document.getElementById('savingsGoalId').value;
+      const amount = parseFloat(document.getElementById('savingsAmount').value);
+      const note = document.getElementById('savingsNote').value;
+      
+      const goal = goals.find(g => g.id === goalId);
+      if (goal) {
+        goal.currentSavings += amount;
+        
+        // Update plan if exists
+        if (goal.plan && goal.plan.length > 0) {
+          const installmentIndex = parseInt(document.getElementById('savingsInstallmentIndex').value);
+          if (goal.plan[installmentIndex]) {
+            goal.plan[installmentIndex].saved = (goal.plan[installmentIndex].saved || 0) + amount;
+          }
+        }
+        
+        updateStats();
+        renderGoals();
+        closeSavingsModal();
+        
+        showNotification(`เพิ่มเงินออม ${formatCurrency(amount)} เรียบร้อยแล้ว`, 'success');
+      }
+    }
+
+    function deleteGoal(goalId) {
+      const goal = goals.find(g => g.id === goalId);
+      if (goal && confirm(`คุณแน่ใจหรือไม่ที่จะลบเป้าหมาย "${goal.name}"?`)) {
+        goals = goals.filter(g => g.id !== goalId);
+        updateStats();
+        renderGoals();
+        showNotification('ลบเป้าหมายเรียบร้อยแล้ว', 'info');
+      }
+    }
+
+    function viewGoalPlan(goal) {
+      // This would open a detailed view - for now just show an alert
+      alert(`รายละเอียดเป้าหมาย: ${goal.name}\nความคืบหน้า: ${((goal.currentSavings / goal.targetAmount) * 100).toFixed(1)}%\nเหลืออีก: ${formatCurrency(goal.targetAmount - goal.currentSavings)}`);
+    }
+
+    function generatePlan(goalData) {
+      // Generate a simple plan based on the goal data
+      const remainingAmount = goalData.targetAmount - goalData.currentSavings;
+      const { installments, amountPer } = calculatePlan(remainingAmount, goalData.dueDate, goalData.planType);
+      
+      const plan = [];
+      for (let i = 0; i < installments; i++) {
+        plan.push({
+          round: i + 1,
+          date: `งวดที่ ${i + 1}`,
+          amount: amountPer,
+          saved: 0
+        });
+      }
+      return plan;
+    }
+
+    function getEmptyState() {
+      const emptyStates = {
+        all: {
+          icon: '🎯',
+          title: 'ยังไม่มีเป้าหมาย',
+          text: 'เริ่มสร้างเป้าหมายการเงินแรกของคุณ!'
+        },
+        active: {
+          icon: '📈',
+          title: 'ไม่มีเป้าหมายที่กำลังดำเนิน',
+          text: 'เป้าหมายทั้งหมดสำเร็จแล้ว หรือยังไม่มีเป้าหมาย'
+        },
+        completed: {
+          icon: '🏆',
+          title: 'ยังไม่มีเป้าหมายที่สำเร็จ',
+          text: 'มาเริ่มออมเงินให้ถึงเป้าหมายกันเถอะ!'
+        },
+        urgent: {
+          icon: '⚡',
+          title: 'ไม่มีเป้าหมายที่เร่งด่วน',
+          text: 'เยี่ยม! คุณมีเวลาเพียงพอสำหรับเป้าหมายทั้งหมด'
+        }
+      };
+
+      const state = emptyStates[currentFilter] || emptyStates.all;
+      
+      return `
+        <div class="placeholder-card">
+          <div class="placeholder-icon">${state.icon}</div>
+          <div class="placeholder-title">${state.title}</div>
+          <div class="placeholder-text">${state.text}</div>
+          <button class="btn btn-primary" onclick="document.getElementById('addGoalFab').click()">
+            <i class="fas fa-plus"></i> สร้างเป้าหมายใหม่
+          </button>
+        </div>
+      `;
+    }
+
+    function showNotification(message, type = 'info') {
+      // Simple notification system
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'}-color);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 3000;
+        animation: slideInRight 0.3s ease;
+        max-width: 300px;
+      `;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Utility functions
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('th-TH', {
+        style: 'currency',
+        currency: 'THB',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
+    function formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function getDaysLeft(dateStr) {
+      const today = new Date();
+      const targetDate = new Date(dateStr);
+      const diffTime = targetDate - today;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    function getCategoryName(category) {
+      const categories = {
+        travel: 'ท่องเที่ยว',
+        education: 'การศึกษา',
+        property: 'ที่อยู่อาศัย',
+        vehicle: 'ยานพาหนะ',
+        emergency: 'เงินฉุกเฉิน',
+        investment: 'การลงทุน',
+        gadget: 'เครื่องใช้',
+        other: 'อื่นๆ'
+      };
+      return categories[category] || category;
+    }
+
+    function getPriorityName(priority) {
+      const priorities = {
+        high: 'สูง',
+        medium: 'กลาง',
+        low: 'ต่ำ'
+      };
+      return priorities[priority] || priority;
+    }
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+   
+    // Enhanced features for better UX
+    function addEnhancedFeatures() {
+      // Auto-save form data to localStorage
+      const formFields = ['goalName', 'goalCategory', 'goalPriority', 'targetAmount', 'currentAmount', 'dueDate', 'planType'];
+      
+      formFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          // Load saved data
+          const savedValue = localStorage.getItem(`goalForm_${fieldId}`);
+          if (savedValue && !editingGoalId) {
+            field.value = savedValue;
+          }
+          
+          // Save data on change
+          field.addEventListener('input', () => {
+            if (!editingGoalId) {
+              localStorage.setItem(`goalForm_${fieldId}`, field.value);
+            }
+          });
+        }
+      });
+      
+      // Clear saved form data when form is submitted
+      goalForm.addEventListener('submit', () => {
+        formFields.forEach(fieldId => {
+          localStorage.removeItem(`goalForm_${fieldId}`);
+        });
+      });
+      
+      // Add keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        // Escape to close modals
+        if (e.key === 'Escape') {
+          if (goalModal.style.display === 'flex') closeGoalModal();
+          if (addSavingsModal.style.display === 'flex') closeSavingsModal();
+        }
+        
+        // Ctrl/Cmd + N to add new goal
+        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+          e.preventDefault();
+          openGoalModal();
+        }
+      });
+      
+      // Add progress animations on load
+      setTimeout(() => {
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+          const width = bar.style.width;
+          bar.style.width = '0%';
+          setTimeout(() => {
+            bar.style.width = width;
+          }, 500);
+        });
+      }, 100);
+      
+      // Add smooth scroll to newly created goals
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            const newGoalCard = Array.from(mutation.addedNodes).find(node => 
+              node.classList && node.classList.contains('goal-card')
+            );
+            if (newGoalCard) {
+              newGoalCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        });
+      });
+      
+      observer.observe(goalsGrid, { childList: true });
+    }
+    
+    // Smart suggestions for goal amounts based on category
+    function addSmartSuggestions() {
+      const categoryAmounts = {
+        travel: [30000, 50000, 80000, 120000],
+        education: [20000, 50000, 100000, 200000],
+        property: [500000, 1000000, 2000000, 5000000],
+        vehicle: [100000, 300000, 500000, 1000000],
+        emergency: [50000, 100000, 200000, 500000],
+        investment: [10000, 50000, 100000, 500000],
+        gadget: [5000, 15000, 30000, 50000],
+        other: [10000, 25000, 50000, 100000]
+      };
+      
+      document.getElementById('goalCategory').addEventListener('change', (e) => {
+        const category = e.target.value;
+        const amounts = categoryAmounts[category];
+        
+        if (amounts) {
+          const quickAmountBtns = document.querySelectorAll('.quick-amount-btn');
+          quickAmountBtns.forEach((btn, index) => {
+            if (amounts[index]) {
+              btn.dataset.amount = amounts[index];
+              btn.textContent = formatCurrency(amounts[index]).replace('฿', '').replace(',000', 'K');
+            }
+          });
+        }
+      });
+    }
+    
+    // Initialize enhanced features
+    addEnhancedFeatures();
+    addSmartSuggestions();
+    
+    // Export functionality for backup
+    window.exportGoals = function() {
+      const dataStr = JSON.stringify(goals, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `goals_backup_${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showNotification('📁 ส่งออกข้อมูลเป้าหมายเรียบร้อยแล้ว', 'success');
+    };
+    
+    // Import functionality
+    window.importGoals = function() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            try {
+              const importedGoals = JSON.parse(event.target.result);
+              if (Array.isArray(importedGoals)) {
+                goals.push(...importedGoals);
+                updateStats();
+                renderGoals();
+                showNotification('📥 นำเข้าข้อมูลเป้าหมายเรียบร้อยแล้ว', 'success');
+              } else {
+                throw new Error('Invalid format');
+              }
+            } catch (error) {
+              showNotification('❌ ไฟล์ไม่ถูกต้อง กรุณาลองใหม่', 'error');
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
+    };
+    
+    // Add context menu for additional options
+    document.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('.goal-card')) {
+        e.preventDefault();
+        // Could implement a custom context menu here
+      }
+    });
+    
+    // Performance optimization: Virtual scrolling for large lists
+    if (goals.length > 50) {
+      console.log('Large dataset detected. Consider implementing virtual scrolling for better performance.');
+    }
+
+  </script>
 </body>
 </html>

@@ -6,188 +6,216 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="theme-darkmode.css">
+
   <style>
-    /* CSS Variables for easy theme management 
-      ตัวแปร CSS เพื่อให้ปรับแก้ธีมสีได้ง่าย
-    */
-    :root {
-      --primary-color: #13bba9;
-      --primary-hover: #0f9a8c;
-      --background-color: #f0f4f8;
-      --my-bubble-bg: linear-gradient(135deg, #13bba9 0%, #0c9b8b 100%);
-      --friend-bubble-bg: #ffffff;
-      --text-dark: #333;
-      --text-light: #fff;
-      --text-secondary: #6c757d;
+    /* ===== Theme Vars (เข้ากับ MoneySkillz) ===== */
+    :root{
+      --primary:#00877F;
+      --primary-600:#00776F;
+      --primary-700:#006A64;
+      --accent:#26A69A;
+
+      --page-bg:#E8F5E9;
+      --card-bg:#ffffff;
+      --text:#0f2f2c;
+      --muted:#62807b;
+      --border:#A0D9D4;
+
+      --shadow: 0 10px 30px rgba(0,0,0,.12);
+      --shadow-soft: 0 6px 18px rgba(0,0,0,.08);
+
+      --header-h: 72px;
+      --footer-h: 76px;
+
+      --my-start: var(--primary);
+      --my-end:   var(--accent);
+      --friend-bg: var(--card-bg);
+    }
+    body.dark{
+      --page-bg:#0F172A;
+      --card-bg:#111827;
+      --text:#E5E7EB;
+      --muted:#93A3B5;
+      --border:#1F2937;
+      --shadow: 0 14px 40px rgba(0,0,0,.45);
+      --shadow-soft: 0 10px 30px rgba(0,0,0,.35);
+      --friend-bg:#0f1720;
     }
 
-    /* Basic setup for full-screen layout */
-    body {
-      font-family: 'Kanit', sans-serif;
-      background: var(--background-color);
-      color: var(--text-dark);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh; /* Full viewport height */
-      overflow: hidden; /* Prevent body scrolling */
+    /* ===== Base + พื้นหลังมีลาย soft-radial ===== */
+    body{
+      font-family:'Kanit',sans-serif;
+      margin:0; padding:0;
+      height:100vh; overflow:hidden;
+      background:
+        radial-gradient(1200px 800px at -10% -20%, rgba(38,166,154,.12), transparent 60%),
+        radial-gradient(900px 700px  at 110% 10%, rgba(0,135,127,.10), transparent 60%),
+        var(--page-bg);
+      color:var(--text);
+      -webkit-tap-highlight-color:transparent;
     }
 
-    /* ==== Header Section ==== */
-    .chat-header {
-      background: #fff;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      position: fixed; /* Stick to the top */
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
+    /* ===== Header กราเดียนต์ + โค้งมนด้านล่าง ===== */
+    .chat-header{
+      height:var(--header-h);
+      position:fixed; inset:0 0 auto 0; z-index:100;
+      display:flex; align-items:center; gap:12px;
+      padding:0 14px;
+      color:#fff;
+      background:linear-gradient(100deg, var(--primary) 0%, var(--accent) 100%);
+      box-shadow: var(--shadow-soft);
+      isolation:isolate;
+    }
+    /* คลื่นโค้ง */
+    .chat-header::after{
+      content:""; position:absolute; inset:auto 0 -18px 0; height:38px;
+      background:linear-gradient(100deg, var(--primary) 0%, var(--accent) 100%);
+      filter:blur(18px); opacity:.55; pointer-events:none;
+      z-index:-1; border-bottom-left-radius:50% 100%; border-bottom-right-radius:50% 100%;
     }
 
-    .back-btn {
-      font-size: 1.8em;
-      font-weight: bold;
-      color: var(--primary-color);
-      text-decoration: none;
-      margin-right: 12px;
+    .back-btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:42px; height:42px; border-radius:999px;
+      background:rgba(255,255,255,.16); color:#fff; text-decoration:none;
+      box-shadow:0 6px 16px rgba(0,0,0,.15);
+      transition:transform .12s ease, background-color .15s ease;
     }
-    
-    .friend-info {
-      flex-grow: 1;
+    .back-btn:hover{ background:rgba(255,255,255,.22); }
+    .back-btn:active{ transform:scale(.96); }
+    .back-btn svg{ width:22px; height:22px; }
+
+    /* Select เพื่อนแบบกลาสซี่ */
+    .friend-info{ flex:1; display:flex; align-items:center; }
+    #friendSelect{
+      width:100%;
+      appearance:none; border:none; outline:none;
+      background:rgba(255,255,255,.16);
+      color:#fff; font-weight:700; font-size:1.02rem;
+      padding:10px 40px 10px 14px; border-radius:14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
+      backdrop-filter: blur(6px);
+    }
+    #friendSelect:focus{ box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); }
+    #friendSelect option{ color:#111; }
+    /* ลูกศร select */
+    .friend-info{ position:relative; }
+    .friend-info::after{
+      content:""; position:absolute; right:14px; width:14px; height:14px; pointer-events:none;
+      background: center/14px no-repeat url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="white" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
     }
 
-    #friendSelect {
-      width: 100%;
-      border: none;
-      background: transparent;
-      font-family: 'Kanit', sans-serif;
-      font-size: 1.1em;
-      font-weight: 500;
-      color: var(--text-dark);
-      -webkit-appearance: none; /* Removes default styling on iOS */
-      -moz-appearance: none; /* Removes default styling on Firefox */
-      appearance: none; /* Removes default arrow */
+    /* ===== กล่องข้อความ ===== */
+    .messages-container{
+      position:relative;
+      height:100%;
+      padding: calc(var(--header-h) + 14px) 16px calc(var(--footer-h) + 16px);
+      overflow-y:auto; display:flex; flex-direction:column; gap:12px;
+      scroll-behavior:smooth;
     }
-    #friendSelect:focus{
-        outline: none;
+    .messages-container::-webkit-scrollbar{ width:0; height:0; }
+
+    .msg-row{ display:flex; align-items:flex-end; max-width:82%; gap:8px; }
+    .msg-row.me{ align-self:flex-end; justify-content:flex-end; }
+    .msg-row.friend{ align-self:flex-start; }
+
+    .msg-bubble{
+      position:relative;
+      padding:12px 14px; border-radius:16px;
+      line-height:1.55; font-size:1rem;
+      box-shadow: var(--shadow-soft);
+      word-break:break-word;
+    }
+    /* ของเรา */
+    .my-bubble{
+      color:#fff;
+      background:linear-gradient(135deg, var(--my-start), var(--my-end));
+      border-bottom-right-radius:6px;
+    }
+    .my-bubble::after{
+      content:""; position:absolute; right:-6px; bottom:0;
+      width:0; height:0; border-left:8px solid var(--my-end);
+      border-top:8px solid transparent; border-bottom:0 solid transparent;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.15));
+    }
+    /* ของเพื่อน */
+    .friend-bubble{
+      background:var(--friend-bg);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-bottom-left-radius:6px;
+    }
+    .friend-bubble::after{
+      content:""; position:absolute; left:-7px; bottom:0;
+      width:0; height:0; border-right:9px solid var(--friend-bg);
+      border-top:9px solid transparent; border-bottom:0 solid transparent;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.06));
+    }
+    .timestamp{
+      font-size:.78rem; color:var(--muted);
+      background: rgba(255,255,255,.6);
+      padding:3px 8px; border-radius:999px;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);
+      backdrop-filter: blur(4px);
+      user-select:none; white-space:nowrap;
+      margin:0 4px 6px;
+    }
+    body.dark .timestamp{ background:rgba(255,255,255,.12); color:#b5c3c0; }
+    .msg-row.me .timestamp{ order:-1; margin:0 0 6px 6px; }
+
+    .empty-note{ text-align:center; color:#92a39f; margin-top:6px; }
+
+    /* ===== แถบพิมพ์ข้อความ ===== */
+    .input-footer{
+      height:var(--footer-h);
+      position:fixed; inset:auto 0 0 0; z-index:90;
+      display:flex; align-items:center; gap:10px;
+      padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.94));
+      border-top:1px solid var(--border);
+      box-shadow: 0 -8px 24px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    body.dark .input-footer{
+      background: linear-gradient(180deg, rgba(17,24,39,.86), rgba(17,24,39,.95));
+      box-shadow: 0 -12px 28px rgba(0,0,0,.45);
     }
 
-    /* ==== Messages Area ==== */
-    .messages-container {
-      flex-grow: 1; /* Take up all available space */
-      overflow-y: auto; /* Allow scrolling for messages */
-      padding: 90px 16px 80px 16px; /* Top/Bottom padding to avoid overlap with fixed header/footer */
-      display: flex;
-      flex-direction: column;
+    #msgInput{
+      flex:1; padding:12px 16px; border-radius:14px;
+      border:1.6px solid var(--border);
+      background:#fff; color:var(--text); font-size:1rem;
+      transition:border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+    }
+    body.dark #msgInput{ background:#0f1720; border-color:#223042; color:#E5E7EB; }
+    #msgInput:focus{
+      outline:none; border-color:var(--primary);
+      box-shadow: 0 0 0 4px rgba(0,135,127,.22);
     }
 
-    .msg-row {
-      display: flex;
-      margin-bottom: 12px;
-      max-width: 80%;
-      align-items: flex-end; /* Align items to the bottom */
+    .send-btn{
+      width:48px; height:48px; border:none; border-radius:999px;
+      background:linear-gradient(135deg, var(--primary), var(--accent));
+      color:#fff; cursor:pointer; flex-shrink:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      box-shadow: var(--shadow);
+      transition: transform .12s ease, filter .15s ease;
     }
-    .msg-bubble {
-      padding: 10px 16px;
-      border-radius: 20px;
-      font-size: 1em;
-      line-height: 1.5;
-    }
-
-    /* My Messages Styling */
-    .msg-row.me {
-      align-self: flex-end;
-    }
-    .msg-bubble.my-bubble {
-      background: var(--my-bubble-bg);
-      color: var(--text-light);
-      border-bottom-right-radius: 5px;
-    }
-
-    /* Friend's Messages Styling */
-    .msg-row.friend {
-      align-self: flex-start;
-    }
-    .msg-bubble.friend-bubble {
-      background: var(--friend-bubble-bg);
-      color: var(--text-dark);
-      border-bottom-left-radius: 5px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-    }
-    
-    .timestamp {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        margin: 0 8px;
-        white-space: nowrap;
-        margin-bottom: 5px;
-    }
-    /* Adjust timestamp position for my messages */
-    .msg-row.me .timestamp {
-        order: -1; /* Move timestamp before the bubble */
-    }
-
-
-    /* ==== Input Footer Section ==== */
-    .input-footer {
-      background: #fff;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-      position: fixed; /* Stick to the bottom */
-      bottom: 0;
-      left: 0;
-      right: 0;
-    }
-
-    #msgInput {
-      flex-grow: 1;
-      padding: 12px 18px;
-      border-radius: 22px;
-      border: 1px solid #e0e0e0;
-      background: var(--background-color);
-      font-family: 'Kanit', sans-serif;
-      font-size: 1em;
-    }
-    #msgInput:focus {
-      outline: none;
-      border-color: var(--primary-color);
-    }
-
-    .send-btn {
-      background: var(--primary-color);
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      cursor: pointer;
-      font-size: 1.5em;
-      line-height: 44px; /* Center the icon vertically */
-      text-align: center;
-      padding-left: 3px; /* visual adjustment for the icon */
-      flex-shrink: 0; /* Prevent button from shrinking */
-      transition: background-color 0.2s ease, transform 0.1s ease;
-    }
-    .send-btn:hover {
-      background: var(--primary-hover);
-    }
-    .send-btn:active {
-        transform: scale(0.9);
-    }
+    .send-btn:hover{ filter:brightness(1.05); }
+    .send-btn:active{ transform:scale(.95); }
+    .send-btn svg{ width:22px; height:22px; }
   </style>
 </head>
 <body>
 
-  <!-- Header: Back button and friend selector -->
+  <!-- Header -->
   <header class="chat-header">
-    <a href="dashboard.html" class="back-btn">‹</a>
+    <a href="dashboard.html" class="back-btn" aria-label="กลับ">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+
     <div class="friend-info">
       <select id="friendSelect" onchange="loadChat()">
         <option value="">เลือกเพื่อนเพื่อเริ่มแชท...</option>
@@ -195,26 +223,29 @@
     </div>
   </header>
 
-  <!-- Main content: Where messages appear -->
+  <!-- Messages -->
   <main class="messages-container" id="chatBox">
-    <!-- Chat messages will be loaded here by JavaScript -->
-    <p style="text-align: center; color: #999; margin-top: 20px;">เลือกเพื่อนจากด้านบนเพื่อเริ่มแชท</p>
+    <p class="empty-note">เลือกเพื่อนจากด้านบนเพื่อเริ่มแชท</p>
   </main>
 
-  <!-- Footer: Text input and send button -->
+  <!-- Input -->
   <footer class="input-footer">
     <input id="msgInput" type="text" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter'){sendMsg();}">
-    <button class="send-btn" onclick="sendMsg()">&#10148;</button>
+    <button class="send-btn" onclick="sendMsg()" aria-label="ส่งข้อความ">
+      <!-- paper-plane -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2.3 20.2l19-8.8c.9-.4.9-1.7 0-2.1l-19-8.8c-.8-.4-1.7.3-1.5 1.2L3.9 11 0.8 19c-.3.9.7 1.7 1.5 1.2zM5.4 12.6l13.9-3.7L5.4 5.2l1.7 5.4c.1.3.1.6 0 .9l-1.7 5.1z"/>
+      </svg>
+    </button>
   </footer>
-  
-  <!-- Firebase Scripts -->
+
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  
+
   <script>
-    // ==== Firebase Config (Updated with your details) ====
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    /* ==== Firebase Config (ฟังก์ชันเดิมทั้งหมดคงไว้) ==== */
     const firebaseConfig = {
       apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
       authDomain: "myapplication-bd04c034.firebaseapp.com",
@@ -226,47 +257,33 @@
       measurementId: "G-Z2ZBWGB245"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ==== Global Variables ====
     let currentUserId = null;
     let selectedFriendId = "";
-    let chatListener = null; // To keep track of the active listener
+    let chatListener = null;
 
-    // ==== DOM Elements ====
     const friendSelect = document.getElementById("friendSelect");
     const chatBox = document.getElementById("chatBox");
     const msgInput = document.getElementById("msgInput");
 
-    // ==== Authentication State Change Listener ====
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUserId = user.uid;
         await loadFriends();
       } else {
-        // If not logged in, redirect to login page
-        console.log("User is not logged in. Redirecting...");
-        window.location.href = "login.html"; // Adjust the path if needed
+        window.location.href = "login.html";
       }
     });
 
-    // ==== Function to Load Friends into the Selector ====
     async function loadFriends() {
       try {
         const userDoc = await db.collection("users").doc(currentUserId).get();
-        if (!userDoc.exists) {
-            console.error("Current user document not found.");
-            return;
-        }
+        if (!userDoc.exists) return;
         const friends = userDoc.data().friends || [];
-        
-        // Clear previous options but keep the default one
-        const defaultOptionHTML = `<option value="">เลือกเพื่อนเพื่อเริ่มแชท...</option>`;
-        friendSelect.innerHTML = defaultOptionHTML;
-
+        friendSelect.innerHTML = `<option value="">เลือกเพื่อนเพื่อเริ่มแชท...</option>`;
         for (const friendId of friends) {
           const friendDoc = await db.collection("users").doc(friendId).get();
           if (friendDoc.exists) {
@@ -274,100 +291,66 @@
             friendSelect.innerHTML += `<option value="${friendId}">${friendName}</option>`;
           }
         }
-      } catch (error) {
-        console.error("Error loading friends:", error);
-      }
+      } catch (e) { console.error(e); }
     }
 
-    // ==== Function to Create a Consistent Chat Document ID ====
-    function getChatDocId(uid1, uid2) {
-      // Sort UIDs to ensure the same ID is generated regardless of who starts the chat
-      return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
-    }
+    function getChatDocId(a,b){ return a<b ? `${a}_${b}` : `${b}_${a}`; }
 
-    // ==== Function to Load Chat Messages ====
     function loadChat() {
       selectedFriendId = friendSelect.value;
-
-      // Unsubscribe from the previous chat listener to prevent multiple listeners
-      if (chatListener) {
-        chatListener(); 
-      }
-
+      if (chatListener) chatListener();
       if (!selectedFriendId) {
-        chatBox.innerHTML = '<p style="text-align: center; color: #999; margin-top: 20px;">เลือกเพื่อนจากด้านบนเพื่อเริ่มแชท</p>';
+        chatBox.innerHTML = '<p class="empty-note">เลือกเพื่อนจากด้านบนเพื่อเริ่มแชท</p>';
         return;
       }
-      
       const docId = getChatDocId(currentUserId, selectedFriendId);
-      
-      // Listen for real-time updates on the chat messages
       chatListener = db.collection("chats").doc(docId)
         .collection("messages").orderBy("timestamp")
-        .onSnapshot((querySnapshot) => {
-          let html = "";
-          if (querySnapshot.empty) {
-              html = '<p style="text-align: center; color: #999;">ยังไม่มีข้อความ ทักทายเพื่อนของคุณได้เลย!</p>';
+        .onSnapshot((qs)=>{
+          let html="";
+          if (qs.empty){
+            html = '<p class="empty-note">ยังไม่มีข้อความ ทักทายเพื่อนของคุณได้เลย!</p>';
           } else {
-            querySnapshot.forEach(doc => {
-              const msg = doc.data();
-              const isMe = msg.sender === currentUserId;
-              const bubbleClass = isMe ? 'me' : 'friend';
-              const bubbleType = isMe ? 'my-bubble' : 'friend-bubble';
-              // Format timestamp to a readable time string
-              const time = msg.timestamp ? msg.timestamp.toDate().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
-
+            qs.forEach(d=>{
+              const m=d.data();
+              const me = m.sender===currentUserId;
+              const row = me?'me':'friend';
+              const bubble = me?'my-bubble':'friend-bubble';
+              const t = m.timestamp ? m.timestamp.toDate().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '';
               html += `
-                <div class="msg-row ${bubbleClass}">
-                  <div class="msg-bubble ${bubbleType}">
-                    ${escapeHTML(msg.text)}
-                  </div>
-                  <div class="timestamp">${time}</div>
+                <div class="msg-row ${row}">
+                  <div class="msg-bubble ${bubble}">${escapeHTML(m.text)}</div>
+                  <div class="timestamp">${t}</div>
                 </div>`;
             });
           }
           chatBox.innerHTML = html;
-          // Automatically scroll to the latest message
           chatBox.scrollTop = chatBox.scrollHeight;
-        }, (error) => {
-            console.error("Error listening to chat:", error);
-            chatBox.innerHTML = '<p style="text-align: center; color: red;">ขออภัย ไม่สามารถโหลดแชทได้</p>';
+        }, ()=>{
+          chatBox.innerHTML = '<p class="empty-note" style="color:#e11d48">ขออภัย ไม่สามารถโหลดแชทได้</p>';
         });
     }
 
-    // ==== Function to Send a Message ====
-    async function sendMsg() {
+    async function sendMsg(){
       const text = msgInput.value.trim();
-      if (!text || !selectedFriendId) {
-        return; // Do nothing if input is empty or no friend is selected
-      }
-
+      if(!text || !selectedFriendId) return;
       const docId = getChatDocId(currentUserId, selectedFriendId);
-      
-      try {
-        // Add the new message to Firestore
-        await db.collection("chats").doc(docId)
-          .collection("messages").add({
-            sender: currentUserId,
-            text: text,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        // Clear the input field and refocus for the next message
-        msgInput.value = "";
-        msgInput.focus();
-      } catch(error) {
-          console.error("Error sending message:", error);
-          // In a real app, you might show a user-friendly error message here
-      }
+      try{
+        await db.collection("chats").doc(docId).collection("messages").add({
+          sender: currentUserId,
+          text,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        msgInput.value=""; msgInput.focus();
+      }catch(e){ console.error(e); }
     }
-    
-    // ==== Utility to escape HTML to prevent XSS ====
-    function escapeHTML(str) {
-        const p = document.createElement('p');
-        p.appendChild(document.createTextNode(str));
-        return p.innerHTML;
+
+    function escapeHTML(s){
+      const p=document.createElement('p'); p.appendChild(document.createTextNode(s));
+      return p.innerHTML;
     }
   </script>
+
   <script src="darkmode-toggle.js"></script>
 </body>
 </html>
