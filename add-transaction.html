@@ -14,7 +14,7 @@
        ================================= */
 
     :root {
-      /* กำหนดค่าสีหลักของแอปพลิเคชัน */
+      /* กำหนดค่าสีหลักของแอปพลิเคชั่น */
       --primary-color: #26A69A;
       --primary-darker: #00796B;
       --background-color: #f4f7f6;
@@ -447,7 +447,7 @@
     // นำเข้า Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, getDoc, serverTimestamp, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, getDoc, query, where, getDocs, serverTimestamp, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     // ================== Firebase Configuration ==================
     const firebaseConfig = {
@@ -488,6 +488,126 @@
         { id: 'first_transaction', name: 'นักบันทึกมือใหม่', description: 'บันทึกธุรกรรมแรกของคุณ', icon: '✏️', xp: 20, coins: 30 }
     ];
 
+    // ================== Utility Functions ==================
+    function showMessageBox(message, type = "info", callback = null) {
+        const messageBox = document.getElementById('messageBox');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageText = document.getElementById('messageText');
+        const closeBtn = document.getElementById('messageCloseBtn');
+
+        messageText.textContent = message;
+        messageBoxContent.className = `message-box-content ${type}`;
+        messageBox.classList.add('show');
+
+        closeBtn.onclick = () => {
+            messageBox.classList.remove('show');
+            if (callback) callback();
+        };
+
+        messageBox.onclick = (e) => {
+            if (e.target === messageBox) {
+                messageBox.classList.remove('show');
+                if (callback) callback();
+            }
+        };
+    }
+
+    // ================== Transaction Quota Check ==================
+    async function checkTransactionQuota(uid) {
+        if (!uid) return 0;
+        
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const transactionsRef = collection(db, 'users', uid, 'transactions');
+            const todayQuery = query(transactionsRef, where('date', '==', today));
+            const snapshot = await getDocs(todayQuery);
+            return snapshot.size;
+        } catch (error) {
+            console.error("Error checking transaction quota:", error);
+            return 0;
+        }
+    }
+
+    // ================== Financial Status Check ==================
+    async function checkSavingsPercentage(uid) {
+        if (!uid) return 100; // Default to 100% if no user
+        
+        try {
+            // Method 1: Try to get data from user document first
+            const userDocRef = doc(db, 'users', uid);
+            const userSnap = await getDoc(userDocRef);
+            
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                const storedIncome = userData.totalIncome || 0;
+                const storedExpenses = userData.totalExpenses || 0;
+                
+                console.log(`Stored data - Income: ${storedIncome}, Expenses: ${storedExpenses}`);
+                
+                if (storedIncome > 0) {
+                    const savings = storedIncome - storedExpenses;
+                    const savingsPercentage = (savings / storedIncome) * 100;
+                    console.log(`From stored data - Savings percentage: ${savingsPercentage}%`);
+                    return Math.max(0, savingsPercentage);
+                }
+            }
+            
+            // Method 2: Calculate from transactions if no stored data
+            console.log('No stored financial data, calculating from transactions...');
+            const transactionsRef = collection(db, 'users', uid, 'transactions');
+            const snapshot = await getDocs(transactionsRef);
+            
+            let totalIncome = 0;
+            let totalExpenses = 0;
+            
+            snapshot.forEach(doc => {
+                const transaction = doc.data();
+                const amount = parseFloat(transaction.amount) || 0;
+                
+                if (transaction.type === 'income') {
+                    totalIncome += amount;
+                } else if (transaction.type === 'expense') {
+                    totalExpenses += amount;
+                }
+            });
+            
+            console.log(`Calculated from transactions - Income: ${totalIncome}, Expenses: ${totalExpenses}`);
+            
+            if (totalIncome > 0) {
+                const savings = totalIncome - totalExpenses;
+                const savingsPercentage = (savings / totalIncome) * 100;
+                console.log(`Calculated savings percentage: ${savingsPercentage}%`);
+                
+                // Update user document with calculated totals
+                await updateDoc(userDocRef, {
+                    totalIncome: totalIncome,
+                    totalExpenses: totalExpenses
+                });
+                
+                return Math.max(0, savingsPercentage);
+            } else {
+                console.log('No income found, returning 100%');
+                return 100; // ถ้าไม่มีรายรับให้ถือว่า 100% (ไม่ถูกจำกัด)
+            }
+        } catch (error) {
+            console.error("Error checking savings percentage:", error);
+            return 100; // Default to safe value
+        }
+    }
+
+    async function updateSpendingRestriction(uid) {
+        const savingsPercentage = await checkSavingsPercentage(uid);
+        const isBlocked = savingsPercentage < 30;
+        
+        // Update localStorage for spending restriction
+        localStorage.setItem('isSpendingBlocked', isBlocked.toString());
+        localStorage.setItem('currentSavingsPercentage', savingsPercentage.toString());
+        
+        console.log(`Savings percentage: ${savingsPercentage}%, Is blocked: ${isBlocked}`);
+        
+        return isBlocked;
+    }
+
     // ================== Emergency Management ==================
     function isEmergencyMode() {
         return sessionStorage.getItem('emergencyOverride') === 'true';
@@ -521,25 +641,38 @@
 
     function updateFormState() {
         const isBlocked = localStorage.getItem('isSpendingBlocked') === 'true';
+        const savingsPercentage = parseFloat(localStorage.getItem('currentSavingsPercentage') || '100');
         const isExpense = typeSelect.value === 'expense';
         const isEmergency = isEmergencyMode();
         
-        // Show/hide spending restriction UI
+        console.log(`Form state - IsBlocked: ${isBlocked}, SavingsPercentage: ${savingsPercentage}, IsExpense: ${isExpense}, IsEmergency: ${isEmergency}`);
+        
+        // Update spending ban alert text with current percentage
+        const alertElement = document.getElementById('spending-ban-alert');
+        alertElement.innerHTML = `🚨 เงินออม ${savingsPercentage.toFixed(1)}% (ต่ำกว่า 30%) - ระบบจำกัดการเพิ่มรายจ่าย`;
+        
+        // Show/hide spending restriction UI only when:
+        // 1. Spending is blocked (savings < 30%)
+        // 2. User is trying to add expense
+        // 3. Emergency mode is not active
         if (isBlocked && isExpense && !isEmergency) {
             spendingBanAlert.style.display = 'block';
             emergencyControls.style.display = 'block';
             
             // Disable form fields
             submitButton.disabled = true;
+            submitButton.textContent = 'ไม่สามารถเพิ่มรายจ่ายได้';
             amountInput.disabled = true;
             descriptionInput.disabled = true;
             categorySelect.disabled = true;
         } else {
+            // Hide restriction UI when savings >= 30% OR not expense OR emergency mode active
             spendingBanAlert.style.display = 'none';
             emergencyControls.style.display = 'none';
             
             // Enable form fields
             submitButton.disabled = false;
+            submitButton.textContent = 'บันทึกรายการ';
             amountInput.disabled = false;
             descriptionInput.disabled = false;
             categorySelect.disabled = false;
@@ -578,78 +711,6 @@
         }
     }
 
-async function saveTransaction(event) {
-    event.preventDefault();
-    
-    if (!currentUser) {
-        showMessageBox("กรุณาเข้าสู่ระบบก่อนบันทึกรายการ", "info");
-        return;
-    }
-
-    // ตรวจสอบจำนวนธุรกรรมในวันนั้น
-    const transactionCount = await checkTransactionQuota(currentUser.uid);
-
-    // จำกัดธุรกรรมไม่เกิน 10 รอบต่อวัน
-    if (transactionCount >= 10) {
-        showMessageBox('คุณทำธุรกรรมครบ 10 รอบแล้วในวันนี้', 'error');
-        return;
-    }
-
-    const isBlocked = localStorage.getItem('isSpendingBlocked') === 'true';
-    const isEmergency = isEmergencyMode();
-    
-    if (isBlocked && typeSelect.value === 'expense' && !isEmergency) {
-        showMessageBox('ไม่สามารถเพิ่มรายจ่ายได้ เนื่องจากเงินออมต่ำกว่า 30%', 'error');
-        return;
-    }
-
-    const transaction = {
-        type: typeSelect.value,
-        category: categorySelect.value,
-        amount: parseFloat(amountInput.value),
-        date: dateInput.value,
-        description: descriptionInput.value.trim(),
-        createdAt: serverTimestamp(),
-        isEmergency: isEmergency,
-        emergencyReason: isEmergency ? (sessionStorage.getItem('emergencyReason') || '') : ''
-    };
-    
-    if (!transaction.type || !transaction.category || !transaction.amount || 
-        transaction.amount <= 0 || !transaction.date || !transaction.description) {
-        showMessageBox("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง", "error");
-        return;
-    }
-
-    submitButton.disabled = true;
-    submitButton.textContent = 'กำลังบันทึก...';
-
-    try {
-        await addDoc(collection(db, 'users', currentUser.uid, 'transactions'), transaction);
-        
-        const userRef = doc(db, 'users', currentUser.uid);
-        await updateDoc(userRef, {
-            xp: increment(10),
-            lastActivity: serverTimestamp()
-        });
-
-        await checkAndAwardBadge(currentUser.uid, 'first_transaction');
-
-        // Clear emergency mode after successful transaction
-        if (isEmergency) {
-            clearEmergencyMode();
-        }
-
-        showMessageBox("บันทึกรายการสำเร็จ! ได้รับ 10 XP!", "success", () => {
-            window.location.href = "dashboard.html";
-        });
-
-    } catch (error) {
-        console.error("Error adding document: ", error);
-        showMessageBox("เกิดข้อผิดพลาดในการบันทึก: " + error.message, "error");
-        submitButton.disabled = false;
-        submitButton.textContent = 'บันทึกรายการ';
-    }
-}
     async function saveTransaction(event) {
         event.preventDefault();
         
@@ -658,11 +719,24 @@ async function saveTransaction(event) {
             return;
         }
 
+        // ตรวจสอบจำนวนธุรกรรมในวันนั้น
+        const transactionCount = await checkTransactionQuota(currentUser.uid);
+
+        // จำกัดธุรกรรมไม่เกิน 10 รอบต่อวัน
+        if (transactionCount >= 10) {
+            showMessageBox('คุณทำธุรกรรมครบ 10 รอบแล้วในวันนี้', 'error');
+            return;
+        }
+
+        // Check current financial status
+        await updateSpendingRestriction(currentUser.uid);
+        
         const isBlocked = localStorage.getItem('isSpendingBlocked') === 'true';
         const isEmergency = isEmergencyMode();
         
         if (isBlocked && typeSelect.value === 'expense' && !isEmergency) {
-            showMessageBox('ไม่สามารถเพิ่มรายจ่ายได้ เนื่องจากเงินออมต่ำกว่า 30%', 'error');
+            const savingsPercentage = parseFloat(localStorage.getItem('currentSavingsPercentage') || '0');
+            showMessageBox(`ไม่สามารถเพิ่มรายจ่ายได้ เนื่องจากเงินออม ${savingsPercentage.toFixed(1)}% (ต่ำกว่า 30%)`, 'error');
             return;
         }
 
@@ -687,20 +761,35 @@ async function saveTransaction(event) {
         submitButton.textContent = 'กำลังบันทึก...';
 
         try {
+            // Add transaction to Firestore
             await addDoc(collection(db, 'users', currentUser.uid, 'transactions'), transaction);
             
+            // Update user stats
             const userRef = doc(db, 'users', currentUser.uid);
-            await updateDoc(userRef, {
+            const updateData = {
                 xp: increment(10),
                 lastActivity: serverTimestamp()
-            });
+            };
 
+            // Update income/expense totals
+            if (transaction.type === 'income') {
+                updateData.totalIncome = increment(transaction.amount);
+            } else {
+                updateData.totalExpenses = increment(transaction.amount);
+            }
+
+            await updateDoc(userRef, updateData);
+
+            // Check and award badge
             await checkAndAwardBadge(currentUser.uid, 'first_transaction');
 
             // Clear emergency mode after successful transaction
             if (isEmergency) {
                 clearEmergencyMode();
             }
+
+            // Update spending restriction after transaction
+            await updateSpendingRestriction(currentUser.uid);
 
             showMessageBox("บันทึกรายการสำเร็จ! ได้รับ 10 XP!", "success", () => {
                 window.location.href = "dashboard.html";
@@ -746,9 +835,14 @@ async function saveTransaction(event) {
     });
 
     // Auth State Observer
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
+            
+            // Check spending restriction when user logs in
+            console.log('User logged in, checking spending restriction...');
+            await updateSpendingRestriction(user.uid);
+            
             transactionForm.style.display = 'block';
             updateFormState();
         } else {
@@ -770,18 +864,38 @@ async function saveTransaction(event) {
     transactionForm.addEventListener('submit', saveTransaction);
     
     // Initialize on DOM ready
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
         setDefaultDate();
         populateCategories();
-        updateFormState();
+        
+        // Wait a bit for auth to initialize, then check restrictions
+        setTimeout(async () => {
+            if (currentUser) {
+                console.log('DOM ready, checking spending restriction for existing user...');
+                await updateSpendingRestriction(currentUser.uid);
+                updateFormState();
+            }
+        }, 1000);
     });
 
     // Check for spending restrictions on page load
-    window.addEventListener('storage', (e) => {
+    window.addEventListener('storage', async (e) => {
         if (e.key === 'isSpendingBlocked') {
+            console.log('Storage event detected, updating form state...');
             updateFormState();
         }
     });
+
+    // Force check restrictions every 5 seconds (for debugging)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        setInterval(async () => {
+            if (currentUser) {
+                console.log('Periodic check - updating spending restrictions...');
+                await updateSpendingRestriction(currentUser.uid);
+                updateFormState();
+            }
+        }, 5000);
+    }
 </script>
 </body>
 </html>
