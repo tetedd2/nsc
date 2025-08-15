@@ -503,25 +503,6 @@
         sessionStorage.removeItem('emergencyReason');
     }
 
-    // ================== Functions ==================
-    function showMessageBox(message, type = "info", onConfirm = null) {
-        const box = document.getElementById("messageBox");
-        const content = document.getElementById("messageBoxContent");
-        const text = document.getElementById("messageText");
-        const closeBtn = document.getElementById("messageCloseBtn");
-
-        text.textContent = message;
-        content.className = 'message-box-content ' + type;
-        box.classList.add("show");
-
-        const closeHandler = () => {
-            box.classList.remove("show");
-            if (onConfirm) onConfirm();
-        };
-
-        closeBtn.addEventListener('click', closeHandler, { once: true });
-    }
-
     function populateCategories() {
         const selectedType = typeSelect.value;
         categorySelect.innerHTML = '';
