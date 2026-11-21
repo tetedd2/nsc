@@ -13,9 +13,10 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
 
   const history = [];                            // เก็บบริบทสนทนาส่งให้โมเดล
 
-  // ---------- นกฮูกแห่งความรู้ (ไอคอน SVG ของน้องซี แทนอิโมจิ) ----------
+  // ---------- นกฮูกแห่งความรู้ (ไอคอน SVG ของน้องซี + ท่าทางตามอารมณ์) ----------
+  // moods: idle | search (ถือแว่นขยาย) | think (กำลังคิด) | happy (สำเร็จ/มีความรู้) | confused (สงสัย)
   const OWL_SVG =
-    '<svg class="ns-owl" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true" focusable="false">' +
+    '<svg class="ns-owl" data-mood="idle" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true" focusable="false">' +
       '<defs>' +
         '<linearGradient id="nsOwlBody" x1="32" y1="17" x2="32" y2="60" gradientUnits="userSpaceOnUse">' +
           '<stop stop-color="#FFF6DF"/><stop offset="1" stop-color="#F3D28F"/>' +
@@ -31,18 +32,24 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
       '<path d="M49 36c1 7-1 12-5 15 3-6 3-11 1-16z" fill="#E9BE74" opacity=".85"/>' +
       // ท้อง
       '<path d="M32 33c7 0 11 5 11 13 0 7-5 11-11 11s-11-4-11-11c0-8 4-13 11-13Z" fill="#FFFDF4" opacity=".65"/>' +
-      // แว่นนักปราชญ์ (ดวงตา)
+      // แว่นนักปราชญ์ (กรอบ + ตาขาว)
       '<circle cx="24" cy="34" r="9" fill="#fff"/>' +
       '<circle cx="40" cy="34" r="9" fill="#fff"/>' +
       '<circle cx="24" cy="34" r="9" fill="none" stroke="#E79A1E" stroke-width="2.4"/>' +
       '<circle cx="40" cy="34" r="9" fill="none" stroke="#E79A1E" stroke-width="2.4"/>' +
       '<path d="M31 33.5h2" stroke="#E79A1E" stroke-width="2.4" stroke-linecap="round"/>' +
-      '<g class="ns-owl-eyes">' +
+      // ดวงตาปกติ (กะพริบได้)
+      '<g class="ns-owl-eyes ns-eyes-open">' +
         '<circle cx="25" cy="35" r="4.3" fill="#123A25"/>' +
         '<circle cx="39" cy="35" r="4.3" fill="#123A25"/>' +
+        '<circle cx="26.6" cy="33.4" r="1.4" fill="#fff"/>' +
+        '<circle cx="40.6" cy="33.4" r="1.4" fill="#fff"/>' +
       '</g>' +
-      '<circle cx="26.6" cy="33.4" r="1.4" fill="#fff"/>' +
-      '<circle cx="40.6" cy="33.4" r="1.4" fill="#fff"/>' +
+      // ดวงตายิ้ม (ตอนสำเร็จ)
+      '<g class="ns-eyes-happy">' +
+        '<path d="M20 36c2-3.4 6-3.4 8 0" stroke="#123A25" stroke-width="2.4" stroke-linecap="round"/>' +
+        '<path d="M36 36c2-3.4 6-3.4 8 0" stroke="#123A25" stroke-width="2.4" stroke-linecap="round"/>' +
+      '</g>' +
       // จะงอยปาก
       '<path d="M32 39l3.3 4.1h-6.6z" fill="#E79A1E"/>' +
       // เท้า
@@ -54,6 +61,42 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
       '<path d="M54.5 13v8.4" stroke="#E79A1E" stroke-width="1.6" stroke-linecap="round"/>' +
       '<circle cx="54.5" cy="12.4" r="1.7" fill="#E79A1E"/>' +
       '<circle class="ns-owl-tassel" cx="54.5" cy="22.4" r="2.3" fill="#F3B63F"/>' +
+      // ===== ของประกอบตามอารมณ์ =====
+      // กำลังคิด: ลูกโป่งความคิด + จุดเด้ง
+      '<g class="ns-acc ns-acc-think">' +
+        '<circle cx="9" cy="23" r="1.5" fill="#fff"/>' +
+        '<circle cx="12" cy="18" r="2.3" fill="#fff"/>' +
+        '<ellipse cx="13" cy="9.5" rx="8" ry="6" fill="#fff"/>' +
+        '<circle class="ns-dot d1" cx="9.5" cy="9.5" r="1.3" fill="#1F8F4E"/>' +
+        '<circle class="ns-dot d2" cx="13" cy="9.5" r="1.3" fill="#1F8F4E"/>' +
+        '<circle class="ns-dot d3" cx="16.5" cy="9.5" r="1.3" fill="#1F8F4E"/>' +
+      '</g>' +
+      // กำลังค้นหา: แว่นขยาย
+      '<g class="ns-acc ns-acc-search">' +
+        '<g class="ns-mag">' +
+          '<circle cx="43" cy="45" r="7.5" fill="#BFE8CF" opacity=".55"/>' +
+          '<circle cx="43" cy="45" r="7.5" fill="none" stroke="#E79A1E" stroke-width="2.6"/>' +
+          '<path d="M48.4 50.4 54 56" stroke="#C57A12" stroke-width="3.4" stroke-linecap="round"/>' +
+          '<path d="M39.6 42.6c.7-1.3 2-2.1 3.4-2.1" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>' +
+        '</g>' +
+      '</g>' +
+      // สงสัย: เครื่องหมาย ? + คิ้วกังวล
+      '<g class="ns-acc ns-acc-question">' +
+        '<g class="ns-q">' +
+          '<path d="M9.6 8.4c0-2 1.7-3.4 3.7-3.4 1.9 0 3.4 1.2 3.4 3 0 2.4-3 2.6-3 4.9" stroke="#E79A1E" stroke-width="2.3" stroke-linecap="round" fill="none"/>' +
+          '<circle cx="13.7" cy="18.2" r="1.5" fill="#E79A1E"/>' +
+        '</g>' +
+        '<path d="M18.5 28 22 26.6M45.5 26.6 42 28" stroke="#C57A12" stroke-width="2" stroke-linecap="round"/>' +
+      '</g>' +
+      // สำเร็จ/มีความรู้: หลอดไฟ + ประกาย
+      '<g class="ns-acc ns-acc-happy">' +
+        '<circle cx="13" cy="10.5" r="5" fill="#FFE08A"/>' +
+        '<circle cx="13" cy="10.5" r="5" fill="none" stroke="#E79A1E" stroke-width="1.4"/>' +
+        '<rect x="10.9" y="14.8" width="4.2" height="2.6" rx="1" fill="#C57A12"/>' +
+        '<path d="M13 5.5v-2M7.6 10.5h-2M18.4 10.5h2M9.2 6.6 7.8 5.2M16.8 6.6 18.2 5.2" stroke="#F3B63F" stroke-width="1.4" stroke-linecap="round"/>' +
+        '<path class="ns-spark s1" d="M50 30l1 2.2 2.2 1-2.2 1-1 2.2-1-2.2-2.2-1 2.2-1z" fill="#FFD866"/>' +
+        '<path class="ns-spark s2" d="M48 52l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z" fill="#FFD866"/>' +
+      '</g>' +
     '</svg>';
 
   // ---------- CSS (โทนเขียวเข้าชุดกับแอป) ----------
@@ -62,17 +105,36 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
     background:linear-gradient(135deg,#1F8F4E,#0E4D2C);color:#fff;font-size:26px;cursor:pointer;
     box-shadow:0 6px 18px rgba(14,77,44,.4);display:flex;align-items:center;justify-content:center;transition:transform .15s;}
   .ns-fab:hover{transform:scale(1.08);} .ns-fab:active{transform:scale(.94);}
-  .ns-owl{display:block;}
+  .ns-owl{display:block;overflow:visible;}
   .ns-fab .ns-owl{width:38px;height:38px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28));animation:ns-owl-bob 3.2s ease-in-out infinite;transform-origin:center;}
   .ns-fab::after{content:"";position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 0 0 rgba(43,196,106,.55);animation:ns-owl-ring 2.6s ease-out infinite;pointer-events:none;}
-  .ns-head .ns-owl{width:30px;height:30px;flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  .ns-head .ns-owl{width:30px;height:30px;flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));cursor:pointer;}
   .ns-owl-eyes{transform-box:fill-box;transform-origin:center;animation:ns-owl-blink 5s infinite;}
   .ns-owl-tassel{transform-box:fill-box;transform-origin:54.5px 12.4px;animation:ns-owl-swing 3.2s ease-in-out infinite;}
   @keyframes ns-owl-bob{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-2.5px) rotate(-2deg);}}
   @keyframes ns-owl-blink{0%,93%,100%{transform:scaleY(1);}96%{transform:scaleY(.12);}}
   @keyframes ns-owl-swing{0%,100%{transform:rotate(-7deg);}50%{transform:rotate(7deg);}}
   @keyframes ns-owl-ring{0%{box-shadow:0 0 0 0 rgba(43,196,106,.5);}70%,100%{box-shadow:0 0 0 12px rgba(43,196,106,0);}}
-  @media (prefers-reduced-motion:reduce){.ns-fab .ns-owl,.ns-owl-eyes,.ns-owl-tassel,.ns-fab::after{animation:none;}}
+  /* ---- ท่าทางตามอารมณ์ ---- */
+  .ns-owl .ns-acc{display:none;transform-box:fill-box;transform-origin:center;}
+  .ns-owl .ns-eyes-happy{display:none;}
+  .ns-owl[data-mood="happy"] .ns-owl-eyes{display:none;}
+  .ns-owl[data-mood="happy"] .ns-eyes-happy{display:block;}
+  .ns-owl[data-mood="think"] .ns-acc-think{display:block;animation:ns-acc-pop .34s ease-out;}
+  .ns-owl[data-mood="search"] .ns-acc-search{display:block;animation:ns-acc-pop .34s ease-out;}
+  .ns-owl[data-mood="confused"] .ns-acc-question{display:block;animation:ns-acc-pop .34s ease-out;}
+  .ns-owl[data-mood="happy"] .ns-acc-happy{display:block;animation:ns-acc-pop .34s ease-out;}
+  @keyframes ns-acc-pop{0%{opacity:0;transform:scale(.5);}60%{transform:scale(1.14);}100%{opacity:1;transform:scale(1);}}
+  .ns-dot{animation:ns-dot 1.1s infinite;}
+  .ns-dot.d2{animation-delay:.18s;} .ns-dot.d3{animation-delay:.36s;}
+  @keyframes ns-dot{0%,100%{opacity:.25;}50%{opacity:1;}}
+  .ns-spark{transform-box:fill-box;transform-origin:center;animation:ns-sp 1.1s ease-in-out infinite;}
+  .ns-spark.s2{animation-delay:.45s;}
+  @keyframes ns-sp{0%,100%{opacity:.35;transform:scale(.6);}50%{opacity:1;transform:scale(1.1);}}
+  .ns-q{transform-box:fill-box;transform-origin:center;animation:ns-qbob 1.3s ease-in-out infinite;}
+  @keyframes ns-qbob{0%,100%{transform:translateY(0);}50%{transform:translateY(-1.6px);}}
+  .ns-mag{transform-box:fill-box;transform-origin:43px 45px;animation:ns-magw 1s ease-in-out infinite;}
+  @keyframes ns-magw{0%,100%{transform:rotate(-7deg);}50%{transform:rotate(7deg);}}
   .ns-panel{position:fixed;right:16px;bottom:calc(72px + 80px);z-index:951;width:340px;max-width:calc(100vw - 32px);
     height:480px;max-height:calc(100vh - 180px);background:#fff;border-radius:18px;overflow:hidden;
     box-shadow:0 12px 40px rgba(0,0,0,.22);display:none;flex-direction:column;font-family:'Kanit','Segoe UI',sans-serif;}
@@ -117,6 +179,10 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
   body.dark-mode .ns-form{background:#1f232a;border-top-color:#333a44;}
   body.dark-mode .ns-form input{background:#2a2f37;border-color:#3a414b;color:#e5e7eb;}
   @media (max-width:480px){.ns-panel{height:64vh;bottom:calc(72px + 72px);} .ns-fab{bottom:calc(72px + 12px);}}
+  @media (prefers-reduced-motion:reduce){
+    .ns-fab .ns-owl,.ns-owl-eyes,.ns-owl-tassel,.ns-fab::after,.ns-dot,.ns-spark,.ns-q,.ns-mag,
+    .ns-owl[data-mood] .ns-acc{animation:none!important;}
+  }
   `;
   const style = document.createElement('style');
   style.setAttribute('data-ns-widget', '');
@@ -171,6 +237,16 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
   const form = panel.querySelector('#nsForm');
   const input = panel.querySelector('#nsInput');
 
+  // ----- ควบคุมท่าทางนกฮูก (ทุกตัวพร้อมกัน) -----
+  function setMood(mood, autoRevertMs) {
+    document.querySelectorAll('.ns-owl').forEach((o) => o.setAttribute('data-mood', mood));
+    clearTimeout(setMood._timer);
+    if (autoRevertMs) setMood._timer = setTimeout(() => setMood('idle'), autoRevertMs);
+  }
+  // แตะที่นกฮูกบนหัวข้อ → ทักทายร่าเริง
+  const headOwl = panel.querySelector('.ns-head-left .ns-owl');
+  if (headOwl) headOwl.addEventListener('click', () => setMood('happy', 1200));
+
   // ----- แผงตั้งค่า -----
   const settings = panel.querySelector('#nsSettings');
   const modeChip = panel.querySelector('#nsMode');
@@ -214,13 +290,16 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
     statusDiv.className = 'ns-status';
     statusDiv.textContent = 'กำลังทดสอบการเชื่อมต่อ...';
     testBtn.disabled = true;
+    setMood('search');
     try {
       const r = await testNongSeeConnection();
       statusDiv.className = 'ns-status ' + (r.ok ? 'ok' : 'err');
       statusDiv.textContent = r.detail;
+      setMood(r.ok ? 'happy' : 'confused', 2200);
     } catch (e) {
       statusDiv.className = 'ns-status err';
       statusDiv.textContent = 'ทดสอบไม่สำเร็จ: ' + e.message;
+      setMood('confused', 2200);
     } finally {
       testBtn.disabled = false;
       refreshMode();
@@ -241,12 +320,13 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
   function openPanel() {
     panel.classList.add('open');
     if (!greeted) {
-      addMsg('ai', 'สวัสดีครับ! ผมน้องซี โค้ชการเงินของคุณเองครับ 😊 ถามเรื่องการออม การลงทุน หรือวางแผนการเงินได้เลยครับ');
+      addMsg('ai', 'สวัสดีครับ! ผมน้องซี โค้ชการเงินของคุณเองครับ ถามเรื่องการออม การลงทุน หรือวางแผนการเงินได้เลยครับ');
       greeted = true;
     }
+    setMood('happy', 1600);
     setTimeout(() => input.focus(), 50);
   }
-  function closePanel() { panel.classList.remove('open'); }
+  function closePanel() { panel.classList.remove('open'); setMood('idle'); }
 
   fab.addEventListener('click', () => (panel.classList.contains('open') ? closePanel() : openPanel()));
   panel.querySelector('.ns-close').addEventListener('click', closePanel);
@@ -259,15 +339,24 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
     input.value = '';
     history.push({ role: 'user', content: message });
 
+    // ท่าทาง: ค้นหา → กำลังคิด
+    let pending = true;
+    setMood('search');
+    setTimeout(() => { if (pending) setMood('think'); }, 700);
+
     const typing = addMsg('ai', 'น้องซีกำลังพิมพ์...');
     try {
       const { text } = await getNongSeeReply(message, history);
+      pending = false;
       typing.textContent = text;
       history.push({ role: 'assistant', content: text });
       if (history.length > 12) history.splice(0, history.length - 12);
+      setMood('happy', 2000);           // สำเร็จ — ได้ความรู้แล้ว
     } catch (err) {
+      pending = false;
       console.error('nong-see-widget:', err);
       typing.textContent = 'ขออภัยครับ เกิดข้อผิดพลาด ลองใหม่อีกครั้งนะครับ';
+      setMood('confused', 2800);        // สงสัย/มีปัญหา
     }
     body.scrollTop = body.scrollHeight;
   });
