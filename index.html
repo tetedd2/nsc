@@ -151,16 +151,43 @@
         border-width: 4px;
       }
     }
+    /* ===== เหรียญลอยพื้นหลัง ===== */
+    .coins { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .coins span { position: absolute; bottom: -50px; font-size: 1.7rem; opacity: 0; animation: rise linear infinite; filter: drop-shadow(0 2px 6px rgba(0,0,0,.2)); }
+    @keyframes rise { 0% { transform: translateY(0) rotate(0); opacity: 0; } 12% { opacity: .85; } 88% { opacity: .5; } 100% { transform: translateY(-112vh) rotate(380deg); opacity: 0; } }
+    /* ===== แสงเรืองหลังโลโก้ ===== */
+    .logo-wrapper { position: relative; z-index: 1; }
+    .logo-wrapper::before { content:""; position:absolute; inset:-28px; border-radius:50%; background: radial-gradient(circle, rgba(255,255,255,.4), transparent 70%); z-index:-1; animation: glow 2s ease-in-out infinite alternate; }
+    @keyframes glow { from { opacity:.35; transform:scale(.88);} to { opacity:.8; transform:scale(1.12);} }
+    .app-name { color:#fff; font-size:2rem; font-weight:800; letter-spacing:.5px; margin: 20px 0 4px; text-shadow: 0 2px 14px rgba(0,0,0,.28); z-index:1; }
+    .app-tag { color: rgba(255,255,255,.9); font-size: .95rem; margin-bottom: 20px; z-index:1; }
+    /* ===== แถบโหลด ===== */
+    .load-bar { width: 170px; height: 7px; background: rgba(255,255,255,.25); border-radius: 999px; overflow: hidden; }
+    .load-bar i { display:block; height:100%; width:42%; background: linear-gradient(90deg,#FFE169,#FFC13B); border-radius:999px; animation: slide 1.3s ease-in-out infinite; }
+    @keyframes slide { 0%{ margin-left:-42%;} 100%{ margin-left:100%;} }
+    .container { position: relative; z-index: 1; }
+    @media (prefers-reduced-motion: reduce){ .coins span, .logo-wrapper::before, .load-bar i { animation: none; } .coins { display:none; } }
   </style>
   <link rel="stylesheet" href="moneyskillz-ui.css">
 </head>
 <body>
+  <div class="coins" aria-hidden="true">
+    <span style="left:8%;  animation-duration:7s;   animation-delay:0s;">🪙</span>
+    <span style="left:22%; animation-duration:9.5s; animation-delay:1.6s;">💰</span>
+    <span style="left:40%; animation-duration:6.5s; animation-delay:.6s;">฿</span>
+    <span style="left:58%; animation-duration:8.5s; animation-delay:2.2s;">🪙</span>
+    <span style="left:74%; animation-duration:7.5s; animation-delay:1s;">💵</span>
+    <span style="left:88%; animation-duration:10.5s; animation-delay:3s;">🪙</span>
+    <span style="left:50%; animation-duration:11s;  animation-delay:4s;">💰</span>
+  </div>
   <div class="container">
     <div class="logo-wrapper">
       <img src="516746497_673252655760176_3157736752216908947_n.png" alt="MoneySkillz Logo">
     </div>
+    <div class="app-name">MoneySkillz</div>
+    <div class="app-tag">ออมวันนี้ เก่งการเงินวันหน้า</div>
     <div class="loading-area">
-      <div class="spinner"></div>
+      <div class="load-bar"><i></i></div>
       <div class="loading-text">กำลังเข้าสู่ระบบ...</div>
     </div>
   </div>
