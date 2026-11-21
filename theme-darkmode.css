@@ -1,35 +1,48 @@
+/* ============================================================
+ *  theme-darkmode.css
+ *  - Light-mode fallback palette = forest (overridden by moneyskillz-ui.css)
+ *  - Dark-mode normalizer scoped to body.dark-mode ONLY, so the forest
+ *    design system (gradient headers, cards) shows normally in light mode.
+ * ============================================================ */
 :root {
-  --primary-color: #26A69A;
-  --primary-darker: #00796B;
-  --background-color: #f4f7f6;
+  --primary-color: #1F8F4E;
+  --primary-darker: #0E4D2C;
+  --background-color: #F3F9F5;
   --card-background: #ffffff;
-  --text-color: #333;
-  --text-secondary: #666;
-  --border-color: #e0e0e0;
-  --shadow-color: rgba(0, 100, 100, 0.1);
+  --text-color: #12301F;
+  --text-secondary: #5B7A68;
+  --border-color: #E4EEE8;
+  --shadow-color: rgba(16, 42, 40, 0.08);
 }
 body.dark-mode {
-  --primary-color: #4DB6AC;
-  --primary-darker: #26A69A;
-  --background-color: #121212;
-  --card-background: #1e1e1e;
-  --text-color: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --border-color: #2c2c2c;
-  --shadow-color: rgba(0,0,0,0.22);
+  --primary-color: #2BC46A;
+  --primary-darker: #bff0d2;
+  --background-color: #0c1711;
+  --card-background: #15271d;
+  --text-color: #e8f5ee;
+  --text-secondary: #8fb3a0;
+  --border-color: #26402f;
+  --shadow-color: rgba(0, 0, 0, 0.4);
 }
-body {
-  background: var(--background-color) !important;
-  color: var(--text-color);
-  transition: background 0.3s, color 0.3s;
-}
-.container, .form-box, .header, .goal-box, .card, .box {
+
+/* Light mode: a soft fallback background (pages/overlay may override) */
+body { color: var(--text-color); transition: background 0.3s, color 0.3s; }
+
+/* Dark mode: enforce dark surfaces on common containers */
+body.dark-mode { background: var(--background-color) !important; }
+body.dark-mode .container,
+body.dark-mode .form-box,
+body.dark-mode .goal-box,
+body.dark-mode .card,
+body.dark-mode .box {
   background: var(--card-background) !important;
   color: var(--text-color) !important;
   box-shadow: 0 6px 22px var(--shadow-color), 0 2px 8px var(--shadow-color);
 }
-input, select {
-  background: var(--background-color) !important;
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background: #15271d !important;
   color: var(--text-color) !important;
   border: 1px solid var(--border-color) !important;
 }

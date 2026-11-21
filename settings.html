@@ -20,143 +20,150 @@
   <link rel="stylesheet" href="theme-darkmode.css">
 
   <style>
-    /* ตัวแปรสีพื้นฐาน - คงเดิม */
     :root {
-      --primary-color: #26A69A;
-      --primary-darker: #00796B;
-      --background-color: #f4f7f6;
+      --primary-color: #1F8F4E;
+      --primary-darker: #0E4D2C;
+      --highlight: #2BC46A;
+      --background-color: #EEF6F0;
       --card-background: #ffffff;
-      --text-color: #333;
-      --text-secondary: #666;
-      --border-color: #e0e0e0;
-      --danger-color: #ef5350;
-      --success-color: #66BB6A;
-      --shadow-color: rgba(0, 100, 100, 0.1);
-      --toggle-bg-off: #ccc;
-      --toggle-bg-on: var(--primary-color);
+      --text-color: #12301F;
+      --text-secondary: #5B7A68;
+      --border-color: #E4EEE8;
+      --danger-color: #E2483B;
+      --success-color: #1F9D54;
+      --shadow-color: rgba(16,42,40,.08);
+      --toggle-bg-off: #cdd9d1;
+      --toggle-bg-on: var(--highlight);
       --toggle-circle: #fff;
     }
     body.dark-mode {
-      --primary-color: #00897B;
-      --primary-darker: #00695C;
-      --background-color: #1a1a1a;
-      --card-background: #282828;
-      --text-color: #e0e0e0;
-      --text-secondary: #aaaaaa;
-      --border-color: #444;
-      --danger-color: #55dec2;
-      --success-color: #a5d6a7;
-      --shadow-color: rgba(0, 0, 0, 0.4);
-      --toggle-bg-off: #555;
-      --toggle-bg-on: var(--primary-color);
-      --toggle-circle: #ccc;
+      --primary-color: #2BC46A;
+      --primary-darker: #bff0d2;
+      --background-color: #0c1711;
+      --card-background: #15271d;
+      --text-color: #e8f5ee;
+      --text-secondary: #8fb3a0;
+      --border-color: #26402f;
+      --danger-color: #ff8a7d;
+      --success-color: #58e08d;
+      --shadow-color: rgba(0,0,0,.4);
+      --toggle-bg-off: #2a3f33;
+      --toggle-circle: #cfeedd;
     }
+    * { box-sizing: border-box; }
     body {
       font-family: 'Kanit', sans-serif;
       background-color: var(--background-color);
       color: var(--text-color);
-      margin: 0;
-      padding: 0;
-      transition: background-color 0.3s, color 0.3s;
-
-      /* เผื่อพื้นที่เท่ากับความสูงเมนูล่าง (ให้พอดีกับหน้าอื่น: ~110px) */
-      padding-bottom: 110px;
+      margin: 0; padding: 0 0 110px;
+      transition: background-color .3s, color .3s;
     }
 
+    /* ---- Hero header ---- */
     .header {
-      background: linear-gradient(to right, #3db3b1, #208576);
-      color: white;
-      padding: 25px 20px;
+      position: relative;
+      background: linear-gradient(140deg, var(--primary-darker), var(--primary-color));
+      color: #fff;
+      padding: 54px 20px 30px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 12px 30px rgba(14,77,44,.25);
+      overflow: hidden;
     }
-    .header h1 {
-      margin: 0;
-      font-size: 2.2rem;
-      font-weight: 600;
+    .header::after {
+      content: ""; position: absolute; right: -30px; top: -30px;
+      width: 150px; height: 150px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.14), transparent 70%);
     }
-    .header p {
-      font-size: 1.1em;
-      opacity: 0.9;
-      margin-top: 5px;
+    .header .hero-icon {
+      width: 60px; height: 60px; margin: 0 auto 10px; border-radius: 18px;
+      display: grid; place-items: center; font-size: 2rem;
+      background: rgba(255,255,255,.18); backdrop-filter: blur(4px);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
     }
+    .header h1 { margin: 0; font-size: 1.9rem; font-weight: 700; letter-spacing: .3px; }
+    .header p { font-size: 1.02em; opacity: .9; margin-top: 4px; }
 
-    .container {
-      max-width: 800px;
-      margin: 25px auto;
-      padding: 0 15px;
-    }
+    .container { max-width: 640px; margin: -18px auto 0; padding: 0 16px; position: relative; z-index: 2; }
 
     .settings-section {
       background: var(--card-background);
-      margin-bottom: 25px;
+      margin-bottom: 16px;
       border-radius: 20px;
-      box-shadow: 0 10px 30px var(--shadow-color);
-      padding: 25px 30px;
-      transition: background-color 0.3s;
+      box-shadow: 0 6px 20px var(--shadow-color);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      animation: msk-rise .5s cubic-bezier(.2,.8,.2,1) both;
     }
+    @keyframes msk-rise { from { opacity:0; transform: translateY(12px);} to { opacity:1; transform:none;} }
+    @media (prefers-reduced-motion: reduce){ .settings-section { animation: none; } }
     .settings-section h2 {
-      color: var(--primary-darker);
-      border-bottom: 2px solid var(--border-color);
-      padding-bottom: 12px;
-      margin-top: 0;
-      font-size: 1.6rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
+      color: var(--primary-color);
+      margin: 0 0 16px;
+      font-size: 1.2rem; font-weight: 700;
+      display: flex; align-items: center; gap: 10px;
     }
-    .settings-section h2 .icon { margin-right: 12px; font-size: 1.8rem;}
+    .settings-section h2 .icon {
+      width: 34px; height: 34px; flex: none; border-radius: 10px;
+      display: grid; place-items: center; font-size: 1.1rem;
+      background: var(--highlight); color: #fff;
+    }
+    body.dark-mode .settings-section h2 { color: #bff0d2; }
 
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
+    .profile-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
     .profile-picture-settings {
-      width: 80px; height: 80px; border-radius: 50%;
-      object-fit: cover; border: 4px solid var(--primary-color);
-      cursor: pointer; transition: transform 0.2s;
+      width: 72px; height: 72px; border-radius: 50%;
+      object-fit: cover; border: 3px solid var(--highlight);
+      cursor: pointer; transition: transform .2s; background: #fff;
     }
-    .profile-picture-settings:hover { transform: scale(1.05);}
+    .profile-picture-settings:active { transform: scale(.96); }
     #profilePictureInput { display: none; }
-    .profile-details { flex-grow: 1; }
-    .profile-info p { color: var(--text-secondary); line-height: 1.7; font-size: 1rem; margin: 4px 0;}
-    .profile-info strong { color: var(--text-color); font-weight: 500;}
-    .stat-item { display: flex; align-items: center; font-size: 1.2rem; color: var(--text-color);}
-    .stat-item .icon { font-size: 2.5rem; margin-right: 15px; color: #FF9800;}
+    .profile-details { flex-grow: 1; min-width: 0; }
+    .stat-item { display: flex; align-items: center; font-size: 1.1rem; color: var(--text-color); }
+    .stat-item .pill {
+      width: 46px; height: 46px; flex: none; border-radius: 14px;
+      display: grid; place-items: center; font-size: 1.5rem; margin-right: 14px;
+      background: linear-gradient(135deg, #FFD54A, #F4A91F);
+    }
 
     textarea, .settings-section button {
-      width: 100%; padding: 14px; margin-top: 10px;
-      border-radius: 12px; border: 1px solid var(--border-color);
-      font-size: 1rem; font-family: 'Kanit', sans-serif; box-sizing: border-box;
+      width: 100%; padding: 13px 15px; margin-top: 10px;
+      border-radius: 14px; font-size: 1rem; font-family: 'Kanit', sans-serif;
     }
-    textarea { background-color: var(--background-color); color: var(--text-color); resize: vertical;}
+    textarea {
+      background-color: var(--background-color); color: var(--text-color);
+      border: 1.5px solid var(--border-color); resize: vertical;
+    }
+    textarea:focus { outline: none; border-color: var(--highlight); }
     .settings-section button {
-      color: white; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s; letter-spacing: 0.5px;
-      background: var(--primary-color);
+      color: #fff; border: none; cursor: pointer; font-weight: 700; letter-spacing: .3px;
+      background: linear-gradient(135deg, var(--highlight), var(--primary-color));
+      box-shadow: 0 5px 16px rgba(31,143,78,.28);
+      transition: transform .12s, filter .15s;
     }
-    .settings-section button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.15);}
-    #submitFeedbackBtn { background: var(--primary-darker);}
-    #logoutBtn { background-color: var(--danger-color); margin-top: 20px;}
-    #clearDataBtn { background-color: #607d8b; }
-    #clearDataBtn:hover { background-color: #455a64; }
+    .settings-section button:active { transform: scale(.98); }
+    @media (hover:hover){ .settings-section button:hover { filter: brightness(1.04); } }
+    #logoutBtn {
+      margin-top: 16px;
+      background: linear-gradient(135deg, #F26A5E, #E2483B);
+      box-shadow: 0 5px 16px rgba(226,72,59,.28);
+    }
+    #clearDataBtn { background: linear-gradient(135deg, #8aa0ad, #607d8b); box-shadow: none; }
 
-    .theme-switch-wrapper { display: flex; align-items: center; gap: 10px; margin-bottom: 20px;}
-    .theme-switch { display: inline-block; height: 34px; position: relative; width: 60px;}
+    .theme-switch-wrapper { display: flex; align-items: center; gap: 12px; font-weight: 500; }
+    .theme-switch { display: inline-block; height: 32px; position: relative; width: 56px; flex: none; }
     .theme-switch input { display: none; }
     .slider {
-      background-color: var(--toggle-bg-off); bottom: 0; cursor: pointer; left: 0;
-      position: absolute; right: 0; top: 0; transition: .4s; border-radius: 34px;
+      background-color: var(--toggle-bg-off); position: absolute; inset: 0;
+      cursor: pointer; transition: .3s; border-radius: 34px;
     }
     .slider:before {
-      background-color: var(--toggle-circle); bottom: 4px; content: ""; height: 26px; left: 4px;
-      position: absolute; transition: .4s; width: 26px; border-radius: 50%;
+      background-color: var(--toggle-circle); bottom: 4px; content: ""; height: 24px; left: 4px;
+      position: absolute; transition: .3s; width: 24px; border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0,0,0,.2);
     }
-    input:checked + .slider { background-color: var(--toggle-bg-on);}
-    input:checked + .slider:before { transform: translateX(26px);}
-
-    .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary-darker); text-decoration: none; font-weight: 500; font-size: 1rem;}
+    input:checked + .slider { background-color: var(--toggle-bg-on); }
+    input:checked + .slider:before { transform: translateX(24px); }
   </style>
 
   <!-- Firebase รวมที่ js/firebase-init.js (import อยู่ในสคริปต์หลักด้านล่าง) -->
@@ -164,13 +171,14 @@
 </head>
 <body>
   <header class="header">
+    <div class="hero-icon">⚙️</div>
     <h1>ตั้งค่า</h1>
     <p>ปรับแต่งบัญชีของคุณ</p>
   </header>
 
-  <!-- เนื้อหาคงเดิมทั้งหมด -->
+  <div class="container">
   <section class="settings-section">
-    <h2><span class="icon"></span> การแสดงผล</h2>
+    <h2><span class="icon">🌙</span> การแสดงผล</h2>
     <div class="theme-switch-wrapper">
       <label class="theme-switch" for="dark-mode-toggle">
         <input type="checkbox" id="dark-mode-toggle" />
@@ -181,7 +189,7 @@
   </section>
 
   <section class="settings-section">
-    <h2><span class="icon"></span> โปรไฟล์ของคุณ</h2>
+    <h2><span class="icon">👤</span> โปรไฟล์ของคุณ</h2>
     <div class="profile-header">
       <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" alt="Profile Picture" class="profile-picture-settings" id="settingsProfilePicture" onclick="document.getElementById('profilePictureInput').click();">
       <input type="file" id="profilePictureInput" accept="image/*">
@@ -194,10 +202,10 @@
   </section>
 
   <section class="settings-section">
-    <h2><span class="icon"></span> สถิติของฉัน</h2>
+    <h2><span class="icon">📊</span> สถิติของฉัน</h2>
     <div class="stat-item">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span class="icon"></span>
+      <div style="display: flex; align-items: center; gap: 0;">
+        <span class="pill">🔥</span>
         <div>
           <strong>Saving Streak</strong>
           <p style="margin:0; font-size: 1rem; color: var(--text-secondary);">บันทึกการออมต่อเนื่อง <strong id="saving-streak-days">--</strong> วันแล้ว!</p>
@@ -240,13 +248,14 @@
   </section>
 
   <section class="settings-section">
-    <h2><span class="icon"></span> ข้อเสนอแนะถึงผู้พัฒนา</h2>
+    <h2><span class="icon">💬</span> ข้อเสนอแนะถึงผู้พัฒนา</h2>
     <form id="feedbackForm">
       <textarea id="feedbackText" rows="5" placeholder="มีความคิดเห็น, ข้อเสนอแนะ, หรือเจอปัญหา? บอกเราได้เลย..."></textarea>
       <button id="submitFeedbackBtn" type="submit">ส่งข้อเสนอแนะ</button>
     </form>
     <div id="feedbackMessage" style="text-align: center; margin-top: 15px; font-size: 0.9em;"></div>
   </section>
+  </div><!-- /.container -->
 
   <!-- Bottom Nav: ใช้ component ร่วม js/bottom-nav.js (5 แท็บ) -->
 
