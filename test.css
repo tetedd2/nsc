@@ -1,6 +1,6 @@
 body {
     font-family: 'Kanit', sans-serif;
-    background-color: #f0f4f8;
+    background-color: #EEF6F0;
     color: #333;
     margin: 0;
     padding: 20px;
@@ -71,7 +71,7 @@ header p {
 }
 
 .choice:hover {
-    background-color: #e0f2f1;
+    background-color: #E8F6EE;
 }
 
 .choice input[type="radio"] {

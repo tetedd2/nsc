@@ -18,27 +18,29 @@
        ================================= */
 
     :root {
-      /* กำหนดค่าสีหลักของแอปพลิเคชั่น */
-      --primary-color: #26A69A;
-      --primary-darker: #00796B;
-      --background-color: #f4f7f6;
+      /* พาเลตเขียวการเงิน */
+      --primary-color: #1F8F4E;
+      --primary-darker: #0E4D2C;
+      --highlight: #2BC46A;
+      --background-color: #EEF6F0;
       --card-background: #ffffff;
-      --text-color: #333;
-      --text-secondary: #666;
-      --border-color: #e0e0e0;
-      --shadow-color: rgba(0, 100, 100, 0.15);
-      --highlight-color: rgba(38, 166, 154, 0.2);
-      --danger-color: #f44336;
-      --warning-color: #ff9800;
+      --text-color: #12301F;
+      --text-secondary: #5B7A68;
+      --border-color: #E4EEE8;
+      --shadow-color: rgba(16, 42, 40, 0.1);
+      --highlight-color: #2BC46A;
+      --danger-color: #E2483B;
+      --warning-color: #E8912A;
     }
 
-    /* สไตล์สำหรับ Dark Mode (หากมีการใช้งานในอนาคต) */
     body.dark-mode {
-      --background-color: #1a1a1a;
-      --card-background: #282828;
-      --text-color: #e0e0e0;
-      --text-secondary: #aaaaaa;
-      --border-color: #444;
+      --primary-color: #2BC46A;
+      --primary-darker: #bff0d2;
+      --background-color: #0c1711;
+      --card-background: #15271d;
+      --text-color: #e8f5ee;
+      --text-secondary: #8fb3a0;
+      --border-color: #26402f;
       --shadow-color: rgba(0, 0, 0, 0.4);
     }
 
@@ -58,11 +60,19 @@
 
     /* ส่วนหัว (Header) */
     .header {
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-darker));
+      background: linear-gradient(140deg, var(--primary-darker), var(--primary-color));
       color: white;
-      padding: 40px 20px 80px;
+      padding: 44px 20px 72px;
       text-align: center;
       position: relative;
+      border-radius: 0 0 32px 32px;
+      box-shadow: 0 12px 30px rgba(14,77,44,.22);
+      overflow: hidden;
+    }
+    .header::after {
+      content: ""; position: absolute; right: -30px; top: -30px;
+      width: 150px; height: 150px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.14), transparent 70%);
     }
 
     .header h1 {
@@ -201,19 +211,18 @@
       width: 100%;
       padding: 15px;
       border: none;
-      border-radius: 8px;
-      background-color: var(--primary-color);
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--highlight), var(--primary-color));
       color: white;
       font-size: 1.2em;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 6px 18px rgba(31,143,78,.3);
+      transition: filter 0.15s ease, transform 0.12s ease;
     }
 
-    .submit-btn:hover:not(:disabled) {
-      background-color: var(--primary-darker);
-      transform: translateY(-2px);
-    }
+    .submit-btn:active:not(:disabled) { transform: scale(.98); }
+    .submit-btn:hover:not(:disabled) { filter: brightness(1.05); }
     
     .submit-btn:disabled {
         background-color: #ccc;
