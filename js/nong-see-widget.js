@@ -13,12 +13,66 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
 
   const history = [];                            // เก็บบริบทสนทนาส่งให้โมเดล
 
+  // ---------- นกฮูกแห่งความรู้ (ไอคอน SVG ของน้องซี แทนอิโมจิ) ----------
+  const OWL_SVG =
+    '<svg class="ns-owl" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true" focusable="false">' +
+      '<defs>' +
+        '<linearGradient id="nsOwlBody" x1="32" y1="17" x2="32" y2="60" gradientUnits="userSpaceOnUse">' +
+          '<stop stop-color="#FFF6DF"/><stop offset="1" stop-color="#F3D28F"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="nsOwlCap" x1="32" y1="5" x2="32" y2="27" gradientUnits="userSpaceOnUse">' +
+          '<stop stop-color="#16422B"/><stop offset="1" stop-color="#0A2416"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      // ลำตัว
+      '<path d="M32 17c13 0 20 9 20 21 0 13-8 21-20 21s-20-8-20-21c0-12 7-21 20-21Z" fill="url(#nsOwlBody)"/>' +
+      // ปีก
+      '<path d="M15 36c-1 7 1 12 5 15-3-6-3-11-1-16z" fill="#E9BE74" opacity=".85"/>' +
+      '<path d="M49 36c1 7-1 12-5 15 3-6 3-11 1-16z" fill="#E9BE74" opacity=".85"/>' +
+      // ท้อง
+      '<path d="M32 33c7 0 11 5 11 13 0 7-5 11-11 11s-11-4-11-11c0-8 4-13 11-13Z" fill="#FFFDF4" opacity=".65"/>' +
+      // แว่นนักปราชญ์ (ดวงตา)
+      '<circle cx="24" cy="34" r="9" fill="#fff"/>' +
+      '<circle cx="40" cy="34" r="9" fill="#fff"/>' +
+      '<circle cx="24" cy="34" r="9" fill="none" stroke="#E79A1E" stroke-width="2.4"/>' +
+      '<circle cx="40" cy="34" r="9" fill="none" stroke="#E79A1E" stroke-width="2.4"/>' +
+      '<path d="M31 33.5h2" stroke="#E79A1E" stroke-width="2.4" stroke-linecap="round"/>' +
+      '<g class="ns-owl-eyes">' +
+        '<circle cx="25" cy="35" r="4.3" fill="#123A25"/>' +
+        '<circle cx="39" cy="35" r="4.3" fill="#123A25"/>' +
+      '</g>' +
+      '<circle cx="26.6" cy="33.4" r="1.4" fill="#fff"/>' +
+      '<circle cx="40.6" cy="33.4" r="1.4" fill="#fff"/>' +
+      // จะงอยปาก
+      '<path d="M32 39l3.3 4.1h-6.6z" fill="#E79A1E"/>' +
+      // เท้า
+      '<path d="M26.5 58.4h4M33.5 58.4h4" stroke="#E79A1E" stroke-width="2.6" stroke-linecap="round"/>' +
+      // หมวกครุย (บัณฑิต) = แห่งความรู้
+      '<path d="M18 16.5v5.5c0 3 6 4.8 14 4.8s14-1.8 14-4.8v-5.5l-14 4.3z" fill="#0E2E1D"/>' +
+      '<path d="M32 6 54.5 13 32 20 9.5 13Z" fill="url(#nsOwlCap)"/>' +
+      '<path d="M32 6 54.5 13 32 20 9.5 13Z" fill="none" stroke="#1C5636" stroke-width="1"/>' +
+      '<path d="M54.5 13v8.4" stroke="#E79A1E" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<circle cx="54.5" cy="12.4" r="1.7" fill="#E79A1E"/>' +
+      '<circle class="ns-owl-tassel" cx="54.5" cy="22.4" r="2.3" fill="#F3B63F"/>' +
+    '</svg>';
+
   // ---------- CSS (โทนเขียวเข้าชุดกับแอป) ----------
   const css = `
   .ns-fab{position:fixed;right:16px;bottom:calc(72px + 16px);z-index:950;width:56px;height:56px;border:none;border-radius:50%;
     background:linear-gradient(135deg,#1F8F4E,#0E4D2C);color:#fff;font-size:26px;cursor:pointer;
     box-shadow:0 6px 18px rgba(14,77,44,.4);display:flex;align-items:center;justify-content:center;transition:transform .15s;}
   .ns-fab:hover{transform:scale(1.08);} .ns-fab:active{transform:scale(.94);}
+  .ns-owl{display:block;}
+  .ns-fab .ns-owl{width:38px;height:38px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28));animation:ns-owl-bob 3.2s ease-in-out infinite;transform-origin:center;}
+  .ns-fab::after{content:"";position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 0 0 rgba(43,196,106,.55);animation:ns-owl-ring 2.6s ease-out infinite;pointer-events:none;}
+  .ns-head .ns-owl{width:30px;height:30px;flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  .ns-owl-eyes{transform-box:fill-box;transform-origin:center;animation:ns-owl-blink 5s infinite;}
+  .ns-owl-tassel{transform-box:fill-box;transform-origin:54.5px 12.4px;animation:ns-owl-swing 3.2s ease-in-out infinite;}
+  @keyframes ns-owl-bob{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-2.5px) rotate(-2deg);}}
+  @keyframes ns-owl-blink{0%,93%,100%{transform:scaleY(1);}96%{transform:scaleY(.12);}}
+  @keyframes ns-owl-swing{0%,100%{transform:rotate(-7deg);}50%{transform:rotate(7deg);}}
+  @keyframes ns-owl-ring{0%{box-shadow:0 0 0 0 rgba(43,196,106,.5);}70%,100%{box-shadow:0 0 0 12px rgba(43,196,106,0);}}
+  @media (prefers-reduced-motion:reduce){.ns-fab .ns-owl,.ns-owl-eyes,.ns-owl-tassel,.ns-fab::after{animation:none;}}
   .ns-panel{position:fixed;right:16px;bottom:calc(72px + 80px);z-index:951;width:340px;max-width:calc(100vw - 32px);
     height:480px;max-height:calc(100vh - 180px);background:#fff;border-radius:18px;overflow:hidden;
     box-shadow:0 12px 40px rgba(0,0,0,.22);display:none;flex-direction:column;font-family:'Kanit','Segoe UI',sans-serif;}
@@ -72,14 +126,14 @@ import { getNongSeeReply, getNongSeeConfig, setNongSeeConfig, testNongSeeConnect
   // ---------- โครงสร้าง ----------
   const fab = document.createElement('button');
   fab.className = 'ns-fab';
-  fab.setAttribute('aria-label', 'เปิดแชตน้องซี');
-  fab.textContent = '🤖';
+  fab.setAttribute('aria-label', 'เปิดแชตน้องซี นกฮูกแห่งความรู้');
+  fab.innerHTML = OWL_SVG;
 
   const panel = document.createElement('div');
   panel.className = 'ns-panel';
   panel.innerHTML =
     '<div class="ns-head">' +
-      '<div class="ns-head-left"><b>🤖 น้องซี</b><span class="ns-mode" id="nsMode">บอตกฎ</span></div>' +
+      '<div class="ns-head-left">' + OWL_SVG + '<b>น้องซี</b><span class="ns-mode" id="nsMode">บอตกฎ</span></div>' +
       '<div class="ns-head-right">' +
         '<span class="ns-gear" id="nsGear" role="button" aria-label="ตั้งค่าโมเดล" title="ตั้งค่าโมเดล">⚙</span>' +
         '<span class="ns-close" role="button" aria-label="ปิด">✕</span>' +
