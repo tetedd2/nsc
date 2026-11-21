@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เกมจัดงบ 50/30/20 – MoneySkillz</title>
+  <meta name="theme-color" content="#06140d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="match-game-style.css">
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <style>
+    .income-banner {
+      text-align: center; background: linear-gradient(135deg, #26a69a, #00897b);
+      color: #fff; border-radius: 16px; padding: 12px; margin-bottom: 14px;
+      box-shadow: 0 6px 18px rgba(0, 137, 123, .25);
+    }
+    .income-banner .label { font-size: .85em; opacity: .9; }
+    .income-banner .amount { font-size: 1.6em; font-weight: 700; }
+
+    .buckets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .bucket {
+      background: rgba(255, 255, 255, .85); border-radius: 14px; padding: 10px 8px;
+      text-align: center; border: 1.5px solid #e0f2f1; box-shadow: 0 2px 8px rgba(178, 223, 219, .3);
+    }
+    .bucket .b-label { font-weight: 700; font-size: .92em; }
+    .bucket .b-total { font-weight: 700; font-size: 1.05em; margin-top: 2px; }
+    .bucket .b-target { font-size: .72em; color: #777; }
+    .bucket-bar-track { height: 6px; background: #eceff1; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+    .bucket-bar { height: 100%; width: 0; border-radius: 3px; transition: width .35s ease; }
+    .bucket.need .b-label { color: #2e7d32; } .bucket.need .bucket-bar { background: #43a047; }
+    .bucket.want .b-label { color: #f57c00; } .bucket.want .bucket-bar { background: #fb8c00; }
+    .bucket.save .b-label { color: #1565c0; } .bucket.save .bucket-bar { background: #1e88e5; }
+
+    .item-card {
+      background: #fff; border-radius: 18px; padding: 22px 16px; text-align: center;
+      box-shadow: 0 6px 20px rgba(0, 150, 136, .12); border: 1.5px solid #d3e5e4; margin-bottom: 14px;
+    }
+    .item-card .i-icon { font-size: 2.6em; }
+    .item-card .i-name { font-size: 1.25em; font-weight: 700; color: #00695c; margin-top: 4px; }
+    .item-card .i-amount { font-size: 1.5em; font-weight: 700; color: #d84315; margin-top: 2px; }
+    .progress-text { text-align: center; color: #15713D; font-size: .9em; margin-bottom: 10px; }
+
+    .cat-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .cat-btn {
+      border: none; border-radius: 14px; padding: 14px 6px; font-family: 'Kanit', sans-serif;
+      font-weight: 700; font-size: 1em; color: #fff; cursor: pointer; transition: transform .1s ease, filter .15s;
+    }
+    .cat-btn:active { transform: scale(.95); }
+    .cat-btn.need { background: linear-gradient(135deg, #66bb6a, #2e7d32); }
+    .cat-btn.want { background: linear-gradient(135deg, #ffb74d, #f57c00); }
+    .cat-btn.save { background: linear-gradient(135deg, #64b5f6, #1565c0); }
+    .cat-btn small { display: block; font-weight: 400; font-size: .72em; opacity: .9; }
+
+    .sum-box { text-align: left; margin: 10px auto; max-width: 280px; }
+    .sum-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #cfd8dc; font-size: .95em; }
+    .tip { font-size: .85em; color: #00695c; background: #e0f2f1; border-radius: 10px; padding: 8px 10px; margin-top: 12px; }
+
+    body.dark-mode .bucket { background: #262b33; border-color: #333a44; }
+    body.dark-mode .item-card { background: #262b33; border-color: #333a44; }
+    body.dark-mode .item-card .i-name { color: #80cbc4; }
+    body.dark-mode .tip { background: #1f3b38; color: #b2dfdb; }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+  <link rel="stylesheet" href="game-neon.css">
+</head>
+<body>
+  <div class="container">
+    <a href="game.html" class="back-btn"><span class="arrow">&#8592;</span> กลับหน้าเมนู</a>
+    <div class="game-header">
+      <div class="game-title">เกมจัดงบ 50/30/20</div>
+      <div style="font-size:1.01em;color:#388e3c;margin-bottom:7px;">แบ่งเงินให้ลงถังถูกหมวด: จำเป็น / อยากได้ / ออม</div>
+    </div>
+
+    <div class="level-info">
+      <div class="level">Level: <span id="playerLevel">1</span></div>
+      <div class="exp">EXP: <span id="playerExp">0</span>/<span id="expToNext">100</span></div>
+    </div>
+    <div class="exp-bar"><div class="exp-fill" id="expFill"></div></div>
+
+    <div class="income-banner">
+      <div class="label">รายได้เดือนนี้</div>
+      <div class="amount" id="income">฿0</div>
+    </div>
+
+    <div class="buckets">
+      <div class="bucket need">
+        <div class="b-label">จำเป็น 50%</div>
+        <div class="b-total" id="needTotal">฿0</div>
+        <div class="b-target">เป้า <span id="needTarget">฿0</span></div>
+        <div class="bucket-bar-track"><div class="bucket-bar" id="needBar"></div></div>
+      </div>
+      <div class="bucket want">
+        <div class="b-label">อยากได้ 30%</div>
+        <div class="b-total" id="wantTotal">฿0</div>
+        <div class="b-target">เป้า <span id="wantTarget">฿0</span></div>
+        <div class="bucket-bar-track"><div class="bucket-bar" id="wantBar"></div></div>
+      </div>
+      <div class="bucket save">
+        <div class="b-label">ออม 20%</div>
+        <div class="b-total" id="saveTotal">฿0</div>
+        <div class="b-target">เป้า <span id="saveTarget">฿0</span></div>
+        <div class="bucket-bar-track"><div class="bucket-bar" id="saveBar"></div></div>
+      </div>
+    </div>
+
+    <div class="progress-text" id="progressText">รายการ 1/10</div>
+    <div class="item-card">
+      <div class="i-icon" id="itemIcon">💸</div>
+      <div class="i-name" id="itemName">-</div>
+      <div class="i-amount" id="itemAmount">฿0</div>
+    </div>
+
+    <div class="cat-buttons" id="catButtons">
+      <button class="cat-btn need" onclick="assign('need')">จำเป็น<small>ของต้องมี</small></button>
+      <button class="cat-btn want" onclick="assign('want')">อยากได้<small>ของอยากมี</small></button>
+      <button class="cat-btn save" onclick="assign('save')">ออม<small>เก็บ/ลงทุน</small></button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+
+  <!-- โหมดมืดอัตโนมัติ -->
+  <script>
+    (function () {
+      if (localStorage.getItem('moneySkillzDarkMode') === 'true') document.body.classList.add('dark-mode');
+    })();
+  </script>
+  <script src="js/confetti.js"></script>
+  <script type="module" src="js/budget-game.js"></script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>จับคู่การเงิน – ระดับปานกลาง</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="match-game-style.css">
+    <link rel="stylesheet" href="theme-darkmode.css">
+</head>
+<body>
+<div class="container">
+  <a href="game.html" class="back-btn"><span class="arrow">&#8592;</span> กลับหน้าเมนู</a>
+  <div class="game-header">
+    <div class="game-title">จับคู่การเงิน<br>ระดับปานกลาง</div>
+    <div style="font-size:1.01em;color:#388e3c;margin-bottom:7px;">จับคู่ศัพท์-ความหมาย-สถานการณ์การเงิน</div>
+  </div>
+    <div class="level-info">
+        <div class="level">Level: <span id="playerLevel">1</span></div>
+        <div class="exp">EXP: <span id="playerExp">0</span>/<span id="expToNext">100</span></div>
+    </div>
+    <div class="exp-bar">
+        <div class="exp-fill" id="expFill"></div>
+    </div>
+  <div class="score-row">
+    <div class="score-item">คะแนน: <span id="score">0</span></div>
+    <div class="score-item timer">เวลา: <span id="timer">90</span>s</div>
+  </div>
+  <div class="card-board card-board-medium" id="gameBoard"></div>
+  <div class="result-box" id="resultBox"></div>
+  <div style="text-align:center;">
+    <button class="main-btn" onclick="startGame()">เล่นใหม่</button>
+  </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+</div>
+
+<!-- แก้ไข: เรียกใช้ Firebase SDK ที่ถูกต้องสำหรับ Firestore และ Auth -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<script src="match-medium.js"></script> 
+<script src="darkmode-toggle.js"></script>
+</body>
+</html>

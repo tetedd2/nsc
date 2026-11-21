@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เกมจำลองลงทุน – MoneySkillz</title>
+  <meta name="theme-color" content="#06140d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="match-game-style.css">
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <style>
+    .invest-banner {
+      text-align: center; background: linear-gradient(135deg, #1F8F4E, #0E4D2C);
+      color: #fff; border-radius: 16px; padding: 12px; margin-bottom: 12px;
+      box-shadow: 0 6px 18px rgba(14, 77, 44, .25);
+    }
+    .invest-banner .label { font-size: .85em; opacity: .92; }
+    .invest-banner .amount { font-size: 1.7em; font-weight: 700; }
+
+    .alloc-hint { text-align: center; font-size: .92em; color: #00695c; margin-bottom: 12px; }
+    .alloc-hint b { color: #1F8F4E; }
+    .alloc-hint.ready b { color: #2e7d32; }
+
+    .asset-row {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; border: 1.5px solid #e0efe8; border-radius: 16px;
+      padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(16,42,40,.06);
+    }
+    .asset-ico { font-size: 1.9em; flex: none; width: 40px; text-align: center; }
+    .asset-info { flex: 1; min-width: 0; }
+    .asset-name { font-weight: 700; font-size: .98em; color: #13311f; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .asset-desc { font-size: .74em; color: #70857a; margin: 2px 0 6px; }
+    .risk { font-size: .64em; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+    .risk.low  { background: #e6f6ec; color: #2e7d32; }
+    .risk.mid  { background: #e8f1fe; color: #1565c0; }
+    .risk.high { background: #fdecea; color: #d84315; }
+    .risk.gold { background: #fff6da; color: #b8860b; }
+    .asset-bar-track { height: 6px; background: #eef2f0; border-radius: 3px; overflow: hidden; }
+    .asset-bar { height: 100%; width: 0; border-radius: 3px; background: #1F8F4E; transition: width .3s ease; }
+    .asset-row[data-key="fund"]  .asset-bar { background: #1e88e5; }
+    .asset-row[data-key="stock"] .asset-bar { background: #fb8c00; }
+    .asset-row[data-key="gold"]  .asset-bar { background: #e0a800; }
+
+    .asset-ctrl { display: flex; align-items: center; gap: 6px; flex: none; }
+    .step {
+      width: 32px; height: 32px; border: none; border-radius: 10px; cursor: pointer;
+      font-size: 1.2em; font-weight: 700; font-family: 'Kanit', sans-serif;
+      background: #eef7f2; color: #1F8F4E; transition: transform .1s, filter .15s;
+    }
+    .step:active { transform: scale(.9); }
+    .step:disabled { opacity: .4; cursor: not-allowed; }
+    .asset-pct { width: 44px; text-align: center; font-weight: 700; font-size: 1em; color: #13311f; }
+
+    .invest-actions { display: flex; gap: 10px; margin-top: 6px; }
+    .even-btn {
+      flex: none; border: 1.5px solid #cfe3d8; background: #fff; color: #1F8F4E;
+      border-radius: 14px; padding: 13px 14px; font-weight: 700; font-family: 'Kanit', sans-serif;
+      font-size: .92em; cursor: pointer;
+    }
+    .even-btn:active { transform: scale(.97); }
+    .invest-btn {
+      flex: 1; border: none; border-radius: 14px; padding: 13px; cursor: pointer;
+      font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 1.05em; color: #fff;
+      background: linear-gradient(135deg, #1F8F4E, #2BC46A);
+      box-shadow: 0 6px 16px rgba(31,143,78,.3); transition: transform .1s, filter .15s;
+    }
+    .invest-btn:active:not(:disabled) { transform: scale(.98); }
+    .invest-btn:disabled { background: #cfe3d8; box-shadow: none; cursor: not-allowed; }
+
+    /* result */
+    .res-value { text-align: center; font-size: 2em; font-weight: 800; margin: 4px 0; }
+    .res-profit { text-align: center; font-size: 1.05em; font-weight: 700; margin-bottom: 8px; }
+    .res-profit.up { color: #2e7d32; } .res-profit.down { color: #d84315; }
+    .sum-box { text-align: left; margin: 10px auto; max-width: 300px; }
+    .sum-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #cfd8dc; font-size: .9em; }
+    .years-row { font-size: .8em; color: #5B7A68; text-align: center; margin: 8px 0; line-height: 1.7; }
+    .tip { font-size: .85em; color: #00695c; background: #e0f2f1; border-radius: 10px; padding: 9px 11px; margin-top: 12px; text-align: left; }
+
+    body.dark-mode .asset-row { background: #1e2a24; border-color: #2a3a32; }
+    body.dark-mode .asset-name { color: #e5f2ea; }
+    body.dark-mode .step { background: #16352a; color: #5fe39a; }
+    body.dark-mode .even-btn { background: #1e2a24; color: #5fe39a; border-color: #2a3a32; }
+    body.dark-mode .tip { background: #15352e; color: #b2dfdb; }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+  <link rel="stylesheet" href="game-neon.css">
+</head>
+<body>
+  <div class="container">
+    <a href="game.html" class="back-btn"><span class="arrow">&#8592;</span> กลับหน้าเมนู</a>
+    <div class="game-header">
+      <div class="game-title">เกมจำลองลงทุน</div>
+      <div style="font-size:1.01em;color:#2e7d32;margin-bottom:7px;">แบ่งเงินลงทุนในสินทรัพย์ 4 แบบ แล้วดูผล 5 ปี — ลองกระจายความเสี่ยงดูนะ!</div>
+    </div>
+
+    <div class="level-info">
+      <div class="level">Level: <span id="playerLevel">1</span></div>
+      <div class="exp">EXP: <span id="playerExp">0</span>/<span id="expToNext">100</span></div>
+    </div>
+    <div class="exp-bar"><div class="exp-fill" id="expFill"></div></div>
+
+    <div class="invest-banner">
+      <div class="label">เงินลงทุนเริ่มต้น · ระยะเวลา 5 ปี</div>
+      <div class="amount">฿10,000</div>
+    </div>
+
+    <div class="alloc-hint" id="allocHint">แบ่งเงินให้ครบ 100% — เหลือจัดสรร <b id="remain">100%</b></div>
+
+    <div class="asset-list" id="assetList"></div>
+
+    <div class="invest-actions">
+      <button class="even-btn" id="evenBtn">⚖ กระจายเท่ากัน</button>
+      <button class="invest-btn" id="investBtn" disabled>ลงทุน 5 ปี 🚀</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+
+  <script>
+    (function () {
+      if (localStorage.getItem('moneySkillzDarkMode') === 'true') document.body.classList.add('dark-mode');
+    })();
+  </script>
+  <script src="js/confetti.js"></script>
+  <script type="module" src="js/investment-game.js"></script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <script async src="https://www.tiktok.com/embed.js"></script>
+  <title>รายละเอียดบทเรียน – บทที่ 3 ความอยาก vs. ความจำเป็น</title>
+  <meta name="theme-color" content="#1F8F4E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4;}
+    .header { background-color:#1F8F4E; color:white; padding:20px; text-align:center; }
+    .container { padding:20px; max-width:800px; margin:0 auto; }
+    .lesson-title { color:#0E4D2C; font-size:1.7rem; margin-bottom:18px; }
+    .lesson-content { font-size:1.07rem; color:#444; line-height:1.9; margin-bottom:24px; }
+    .pagination { text-align:center; margin:28px 0 10px 0;}
+    .page-btn { display:inline-block; background:#1F8F4E; color:#fff; padding:8px 20px; border-radius:7px; text-decoration:none; margin:0 12px; transition:background 0.2s;}
+    .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
+    .back-btn { margin-top:30px; display:inline-block; background:#1F8F4E; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
+    .back-btn:hover { background:#15713D; }
+    .action-btn { background:#1F8F4E; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .action-btn:hover { background:#15713D; }
+    .action-btn:disabled { background:#ccc !important; color:#888; pointer-events:none; }
+    .quiz-status { margin-left:16px; font-weight:bold; }
+    table { border-collapse:collapse; width:100%; margin:18px 0;}
+    th,td { border:1px solid #bbb; padding:10px; }
+    th { background:#eee; }
+    ul,ol { margin-bottom:1em; }
+    .emph { color:#d84315; font-weight:bold;}
+    .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
+    .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 24px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .end-of-chapter-quiz .question { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #1F8F4E; }
+    .end-of-chapter-quiz .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; }
+    .end-of-chapter-quiz .choices { display: flex; flex-direction: column; gap: 10px; }
+    .end-of-chapter-quiz .choice { background-color: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 10px; cursor: pointer; display: block; }
+    #quizResult.correct { color: #388e3c; }
+    #quizResult.incorrect { color: #d32f2f; }
+
+    /* Custom Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+    .modal-content h3 {
+        color: #0E4D2C;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    .modal-content p {
+        color: #333;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        white-space: pre-wrap; /* Preserve newlines from message */
+    }
+    .modal-content button {
+        background-color: #1F8F4E;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .modal-content button:hover {
+        background-color: #15713D;
+        transform: translateY(-1px);
+    }
+    /* Specific styles for success/error messages */
+    .modal-content.success h3 { color: #388e3c; }
+    .modal-content.error h3 { color: #d32f2f; }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+</head>
+<body>
+  <div class="header"><h1>รายละเอียดบทเรียน: ความอยาก vs. ความจำเป็น</h1></div>
+  <div class="container">
+    <div id="lessonDetails"></div>
+    <div id="tiktokVideo"></div>
+    <div class="pagination" id="pagination"></div>
+    <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="customAlertModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <button id="modalCloseBtn">ตกลง</button>
+    </div>
+  </div>
+
+  <script>
+    const lessonId = 3; // This should be dynamically set for each lesson page
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageNow = Number(urlParams.get("page")||1);
+
+    const pages = [
+       {
+        title: "บทที่ 3: นิยามของ 'ความจำเป็น' และ 'ความอยากได้' (หน้า 1/6)",
+        content: `
+          <div>
+            เคยไหม? ที่เห็นของชิ้นใหม่แล้วใจสั่น อยากได้เดี๋ยวนั้น แต่ในกระเป๋าก็มีเงินจำกัด บทเรียนนี้จะช่วยให้คุณแยกแยะระหว่างสองความรู้สึกนี้ เพื่อการตัดสินใจใช้เงินที่ชาญฉลาด<br><br>
+            <b>1. ความจำเป็น (Needs):</b> คือ สิ่งที่ขาดไม่ได้ในการดำรงชีวิต หากไม่มีจะทำให้การใช้ชีวิตลำบากหรืออยู่ไม่ได้เลย โดยพื้นฐานคือปัจจัย 4
+            <ul>
+              <li><b>อาหาร:</b> ข้าว, น้ำ, กับข้าว เพื่อให้ร่างกายเติบโตและมีพลังงาน</li>
+              <li><b>ที่อยู่อาศัย:</b> บ้าน, ค่าเช่าห้อง เพื่อความปลอดภัยและการพักผ่อน</li>
+              <li><b>เครื่องนุ่งห่ม:</b> เสื้อผ้า, ชุดนักเรียน/ทำงาน ตามความเหมาะสม</li>
+              <li><b>ยารักษาโรค:</b> ยาเมื่อเจ็บป่วย, ค่ารักษาพยาบาล</li>
+            </ul>
+            <p>ในยุคปัจจุบัน อาจรวมถึงค่าเดินทางไปทำงานหรือเรียน และค่าอินเทอร์เน็ตเพื่อการสื่อสารและการทำงาน</p>
+            <b>2. ความอยากได้ (Wants):</b> คือ สิ่งที่ช่วยให้ชีวิตสะดวกสบายขึ้น, สนุกสนาน, หรือตอบสนองความพอใจ แต่<span class="emph">ไม่มีก็ยังใช้ชีวิตอยู่ได้</span>
+            <ul>
+                <li>ชานมไข่มุก, บุฟเฟต์, กาแฟแบรนด์ดัง</li>
+                <li>เสื้อผ้าแฟชั่นใหม่ล่าสุด, กระเป๋าแบรนด์เนม</li>
+                <li>สมาร์ทโฟนรุ่นท็อป, อุปกรณ์เล่นเกม</li>
+                <li>การท่องเที่ยว, ดูคอนเสิร์ต</li>
+            </ul>
+            <div class="block">
+              <b>ข้อคิดสำคัญ:</b> ความจำเป็นคือสิ่งที่ช่วยให้เรา "อยู่รอด" แต่ความอยากได้คือสิ่งที่ช่วย "เติมเต็ม" ซึ่งต้องจัดการให้สมดุล
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: ทำไมเราถึงสับสนระหว่างสองสิ่งนี้? (หน้า 2/6)",
+        content: `
+          <div>
+            การแยกแยะระหว่าง Needs และ Wants ไม่ใช่เรื่องง่ายเสมอไป เพราะมีปัจจัยหลายอย่างที่ทำให้เราสับสน โดยเฉพาะ:
+            <ol>
+              <li>
+                <b>การตลาดและการโฆษณา:</b>
+                <p>แบรนด์ต่างๆ พยายามสร้างความรู้สึกว่าสินค้าของเขาคือ "สิ่งจำเป็น" ผ่านการโฆษณาที่น่าดึงดูด เช่น "ของมันต้องมี!" หรือ "โปรโมชั่นนี้ห้ามพลาด!" ทำให้เรารู้สึกว่าถ้าไม่ซื้อตอนนี้จะเสียโอกาสครั้งใหญ่</p>
+              </li>
+              <li>
+                <b>แรงกดดันทางสังคม (Social Pressure):</b>
+                <p>เมื่อเห็นเพื่อนหรือคนในโซเชียลมีเดียมีไลฟ์สไตล์ที่ดี ใช้ของแบรนด์เนม หรือไปเที่ยวคาเฟ่สวยๆ เราอาจรู้สึกว่าต้องทำตามเพื่อที่จะได้รับการยอมรับและไม่ตกเทรนด์</p>
+              </li>
+              <li>
+                <b>อารมณ์และความรู้สึก:</b>
+                <p>บางครั้งเราซื้อของเพื่อบำบัดความเครียด (Retail Therapy) หรือให้รางวัลกับตัวเอง ซึ่งการตัดสินใจเหล่านี้มักมาจากอารมณ์ชั่ววูบมากกว่าเหตุผล</p>
+              </li>
+            </ol>
+            <div class="block">
+              <b>Case Study:</b> น้องจอยรู้สึกว่าตัวเอง "จำเป็น" ต้องซื้อหูฟังไร้สายรุ่นใหม่ เพราะเห็นเพื่อนทุกคนในกลุ่มใช้กัน และโฆษณาก็บอกว่ามันจะทำให้ชีวิตดีขึ้น ทั้งที่หูฟังอันเก่าก็ยังใช้ได้ดีอยู่ กรณีนี้ "ความอยาก" ถูกอิทธิพลของสังคมและการตลาดผลักดันจนกลายเป็น "ความจำเป็น" ในความรู้สึก
+            </div>
+            <table>
+              <tr><th>ปัจจัยกระตุ้น</th><th>ตัวอย่างความคิด</th></tr>
+              <tr><td>การตลาด</td><td>"ลดราคาขนาดนี้ ไม่ซื้อได้ไง!"</td></tr>
+              <tr><td>สังคม</td><td>"เพื่อนมีกันหมดแล้ว เราไม่มีได้เหรอ?"</td></tr>
+              <tr><td>อารมณ์</td><td>"ทำงานเหนื่อยมาทั้งอาทิตย์ ขอช้อปแก้เครียดหน่อย"</td></tr>
+            </table>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: ผลกระทบของการใช้เงินตามใจอยาก (หน้า 3/6)",
+        content: `
+          <div>
+            การให้ความสำคัญกับ "ความอยากได้" มากกว่า "ความจำเป็น" อาจนำไปสู่ปัญหาทางการเงินได้ในระยะสั้นและระยะยาว
+            <br><br>
+            <b>ผลกระทบระยะสั้น:</b>
+            <ul>
+              <li><b>เงินขาดมือ:</b> ไม่มีเงินพอจ่ายค่าใช้จ่ายที่จำเป็น เช่น ค่าเช่าบ้าน, ค่าน้ำ-ไฟ, หรือค่าอาหารปลายเดือน</li>
+              <li><b>ขาดสภาพคล่อง:</b> ไม่มีเงินสดสำรองสำหรับเหตุการณ์ฉุกเฉิน เช่น เจ็บป่วย หรือต้องซ่อมรถ</li>
+            </ul>
+            <b>ผลกระทบระยะยาว:</b>
+            <ul>
+              <li><b>การเป็นหนี้:</b> ต้องพึ่งพาบัตรเครดิต, สินเชื่อส่วนบุคคล ซึ่งมีดอกเบี้ยสูง ทำให้รายได้ในอนาคตต้องถูกนำไปใช้หนี้</li>
+              <li><b>ไม่บรรลุเป้าหมายทางการเงิน:</b> ไม่มีเงินออมเพื่อเป้าหมายใหญ่ในชีวิต เช่น เก็บเงินดาวน์บ้าน, เรียนต่อ, หรือเพื่อการเกษียณ</li>
+              <li><b>ความเครียด:</b> ความกังวลเรื่องหนี้สินและเงินไม่พอใช้ส่งผลเสียต่อสุขภาพจิตและความสัมพันธ์ในครอบครัว</li>
+            </ul>
+            <div class="block">
+              <b>ตัวอย่าง:</b> การเลือกผ่อนสมาร์ทโฟนรุ่นใหม่ (Want) ทุกปี อาจทำให้เราต้องจ่ายเงินเดือนละ 2,000-3,000 บาท ซึ่งเงินจำนวนนี้ในหนึ่งปี (24,000-36,000 บาท) สามารถนำไปเป็นเงินเก็บฉุกเฉินหรือลงทุนเพื่ออนาคตได้เลย
+            </div>
+            <div class="takeaway">
+              การตามใจ "ความอยาก" ในวันนี้ อาจต้องแลกมาด้วยการขาดแคลน "ความจำเป็น" ในวันหน้า
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: เทคนิคช่วยตัดสินใจก่อนใช้เงิน (หน้า 4/6)",
+        content: `
+          <div>
+            เมื่อเกิดความอยากได้ของบางอย่างขึ้นมา ลองใช้เทคนิคเหล่านี้เพื่อช่วยให้คุณตัดสินใจอย่างมีสติมากขึ้น
+            <ol>
+              <li>
+                <b>กฎ \"รอ 24 ชั่วโมง\":</b>
+                <p>สำหรับของที่ไม่จำเป็นเร่งด่วน ให้ใจเย็นๆ แล้วกลับบ้านไปก่อน ลองรอสัก 24-48 ชั่วโมง ถ้าความอยากได้นั้นหายไป แสดงว่ามันเป็นเพียงอารมณ์ชั่ววูบ</p>
+              </li>
+              <li>
+                <b>ถามตัวเอง 3 คำถามหลัก:</b>
+                <ul>
+                  <li><b>เรา \"อยากได้\" หรือ \"จำเป็นต้องมี\" มันจริงๆ?</b> (แยกแยะตามนิยามที่เรียนมา)</li>
+                  <li><b>เรามีอะไรที่ใช้ทดแทนได้อยู่แล้วหรือไม่?</b> (เช่น มีกระเป๋าอยู่แล้ว 5 ใบ)</li>
+                  <li><b>ถ้าซื้อสิ่งนี้ จะกระทบกับเงินที่ต้องใช้จ่ายในสิ่งที่จำเป็นหรือไม่?</b></li>
+                </ul>
+              </li>
+               <li>
+                <b>คำนวณเป็น \"ชั่วโมงทำงาน\":</b>
+                <p>ลองเปลี่ยนราคาสินค้าเป็นเวลาที่คุณต้องทำงานเพื่อแลกมันมา เช่น ถ้าคุณมีรายได้ชั่วโมงละ 150 บาท และต้องการซื้อรองเท้าราคา 3,000 บาท คุณต้องทำงานถึง 20 ชั่วโมงเพื่อมัน คุ้มค่าหรือไม่?</p>
+              </li>
+            </ol>
+            <div class="block">
+              <b>เคล็ดลับ:</b> สร้าง \"Wish List\" หรือรายการของที่อยากได้ จดทุกอย่างที่อยากได้ลงไป แล้วทบทวนทุกสิ้นเดือน คุณอาจพบว่าบางอย่างคุณก็ไม่ได้อยากได้มันอีกต่อไปแล้ว
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: สร้างแผนใช้เงินอย่างชาญฉลาด (หน้า 5/6)",
+        content: `
+          <div>
+            การแยกแยะ Wants vs. Needs จะทรงพลังที่สุดเมื่อนำมาใช้กับการวางแผนการเงินหรือการทำงบประมาณส่วนตัว<br><br>
+            <b>หลักการจัดสรรเงินแบบง่ายๆ: กฎ 50/30/20</b>
+            <p>เป็นแนวทางที่นิยมในการแบ่งรายได้ออกเป็น 3 ส่วน:</p>
+            <ul>
+              <li><b class="emph">50% สำหรับความจำเป็น (Needs):</b> ค่าใช้จ่ายคงที่ที่ต้องจ่ายทุกเดือน เช่น ค่าเช่าบ้าน, ค่าน้ำ-ไฟ, ค่าอาหาร, ค่าเดินทาง, หนี้สินที่จำเป็น</li>
+              <li><b class="emph">30% สำหรับความอยากได้ (Wants):</b> ค่าใช้จ่ายเพื่อความสุขและความสะดวกสบาย เช่น กินข้าวนอกบ้าน, ช้อปปิ้ง, ดูหนัง, ท่องเที่ยว, งานอดิเรก</li>
+              <li><b class="emph">20% สำหรับเป้าหมายทางการเงิน (Savings & Goals):</b> เงินออม, การลงทุน, การจ่ายหนี้เพื่อให้หมดเร็วขึ้น</li>
+            </ul>
+            <div class="block">
+              <b>ตัวอย่าง:</b> หากมีรายได้ 15,000 บาท/เดือน
+              <ul>
+                <li><b>Needs (50%):</b> 7,500 บาท</li>
+                <li><b>Wants (30%):</b> 4,500 บาท</li>
+                <li><b>Savings (20%):</b> 3,000 บาท</li>
+              </ul>
+              การมีงบสำหรับ "Wants" ทำให้เรายังคงมีความสุขได้โดยไม่รู้สึกผิด และไม่กระทบกับส่วนที่จำเป็นและเงินออม
+            </div>
+            <p>คุณไม่จำเป็นต้องทำตามสัดส่วนนี้เป๊ะๆ สามารถปรับให้เข้ากับไลฟ์สไตล์และภาระของตัวเองได้ หัวใจสำคัญคือการ "กัน" เงินสำหรับสิ่งที่จำเป็นและเงินออมไว้ก่อนเสมอ</p>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 3: สรุปและแบบทดสอบท้ายบท (หน้า 6/6)",
+        content: `
+          <div class="takeaway">
+            สรุป: การแยกแยะระหว่างสิ่งที่ "จำเป็น" และสิ่งที่ "อยากได้" คือทักษะพื้นฐานที่สำคัญที่สุดของการบริหารเงินส่วนบุคคล มันช่วยให้เราควบคุมการใช้จ่าย, หลีกเลี่ยงหนี้สินที่ไม่จำเป็น, และมีเงินเหลือพอที่จะสร้างอนาคตที่มั่นคงได้
+          </div>
+          <div class="video-container">
+            <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/vxr9F4fZSyo?si=agMxRZMaFjUDJeNj" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-cross-origin" allowfullscreen></iframe>
+          </div>
+          
+          <div class="end-of-chapter-quiz" id="end-of-chapter-quiz"></div>
+          <button type="button" class="action-btn" id="checkQuizBtn">ตรวจคำตอบ</button>
+          <span id="quizResult" class="quiz-status"></span>
+          <div style="margin-top:16px;">
+            <button id="doneBtn" class="action-btn disabled" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status" style="color:#388e3c;"></span>
+          </div>
+            <h3>แหล่งที่มาที่น่าเชื่อถือ</h3>
+  <ul>
+    <li><a href="https://www.yuvabadhanafoundation.org/th/%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3/%E0%B8%9A%E0%B8%97%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%B1%E0%B9%88%E0%B8%A7%E0%B9%84%E0%B8%9B/%E0%B9%80%E0%B8%84%E0%B8%A5%E0%B9%87%E0%B8%94%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%87%E0%B8%B4%E0%B8%99/%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%87%E0%B8%B4%E0%B8%99-%E0%B8%A7%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B8%E0%B9%88%E0%B8%99/" target="_blank">มูลนิธิส่งเสริมการศึกษาทางการเงิน: การแยกแยะความต้องการและความจำเป็น</a></li>
+    <li><a href="https://www.bot.or.th/th/research-and-publications/articles-and-publications/bot-magazine/Phrasiam-66-2/SpecialScoop_BOTFoundation.html">ธนาคารแห่งประเทศไทย: จัดการเงินอย่างชาญฉลาด</a></li>
+    <li><a href="https://mgronline.com/mutualfund/detail/9570000113899" target="_blank">MoneyGuru Thailand: วิธีควบคุมความอยากซื้อของ</a></li>
+  </ul>
+</div>
+        `
+      }
+    ];
+
+    let page = Math.min(Math.max(pageNow,1), pages.length);
+    let html = `<div class="lesson-title">${pages[page-1].title}</div>
+                <div class="lesson-content">${pages[page-1].content}</div>`;
+    document.getElementById("lessonDetails").innerHTML = html;
+
+    let pag = "";
+    if (page > 1) pag += `<a class="page-btn" href="lesson-detail3.html?page=${page-1}">หน้าก่อนหน้า</a>`;
+    if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail3.html?page=${page+1}">หน้าถัดไป</a>`;
+    document.getElementById("pagination").innerHTML = pag;
+
+    // --- Custom Modal Functions ---
+    const customAlertModal = document.getElementById('customAlertModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalContent = customAlertModal.querySelector('.modal-content');
+
+    function showCustomAlert(title, message, isSuccess = true) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message; // Use textContent to handle newlines naturally
+        modalContent.className = 'modal-content ' + (isSuccess ? 'success' : 'error');
+        customAlertModal.classList.add('show');
+    }
+
+    function hideCustomAlert() {
+        customAlertModal.classList.remove('show');
+    }
+
+    modalCloseBtn.addEventListener('click', hideCustomAlert);
+    // --- End Custom Modal Functions ---
+
+    if (page === pages.length) {
+        setTimeout(() => {
+            const quizData = [
+                { question: "1. ข้อใดต่อไปนี้จัดเป็น 'ความจำเป็น' (Needs)?", choices: ["ก. สมาร์ทโฟนรุ่นใหม่ล่าสุด", "ข. ค่าเดินทางไปทำงาน", "ค. ดินเนอร์บุฟเฟต์กับเพื่อน"], answer: "ข. ค่าเดินทางไปทำงาน" },
+                { question: "2. เทคนิคใดที่แนะนำให้ใช้เมื่อเกิดความอยากซื้อของกะทันหัน?", choices: ["ก. รีบซื้อทันทีเพราะมีโปรโมชั่น", "ข. ถามความเห็นเพื่อนในโซเชียล", "ค. รอ 24 ชั่วโมงก่อนตัดสินใจ"], answer: "ค. รอ 24 ชั่วโมงก่อนตัดสินใจ" },
+                { question: "3. ตามกฎ 50/30/20 ควรจัดสรรเงินสำหรับ 'ความอยากได้' (Wants) กี่เปอร์เซ็นต์?", choices: ["ก. 50%", "ข. 20%", "ค. 30%"], answer: "ค. 30%" }
+            ];
+
+            const quizContainer = document.getElementById('end-of-chapter-quiz');
+            const checkButton = document.getElementById('checkQuizBtn');
+            const resultContainer = document.getElementById('quizResult');
+            const doneBtn = document.getElementById("doneBtn");
+            const doneStatus = document.getElementById("doneStatus");
+
+            function buildEndOfChapterQuiz() {
+                quizData.forEach((currentQuestion, questionNumber) => {
+                    const choicesHTML = currentQuestion.choices.map(choice => `<label class="choice"><input type="radio" name="chapter_question${questionNumber}" value="${choice}">${choice}</label>`).join('');
+                    const questionHTML = `<div class="question"><div class="question-text">${currentQuestion.question}</div><div class="choices">${choicesHTML}</div></div>`;
+                    if(quizContainer) quizContainer.innerHTML += questionHTML;
+                });
+            }
+
+            function checkQuizAnswers() {
+                if(!quizContainer) return;
+                const answerContainers = quizContainer.querySelectorAll('.choices');
+                let numCorrect = 0, allAnswered = true;
+                quizData.forEach((currentQuestion, questionNumber) => {
+                    const selector = `input[name=chapter_question${questionNumber}]:checked`;
+                    const userAnswerNode = (answerContainers[questionNumber]) ? answerContainers[questionNumber].querySelector(selector) : null;
+                    if (!userAnswerNode) { allAnswered = false; return; }
+                    if (userAnswerNode.value === currentQuestion.answer) numCorrect++;
+                });
+                
+                if (!allAnswered) {
+                    resultContainer.textContent = "กรุณาตอบคำถามให้ครบทุกข้อ";
+                    resultContainer.className = "quiz-status incorrect";
+                    doneBtn.disabled = true; // Keep done button disabled if not all questions are answered
+                    doneBtn.classList.add('disabled');
+                    return;
+                }
+                if (numCorrect === quizData.length) {
+                    resultContainer.textContent = "ยอดเยี่ยม! คุณตอบถูกทุกข้อ";
+                    resultContainer.className = "quiz-status correct";
+                    doneBtn.disabled = false;
+                    doneBtn.classList.remove('disabled');
+                    doneStatus.textContent = "ตอนนี้คุณสามารถกดยืนยันเพื่อจบบทเรียนได้แล้ว!";
+                } else {
+                    resultContainer.textContent = `พยายามอีกนิด! คุณตอบถูก ${numCorrect} จาก ${quizData.length} ข้อ`;
+                    resultContainer.className = "quiz-status incorrect";
+                    doneBtn.disabled = true;
+                    doneBtn.classList.add('disabled');
+                    doneStatus.textContent = "";
+                }
+            }
+            
+            function finishLesson() {
+                if (window.completeLessonInFirestore) {
+                    window.completeLessonInFirestore(lessonId, 80); // Award 80 XP
+                } else {
+                    console.error("Firebase script not loaded. Saving to localStorage only.");
+                    localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                    window.checkInitialDoneStatus();
+                    showCustomAlert("บันทึกความคืบหน้า", "บทเรียนนี้ถูกบันทึกเป็นเสร็จสิ้นแล้ว!");
+                }
+            }
+
+            window.checkInitialDoneStatus = function() {
+                if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
+                    doneStatus.textContent = "คุณเรียนจบบทนี้แล้ว!";
+                    if(doneBtn) doneBtn.disabled = true;
+                    if(doneBtn) doneBtn.classList.add('disabled');
+                    if(checkButton) checkButton.style.display = 'none';
+                    if(resultContainer) resultContainer.style.display = 'none';
+                    if(quizContainer) quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => { radio.disabled = true; });
+                }
+            }
+
+            buildEndOfChapterQuiz();
+            if(checkButton) checkButton.addEventListener('click', checkQuizAnswers);
+            if(doneBtn) doneBtn.addEventListener('click', finishLesson);
+            window.checkInitialDoneStatus();
+
+        }, 200);
+    }
+  </script>
+
+  <!-- Firebase XP & Level Up System -->
+  <script type="module">
+    import { onAuthStateChanged, doc, runTransaction, increment, arrayUnion, auth, db } from './js/firebase-init.js';
+
+  
+
+    const LEVEL_CONFIG = [
+        { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+        { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+        { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+        { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+        { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity },
+    ];
+
+    /**
+     * ฟังก์ชันหลักในการเพิ่ม XP, ตรวจสอบการเลเวลอัพ และบันทึกข้อมูลลง Firestore
+     * @param {string} uid - User ID ของ Firebase
+     * @param {number} amount - จำนวน XP ที่จะเพิ่ม
+     * @param {number} lessonId - ID ของบทเรียนที่เพิ่งเรียนจบ
+     * @returns {Promise<{success: boolean, message: string, isSuccessStatus: boolean}>} - ผลลัพธ์และข้อความที่จะแสดง
+     */
+    async function grantXpAndLevelUp(uid, amount, lessonId) {
+        if (!uid || !amount || amount <= 0) return { success: false, message: "Invalid input.", isSuccessStatus: false };
+        const userRef = doc(db, 'users', uid);
+        let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+        let isSuccessStatus = true;
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userSnap = await transaction.get(userRef);
+                if (!userSnap.exists()) throw new Error("User document not found.");
+                const userData = userSnap.data();
+                const completedLessons = userData.completedLessons || [];
+                if (completedLessons.includes(lessonId)) {
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว ได้รับ XP ไปแล้ว";
+                    isSuccessStatus = false;
+                    return; 
+                }
+                let xp = userData.xp || 0;
+                let level = userData.level || 1;
+                let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+                let totalCoinReward = 0;
+                xp += amount;
+                while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
+                    const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
+                    if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
+                        const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                        const rewardForThisLevel = 100 + (nextLevelInfo.level * 25);
+                        totalCoinReward += rewardForThisLevel;
+                        xp -= nextLevelXP;
+                        level = nextLevelInfo.level;
+                        nextLevelXP = nextLevelInfo.xpToNext;
+                        finalMessage += `\n🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${nextLevelInfo.name}!`;
+                    } else { break; }
+                }
+                const finalUpdateData = { xp, level, nextLevelXP, completedLessons: arrayUnion(lessonId) };
+                if (totalCoinReward > 0) {
+                    finalUpdateData.coins = increment(totalCoinReward);
+                    finalMessage += `\nได้รับ ${totalCoinReward} เหรียญ!`;
+                }
+                transaction.update(userRef, finalUpdateData);
+            });
+            return { success: true, message: finalMessage, isSuccessStatus: isSuccessStatus };
+        } catch (error) {
+            console.error("Error in transaction: ", error);
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล", isSuccessStatus: false };
+        }
+    }
+
+    /**
+     * ฟังก์ชันที่ถูกเรียกจากปุ่ม "เรียนจบบทนี้" เพื่อเริ่มกระบวนการให้ XP
+     * @param {number} lessonId - ID บทเรียน
+     * @param {number} xpToAdd - XP ที่จะให้
+     */
+    window.completeLessonInFirestore = async (lessonId, xpToAdd) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        if (doneBtn.disabled) return;
+        doneBtn.disabled = true;
+        doneStatus.textContent = "กำลังบันทึก...";
+        const user = auth.currentUser;
+        if (user) {
+            const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
+            showCustomAlert(result.success ? "สำเร็จ!" : "เกิดข้อผิดพลาด", result.message, result.isSuccessStatus);
+            doneStatus.textContent = result.message.split('\n')[0];
+            if(result.success) {
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                if (window.checkInitialDoneStatus) window.checkInitialDoneStatus();
+            } else {
+                doneBtn.disabled = false;
+            }
+        } else {
+            showCustomAlert("แจ้งเตือน", "กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP", false);
+            doneBtn.disabled = false;
+            doneStatus.textContent = "โปรดเข้าสู่ระบบ";
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+
+        if (doneBtn) {
+            if (!user) {
+                console.log("User is not logged in.");
+                doneBtn.disabled = true;
+                doneBtn.classList.add('disabled');
+                doneBtn.textContent = "กรุณาเข้าสู่ระบบ";
+                doneStatus.textContent = "";
+            } else {
+                console.log("User is logged in.", user.uid);
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus();
+                }
+                if (!doneBtn.disabled) {
+                    doneBtn.textContent = "เรียนจบบทนี้";
+                }
+            }
+        }
+    });
+  </script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

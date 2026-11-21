@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛒 ร้านค้า - MoneySkillz</title>
+  <meta name="theme-color" content="#1F8F4E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <style>
+    .back-btn { font-size:1.15em; background:var(--primary-color,#09a79d); color:#fff; border:none; border-radius:10px;
+                padding:10px 22px; margin-bottom:24px; cursor:pointer; box-shadow:0 2px 8px var(--shadow-color);}
+    .back-btn:hover { background:var(--primary-darker,#087e7e);}
+    .shop-header { text-align:center; margin-top:24px; }
+    .shop-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px 12px;
+      margin-top: 12px;
+    }
+    .shop-item {
+      background: #f6f6f6;
+      border: 2px solid #eee;
+      border-radius: 20px;
+      width: 130px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      margin: 10px 10px 20px 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      padding: 16px 8px 10px 8px;
+      transition: all 0.2s;
+    }
+    .shop-item .item-icon {
+      font-size: 2.7em;
+      margin-bottom: 2px;
+    }
+    .shop-item .item-name {
+      font-size: 1em;
+      font-weight: 600;
+      text-align: center;
+      margin: 8px 0 3px 0;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+    .shop-item .item-price {
+      font-size: 0.98em;
+      color: #2980b9;
+      margin-bottom: 8px;
+    }
+    .shop-item button {
+      margin-top: auto;
+      background: #09a79d;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 6px 18px;
+      font-size: 1em;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .shop-item.unlocked { background: #b4f1c6; color: #fff; border-color: #229954; }
+    .shop-item.unlocked button { background: #aaa; color: #fff; cursor: default; }
+    .shop-item.locked { filter: grayscale(40%); opacity: 0.85; }
+    .shop-item.unlocked .item-price { color: #fff; }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+</head>
+<body>
+  <div class="container card-section badge-section">
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">← กลับหน้าหลัก</button>
+    <div class="shop-header">
+      <h2><span class="icon">🛒</span> ร้านค้าไอเทม/ของรางวัล</h2>
+      <div class="summary-item" style="max-width:300px;margin:auto;margin-bottom:24px;">
+        <strong>เหรียญคงเหลือ:</strong>
+        <span class="amount" id="userCoins">0</span>
+      </div>
+    </div>
+    <div class="shop-row" id="shopItemsRow"></div>
+  </div>
+
+  <!-- Firebase SDK & Shop Logic -->
+  <script type="module">
+    import { onAuthStateChanged, doc, updateDoc, getDoc, arrayUnion, onSnapshot, auth, db } from './js/firebase-init.js';
+
+    // ----- config Firebase -----
+
+
+    // ---- เพิ่มเหรียญใหม่ๆ ได้ตรงนี้ ----
+    const shopItems = [
+      { id: 'bank', name: 'เหรียญนักออม', price: 100, icon: '🏦' },
+      { id: 'invest', name: 'เหรียญนักลงทุน', price: 120, icon: '💹' },
+      { id: 'planner', name: 'เหรียญวางแผน', price: 110, icon: '📝' },
+      { id: 'debt', name: 'เหรียญปลอดหนี้', price: 90, icon: '💸' },
+      { id: 'income', name: 'เหรียญรายรับหลายทาง', price: 80, icon: '🌐' },
+      { id: 'entrepreneur', name: 'เหรียญผู้ประกอบการ', price: 150, icon: '💡' },
+      { id: 'dreamer', name: 'เหรียญนักฝัน', price: 70, icon: '💭' },
+      { id: 'superstar', name: 'เหรียญดาวรุ่ง', price: 200, icon: '🌟' },
+      { id: 'gold', name: 'เหรียญทองคำ', price: 300, icon: '🪙' }
+    ];
+
+    // ---- แสดงเหรียญทุกอัน (ซื้อเหรียญไหนก่อนก็ได้) ----
+    function renderShop(user) {
+      document.getElementById('userCoins').textContent = user.coins || 0;
+      const inventory = user.inventory || [];
+      const row = document.getElementById('shopItemsRow');
+      row.innerHTML = '';
+
+      shopItems.forEach(item => {
+        const bought = inventory.includes(item.id);
+        const el = document.createElement('div');
+        el.className = 'shop-item ' + (bought ? 'unlocked' : 'locked');
+        el.innerHTML = `
+          <div class="item-icon">${item.icon}</div>
+          <div class="item-name">${item.name}</div>
+          <div class="item-price">${item.price} 🪙</div>
+          <button ${bought ? 'disabled' : ''}>
+            ${bought ? 'ซื้อแล้ว' : 'ซื้อ'}
+          </button>
+        `;
+        el.querySelector('button').onclick = async () => {
+          if (bought) return;
+          if ((user.coins || 0) < item.price) {
+            alert("เหรียญไม่พอ!");
+            return;
+          }
+          const ok = confirm(`ซื้อ ${item.name} ในราคา ${item.price} เหรียญ?`);
+          if (!ok) return;
+          await buyItem(auth.currentUser.uid, item.id, item.price);
+        };
+        row.appendChild(el);
+      });
+    }
+
+    // ---- ฟังก์ชันซื้อของ ----
+    async function buyItem(uid, itemId, price) {
+      const userRef = doc(db, 'users', uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) return alert('ไม่พบข้อมูลผู้ใช้');
+      const user = userSnap.data();
+      if ((user.coins || 0) < price) return alert('เหรียญไม่พอ');
+      await updateDoc(userRef, {
+        coins: (user.coins || 0) - price,
+        inventory: arrayUnion(itemId)
+      });
+      alert('ซื้อสำเร็จ!');
+    }
+
+    // ---- โหลดข้อมูล user ----
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        alert('กรุณาเข้าสู่ระบบ');
+        window.location.href = 'login.html';
+        return;
+      }
+      onSnapshot(doc(db, 'users', user.uid), snap => {
+        const data = snap.data() || {};
+        renderShop(data);
+      });
+    });
+  </script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

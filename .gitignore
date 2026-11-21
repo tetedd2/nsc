@@ -1,0 +1,22 @@
+# Firebase
+.firebase/
+*-debug.log
+firebase-debug.log
+firestore-debug.log
+
+# Secrets / env
+.env
+.env.local
+*.local
+
+# Dependencies
+node_modules/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+
+# Logs
+*.log

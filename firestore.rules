@@ -1,0 +1,85 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helper functions ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    // ตรวจว่า update ครั้งนี้แตะเฉพาะฟิลด์ที่อนุญาตไหม (ใช้กับระบบเพื่อน)
+    function onlyChangesKeys(allowedKeys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedKeys);
+    }
+
+    // ---------- users ----------
+    // โปรไฟล์ผู้ใช้: อ่านได้ถ้าล็อกอิน (จำเป็นสำหรับ leaderboard, ค้นหาเพื่อน, แสดงชื่อในแชต)
+    match /users/{userId} {
+      allow read: if isSignedIn();
+
+      // สร้าง/ลบ ได้เฉพาะเจ้าของบัญชีตัวเอง
+      allow create: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // แก้ไข: เจ้าของแก้ได้ทุกอย่าง
+      //        คนอื่นที่ล็อกอินแก้ได้เฉพาะฟิลด์ระบบเพื่อน (friends, friendRequests) เท่านั้น
+      //        เพื่อให้ปุ่ม "ส่ง/รับ/ลบคำขอเป็นเพื่อน" ทำงานได้ โดยแก้ข้อมูลอื่นของคนอื่นไม่ได้
+      allow update: if isOwner(userId)
+                    || (isSignedIn() && onlyChangesKeys(['friends', 'friendRequests']));
+
+      // ธุรกรรมและเป้าหมาย: เจ้าของเท่านั้นที่เข้าถึงได้
+      match /transactions/{txId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /goals/{goalId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ---------- leaderboard ----------
+    // ทุกคนที่ล็อกอินอ่านได้; เพิ่มคะแนนได้เฉพาะคะแนนของตัวเอง; แก้/ลบของเดิมไม่ได้ (กันปลอมคะแนน)
+    match /leaderboard/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ---------- chats ----------
+    // chatDocId มีรูปแบบ "<uidA>_<uidB>" (เรียงจากน้อยไปมาก)
+    // อนุญาตเฉพาะคู่สนทนาสองคนนั้น และผู้ส่งต้องเป็นตัวเอง
+    match /chats/{chatId} {
+      function isParticipant() {
+        return isSignedIn() && request.auth.uid in chatId.split('_');
+      }
+      allow read, write: if isParticipant();
+
+      match /messages/{messageId} {
+        allow read: if isParticipant();
+        allow create: if isParticipant()
+                      && request.resource.data.senderId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    // ---------- feedback ----------
+    // ส่งความคิดเห็นได้ถ้าล็อกอิน แต่อ่าน/แก้ไม่ได้จากฝั่ง client (ให้ดูผ่าน console เท่านั้น)
+    match /feedback/{docId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if false;
+    }
+
+    // ---------- artifacts (path เก่าที่ history.html ใช้) ----------
+    // เจ้าของเท่านั้นที่เข้าถึงธุรกรรมของตัวเองใต้ path นี้ได้
+    match /artifacts/{appId}/users/{userId}/{document=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ค่าเริ่มต้น: ปฏิเสธทุกอย่างที่ไม่ได้ระบุไว้ข้างบน
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

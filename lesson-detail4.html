@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <title>รายละเอียดบทเรียน – บทที่ 4 การวางแผนการเงินส่วนบุคคล</title>
+  <meta name="theme-color" content="#1F8F4E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4;}
+    .header { background-color:#1F8F4E; color:white; padding:20px; text-align:center; }
+    .container { padding:20px; max-width:800px; margin:0 auto; }
+    .lesson-title { color:#0E4D2C; font-size:1.7rem; margin-bottom:18px; }
+    .lesson-content { font-size:1.08rem; color:#444; line-height:1.95; margin-bottom:24px; }
+    .pagination { text-align:center; margin:28px 0 10px 0;}
+    .page-btn { display:inline-block; background:#1F8F4E; color:#fff; padding:8px 20px; border-radius:7px; text-decoration:none; margin:0 12px; transition:background 0.2s;}
+    .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
+    .back-btn { margin-top:30px; display:inline-block; background:#1F8F4E; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
+    .back-btn:hover { background:#15713D; }
+    .action-btn { background:#1F8F4E; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .action-btn:hover { background:#15713D; }
+    .action-btn:disabled { background:#ccc !important; color:#888; pointer-events:none; }
+    .quiz-status { margin-left:16px; font-weight:bold; }
+    table { border-collapse:collapse; width:100%; margin:18px 0;}
+    th,td { border:1px solid #bbb; padding:10px; }
+    th { background:#eee; }
+    ul,ol { margin-bottom:1em; }
+    .emph { color:#d84315; font-weight:bold;}
+    .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
+    .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+    .highlight { background:#e3f2fd; border-left:6px solid #42a5f5; padding:8px 15px; border-radius:6px; margin:14px 0;}
+    .example { background: #e0f7fa; border-left: 6px solid #00bcd4; padding: 8px 15px; border-radius: 6px; margin: 14px 0; }
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 24px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .end-of-chapter-quiz .question { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #1F8F4E; }
+    .end-of-chapter-quiz .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; }
+    .end-of-chapter-quiz .choices { display: flex; flex-direction: column; gap: 10px; }
+    .end-of-chapter-quiz .choice { background-color: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 10px; cursor: pointer; display: block; }
+    #quizResult.correct { color: #388e3c; }
+    #quizResult.incorrect { color: #d32f2f; }
+
+    /* Custom Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+    .modal-content h3 {
+        color: #0E4D2C;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    .modal-content p {
+        color: #333;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        white-space: pre-wrap; /* Preserve newlines from message */
+    }
+    .modal-content button {
+        background-color: #1F8F4E;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .modal-content button:hover {
+        background-color: #15713D;
+        transform: translateY(-1px);
+    }
+    /* Specific styles for success/error messages */
+    .modal-content.success h3 { color: #388e3c; }
+    .modal-content.error h3 { color: #d32f2f; }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+</head>
+<body>
+  <div class="header"><h1>รายละเอียดบทเรียน: การวางแผนการเงินส่วนบุคคล</h1></div>
+  <div class="container">
+    <div id="lessonDetails"></div>
+    <div class="pagination" id="pagination"></div>
+    <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="customAlertModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <button id="modalCloseBtn">ตกลง</button>
+    </div>
+  </div>
+
+  <script>
+    const lessonId = 4; // This should be dynamically set for each lesson page
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageNow = Number(urlParams.get("page")||1);
+
+    const pages = [
+      {
+        title: "บทที่ 4: ความหมายและความสำคัญของการวางแผน (หน้า 1/6)",
+        content: `
+          <div>
+            <b>การวางแผนการเงินส่วนบุคคล</b> คือศิลปะและวิทยาศาสตร์ในการบริหารเงินให้เหมาะสมกับชีวิตแต่ละคน เป็นกระบวนการ “ตั้งเป้าหมาย-วิเคราะห์-ลงมือ-ทบทวน-ปรับปรุง” การเงินของตนเอง<br><br>
+            <b>ประโยชน์หลัก:</b>
+            <ul>
+              <li>ช่วยให้รู้สถานะการเงินของตัวเองจริง ๆ</li>
+              <li>ลดความเครียด ป้องกันปัญหาเงินขาดมือและหนี้สิน</li>
+              <li>ใช้เงินกับเป้าหมายได้จริง ไม่ใช่แค่ฝัน</li>
+              <li>พร้อมรับมือเหตุการณ์ฉุกเฉิน</li>
+              <li>มีอิสรภาพและคุณภาพชีวิตที่ดีขึ้น</li>
+            </ul>
+            <div class="block"><b>ตัวอย่าง:</b> ฝ้ายได้เงินค่าขนมเดือนละ 900 บาท ถ้าไม่วางแผนจะหมดไปกับขนม-ของเล่นหมด แต่ถ้าฝ้ายแบ่งจ่าย 600 ใช้จ่าย, 200 ออม, 100 เผื่อฉุกเฉิน ฝ้ายจะมีเงินสำรองพร้อมทุกเดือน</div>
+            <h3>องค์ประกอบของแผนการเงินที่ดี</h3>
+            <ol>
+              <li>การตั้งเป้าหมายที่ชัดเจน</li>
+              <li>วิเคราะห์รายรับ-รายจ่ายจริง (ทุกบาท ทุกสตางค์)</li>
+              <li>วางงบประมาณและวินัยในการใช้เงิน</li>
+              <li>สร้างนิสัยออมและการลงทุนที่เหมาะสม</li>
+              <li>มีเงินสำรองฉุกเฉินหรือประกันชีวิต</li>
+              <li>ประเมินและทบทวนแผนสม่ำเสมอ</li>
+            </ol>
+            <div class="highlight"><b>Infobox:</b> งานวิจัยพบว่า “เด็กที่เริ่มวางแผนการเงินตั้งแต่ประถม” จะเติบโตเป็นผู้ใหญ่ที่บริหารเงินได้ดี มีโอกาสประสบความสำเร็จในอนาคตสูง</div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: ภาพรวม/เครื่องมือและเทคนิค (หน้า 2/6)",
+        content: `
+          <div>
+            <h3>เครื่องมือวางแผนการเงิน</h3>
+            <ul>
+              <li>สมุดจดบัญชีรายรับ-รายจ่าย หรือใช้แอปฯ จัดการเงิน (เช่น Money Lover, K-My Money ฯl)</li>
+              <li>ไฟล์ Excel หรือ Google Sheets</li>
+              <li>แผนงบประมาณรายเดือน/รายปี (Budget Plan)</li>
+              <li>เทคนิค “ซองเงิน” แยกเงินใช้แต่ละอย่าง</li>
+              <li>ระบบออมเงินอัตโนมัติของธนาคาร</li>
+            </ul>
+            <table>
+              <tr><th>เครื่องมือ</th><th>ข้อดี</th><th>ข้อจำกัด</th></tr>
+              <tr><td>สมุดจด</td><td>เริ่มง่าย เห็นภาพชัด</td><td>แก้ไข/ค้นหาย้อนหลังยาก</td></tr>
+              <tr><td>Excel/Sheets</td><td>คำนวณอัตโนมัติ วิเคราะห์ได้ลึก</td><td>ต้องมีพื้นฐานคอมฯ</td></tr>
+              <tr><td>แอปฯ</td><td>สะดวก-แจ้งเตือน-มีกราฟ</td><td>บางแอปต้องเสียเงิน/ต้องระวังข้อมูลรั่วไหล</td></tr>
+              <tr><td>ซองเงิน</td><td>แยกชัด เหมาะกับเด็ก-มือใหม่</td><td>เงินสดเสี่ยงหาย-ไม่ปลอดภัยเท่าบัญชี</td></tr>
+            </table>
+            <div class="example"><b>ตัวอย่าง:</b> ปาร์คใช้เทคนิค “ซองเงิน” แยก 5 ซอง (อาหาร, เดินทาง, ขนม, ออม, เหตุฉุกเฉิน) หมดซองไหนหยุดจ่ายทันที</div>
+            <div class="block"><b>Tips:</b> เริ่มจด “ทุกบาททุกสตางค์” อย่างน้อย 2 สัปดาห์ จะเห็นชัดว่าตัวเองรั่วไหลเงินกับอะไร</div>
+            <div class="highlight"><b>Infobox:</b> แนะนำให้ตั้งเป้าหมาย “SMART” (Specific, Measurable, Achievable, Relevant, Time-bound) ช่วยให้ไม่ท้อและทำสำเร็จจริง</div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: การวางเป้าหมายการเงิน & ตัวอย่างการตั้งเป้า (หน้า 3/6)",
+        content: `
+          <div>
+            <h3>เป้าหมายการเงินต้องมีทั้งระยะสั้น กลาง ยาว</h3>
+            <ul>
+              <li><b>ระยะสั้น:</b> 1-6 เดือน เช่น ซื้อของขวัญ/อุปกรณ์เรียนใหม่/ทัศนศึกษา</li>
+              <li><b>ระยะกลาง:</b> 6 เดือน-2 ปี เช่น ออมเงินไปเที่ยว/ซื้อโทรศัพท์</li>
+              <li><b>ระยะยาว:</b> เกิน 2 ปี เช่น ออมเรียนต่อ/ซื้อคอมฯ/กองทุนการศึกษา</li>
+            </ul>
+            <table>
+              <tr>
+                <th>เป้าหมาย</th>
+                <th>จำนวนเงิน</th>
+                <th>วิธีวางแผน</th>
+                <th>เทคนิคสำเร็จ</th>
+              </tr>
+              <tr>
+                <td>ซื้อหูฟัง</td>
+                <td>600 บาท</td>
+                <td>ออมเดือนละ 100 บาท 6 เดือน</td>
+                <td>ติดรูปหูฟังไว้ที่กระปุก, จดวันละ 5 บาท</td>
+              </tr>
+              <tr>
+                <td>เรียนภาษาอังกฤษพิเศษ</td>
+                <td>3,000 บาท</td>
+                <td>ออมเดือนละ 250 บาท 12 เดือน</td>
+                <td>โอนเข้าบัญชีทุกต้นเดือน</td>
+              </tr>
+              <tr>
+                <td>ไปต่างประเทศกับโรงเรียน</td>
+                <td>30,000 บาท</td>
+                <td>แบ่งออม+หารายได้เสริม</td>
+                <td>วางแผนกับผู้ปกครอง/ลุ้นทุน</td>
+              </tr>
+            </table>
+            <div class="block"><b>Case Study:</b> น้ำฟ้าวางแผนออม 2,000 บาทใน 4 เดือน เธอออมวันละ 15 บาท (ใช้เหรียญที่เหลือทุกวัน) ได้ครบเป้าตามเวลา</div>
+            <div class="highlight"><b>Infobox:</b> อย่าลืม “ติดตาม” และ “ทบทวน” เป้าหมายทุกเดือน เช่น สรุปยอดเงินออม/ปรับแผนถ้ารายได้เปลี่ยน</div>
+            <div class="block"><b>เทคนิค:</b> ตั้งรางวัลให้ตัวเองถ้าออมได้ครบเป้า เช่น ซื้อของเล็กๆ ให้รางวัลตัวเอง</div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: การวิเคราะห์-ปรับแผนและรับมืออุปสรรค (หน้า 4/6)",
+        content: `
+          <div>
+            <h3>เทคนิควิเคราะห์และรับมือปัญหา</h3>
+            <ul>
+              <li>ทบทวนแผนการเงิน “ทุกเดือน” หรือทันทีที่มีรายได้/รายจ่ายเปลี่ยนแปลง</li>
+              <li>ปรับเป้าหมายให้เหมาะกับสถานการณ์ เช่น ถ้ารายรับน้อยลงให้ลดงบฟุ่มเฟือย</li>
+              <li>จดบัญชีรายรับ-รายจ่ายเสมอ จะเห็น “จุดรั่วไหล” ที่ต้องปรับ</li>
+              <li>แบ่งเป้าหมายเป็น “เป้าย่อย” เช่น เป้าหมายใหญ่ 12 เดือน ให้แบ่ง 3 ช่วง</li>
+            </ul>
+            <table>
+              <tr>
+                <th>ปัญหา</th>
+                <th>วิธีแก้ไข</th>
+                <th>ผลลัพธ์</th>
+              </tr>
+              <tr>
+                <td>เงินหมดก่อนสิ้นเดือน</td>
+                <td>แยกเงินไว้หลายซอง, ใช้งบประมาณ</td>
+                <td>เหลือเงินออมมากขึ้น</td>
+              </tr>
+              <tr>
+                <td>ไม่ถึงเป้า</td>
+                <td>ตั้งเตือนในมือถือ, ขอแรงเพื่อน/ครอบครัวช่วย</td>
+                <td>ทำสำเร็จเร็วขึ้น</td>
+              </tr>
+              <tr>
+                <td>อยากซื้อของใหญ่แต่ไม่มีเงินก้อน</td>
+                <td>ผ่อนออม, หารายได้เสริม, ปรับเป้าหมาย</td>
+                <td>ซื้อได้โดยไม่เป็นหนี้</td>
+              </tr>
+            </table>
+            <div class="block"><b>ตัวอย่าง:</b> มิกกี้อยากไปเที่ยวกับเพื่อนแต่เงินไม่พอ เขาตั้งเป้าออม 1,500 บาทใน 3 เดือน ออมวันละ 17 บาท พร้อมลดขนมจากวันละ 30 เหลือ 15 บาท</div>
+            <div class="highlight"><b>Infobox:</b> “การปรับแผน” คือหัวใจของการจัดการการเงิน ไม่มีแผนไหนสมบูรณ์แบบตลอดไป ต้องยืดหยุ่นและกล้าตรวจสอบตัวเอง</div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: ข้อคิดแรงบันดาลใจและสถานการณ์ฝึกคิด (หน้า 5/6)",
+        content: `
+          <div class="takeaway">
+            <b>ข้อคิดสำคัญ:</b>
+            <ul>
+              <li>ยิ่งเริ่มวางแผนเร็ว ยิ่งถึงเป้าหมายเร็ว</li>
+              <li>เงินเดือนน้อยก็รวยได้ ถ้า “วางแผน-ออม-ลงทุน” อย่างถูกต้อง</li>
+              <li>ความสม่ำเสมอสำคัญกว่า “จำนวนเงิน” ที่ออมในแต่ละเดือน</li>
+              <li>การทบทวน-ปรับแผนเป็นกุญแจสำคัญของความสำเร็จ</li>
+            </ul>
+            <div class="block">
+              <b>กรณีศึกษา:</b>
+              <ul>
+                <li>โอ๋อยากซื้อโน๊ตบุ๊ค ตั้งเป้าเก็บ 9,000 บาทใน 10 เดือน ทุกเดือนเขาออม 900 บาท โดยลดรายจ่ายขนม ของเล่นบางส่วนลง</li>
+                <li>ใบบัวจดบัญชีรายรับ-รายจ่าย พบว่าเสียเงินกับการกินขนมเกินไป เลยปรับลดทีละนิด แล้วออมเพิ่มได้ปีละ 2,000 บาท</li>
+              </ul>
+            </div>
+            <div class="block">
+              <b>สถานการณ์ฝึกคิด:</b>
+              <ol>
+                <li>ถ้ามีเหตุการณ์ที่ทำให้ต้องใช้เงินก้อนทันที (เช่น มือถือเสีย ต้องซ่อมด่วน) จะใช้เงินก้อนจากไหน? ควรวางแผนยังไง?</li>
+                <li>ถ้าค่าใช้จ่ายเดือนหนึ่งสูงผิดปกติ (เช่น วันเกิด เพื่อนแต่งงาน) จะวางแผนล่วงหน้าอย่างไร?</li>
+              </ol>
+            </div>
+            <div class="highlight"><b>Infobox:</b> ความมั่นคงทางการเงินไม่ได้เกิดจากรายได้สูงอย่างเดียว แต่เกิดจากวินัย ความอดทน และแผนที่ดี</div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 4: สรุปและแบบทดสอบท้ายบท (หน้า 6/6)",
+        content: `
+          <div class="takeaway">
+            สรุป: การวางแผนการเงินไม่ใช่เรื่องยาก แต่ต้องอาศัยวินัยและความเข้าใจ การเริ่มต้นตั้งแต่วันนี้ คือก้าวแรกสู่อิสรภาพทางการเงินในอนาคต
+          </div>
+          <div class="video-container">
+            <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/YvrPvcnWGoQ?si=Rqz9gwRP2LtupnWV&amp;start=2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
+          
+          <div class="end-of-chapter-quiz" id="end-of-chapter-quiz"></div>
+          <button type="button" class="action-btn" id="checkQuizBtn">ตรวจคำตอบ</button>
+          <span id="quizResult" class="quiz-status"></span>
+          <div style="margin-top:16px;">
+            <button id="doneBtn" class="action-btn disabled" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status" style="color:#388e3c;"></span>
+          </div>
+<!-- ===== แหล่งที่มาบทที่ 4 ===== -->
+<div class="block" style="margin-top:32px;">
+  <h3>แหล่งที่มาที่น่าเชื่อถือ</h3>
+  <ul>
+    <li><a href="https://www.fpo.go.th/main" target="_blank">สำนักงานเศรษฐกิจการคลัง: การวางแผนการเงินส่วนบุคคล</a></li>
+ </ul>
+</div>
+        `
+      }
+    ];
+
+    let page = Math.min(Math.max(pageNow,1), pages.length);
+    let html = `<div class="lesson-title">${pages[page-1].title}</div>
+                <div class="lesson-content">${pages[page-1].content}</div>`;
+    document.getElementById("lessonDetails").innerHTML = html;
+
+    let pag = "";
+    if (page > 1) pag += `<a class="page-btn" href="lesson-detail4.html?page=${page-1}">หน้าก่อนหน้า</a>`;
+    if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail4.html?page=${page+1}">หน้าถัดไป</a>`;
+    document.getElementById("pagination").innerHTML = pag;
+
+    // --- Custom Modal Functions ---
+    const customAlertModal = document.getElementById('customAlertModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalContent = customAlertModal.querySelector('.modal-content');
+
+    function showCustomAlert(title, message, isSuccess = true) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message; // Use textContent to handle newlines naturally
+        modalContent.className = 'modal-content ' + (isSuccess ? 'success' : 'error');
+        customAlertModal.classList.add('show');
+    }
+
+    function hideCustomAlert() {
+        customAlertModal.classList.remove('show');
+    }
+
+    modalCloseBtn.addEventListener('click', hideCustomAlert);
+    // --- End Custom Modal Functions ---
+
+
+    if (page === pages.length) {
+        setTimeout(() => {
+            const quizData = [
+                { question: "1. การตั้งเป้าหมายแบบ \"SMART\" ในการวางแผนการเงินคืออะไร?", choices: ["ก. เป้าหมายที่ใหญ่และท้าทายที่สุด", "ข. เป้าหมายที่เฉพาะเจาะจง, วัดผลได้, ทำได้จริง, เกี่ยวข้อง และมีกรอบเวลา", "ค. เป้าหมายที่เน้นการออมระยะสั้นเท่านั้น"], answer: "ข. เป้าหมายที่เฉพาะเจาะจง, วัดผลได้, ทำได้จริง, เกี่ยวข้อง และมีกรอบเวลา" },
+                { question: "2. เครื่องมือใดที่เหมาะสำหรับผู้เริ่มต้นควบคุมงบประมาณ แต่เสี่ยงหากใช้กับเงินสดเยอะๆ?", choices: ["ก. แอปพลิเคชันจัดการเงิน", "ข. เทคนิค \"ซองเงิน\"", "ค. ไฟล์ Google Sheets"], answer: "ข. เทคนิค \"ซองเงิน\"" },
+                { question: "3. สิ่งใดคือหัวใจสำคัญที่ทำให้แผนการเงินประสบความสำเร็จในระยะยาว?", choices: ["ก. การตั้งเป้าหมายไว้ตั้งแต่แรกและห้ามเปลี่ยนแปลงเด็ดขาด", "ข. การใช้เงินตามแผนที่วางไว้ให้ได้ 100% โดยไม่มีข้อผิดพลาด", "ค. การทบทวนและปรับปรุงแผนอย่างสม่ำเสมอ"], answer: "ค. การทบทวนและปรับปรุงแผนอย่างสม่ำเสมอ" }
+            ];
+
+            const quizContainer = document.getElementById('end-of-chapter-quiz');
+            const checkButton = document.getElementById('checkQuizBtn');
+            const resultContainer = document.getElementById('quizResult');
+            const doneBtn = document.getElementById("doneBtn");
+            const doneStatus = document.getElementById("doneStatus");
+
+            function buildEndOfChapterQuiz() {
+                quizData.forEach((currentQuestion, questionNumber) => {
+                    const choicesHTML = currentQuestion.choices.map(choice => `<label class="choice"><input type="radio" name="chapter_question${questionNumber}" value="${choice}">${choice}</label>`).join('');
+                    const questionHTML = `<div class="question"><div class="question-text">${currentQuestion.question}</div><div class="choices">${choicesHTML}</div></div>`;
+                    if(quizContainer) quizContainer.innerHTML += questionHTML;
+                });
+            }
+
+            function checkQuizAnswers() {
+                if (!quizContainer) return;
+                const answerContainers = quizContainer.querySelectorAll('.choices');
+                let numCorrectForDisplay = 0; // นับจำนวนข้อที่ถูกต้องเพื่อแสดงผล
+                let allRequiredQuestionsPassed = true; // แฟล็กสำหรับเงื่อนไขการผ่านแบบทดสอบโดยรวม (เฉพาะข้อ 1 และ 3 ที่สำคัญ)
+
+                quizData.forEach((currentQuestion, questionNumber) => {
+                    const selector = `input[name=chapter_question${questionNumber}]:checked`;
+                    const userAnswerNode = (answerContainers[questionNumber]) ? answerContainers[questionNumber].querySelector(selector) : null;
+                    
+                    if (userAnswerNode) {
+                        console.log(`Question ${questionNumber + 1}: User selected: "${userAnswerNode.value.trim()}", Correct answer (from quizData): "${currentQuestion.answer}"`);
+                    } else {
+                        console.log(`Question ${questionNumber + 1}: No answer selected.`);
+                    }
+
+                    if (questionNumber === 1) { // This is question 2 (index 1) in the quizData
+                        // As per user's previous request, question 2 is always considered correct for passing the quiz
+                        // and will add 1 point to the displayed correct count if any option is selected.
+                        if (userAnswerNode) { // Only count if an option is selected for question 2
+                           numCorrectForDisplay++;
+                        }
+                        // Question 2 does not affect the 'allRequiredQuestionsPassed' flag.
+                    } else { // For question 1 (index 0) and question 3 (index 2)
+                        // These questions must be answered correctly to pass the quiz
+                        if (userAnswerNode && userAnswerNode.value.trim() === currentQuestion.answer) {
+                            numCorrectForDisplay++;
+                        } else {
+                            allRequiredQuestionsPassed = false; // If question 1 or 3 is incorrect or not selected, the quiz fails
+                        }
+                    }
+                });
+
+                if (allRequiredQuestionsPassed) { // If questions 1 and 3 are correct (question 2 is disregarded for passing/failing)
+                    resultContainer.textContent = "ยอดเยี่ยม! คุณตอบถูกทุกข้อ";
+                    resultContainer.className = "quiz-status correct";
+                    doneBtn.disabled = false;
+                    doneBtn.classList.remove('disabled');
+                    doneStatus.textContent = "ตอนนี้คุณสามารถกดยืนยันเพื่อจบบทเรียนได้แล้ว!";
+                } else {
+                    resultContainer.textContent = `พยายามอีกนิด! คุณตอบถูก ${numCorrectForDisplay} จาก ${quizData.length} ข้อ`;
+                    resultContainer.className = "quiz-status incorrect";
+                    doneBtn.disabled = true;
+                    doneBtn.classList.add('disabled');
+                    doneStatus.textContent = "";
+                }
+            }
+            
+            function finishLesson() {
+                if (window.completeLessonInFirestore) {
+                    window.completeLessonInFirestore(lessonId, 80); // Award 80 XP
+                } else {
+                    console.error("Firebase script not loaded. Saving to localStorage only.");
+                    localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                    window.checkInitialDoneStatus();
+                    showCustomAlert("บันทึกความคืบหน้า", "บทเรียนนี้ถูกบันทึกเป็นเสร็จสิ้นแล้ว!");
+                }
+            }
+
+            window.checkInitialDoneStatus = function() {
+                if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
+                    doneStatus.textContent = "คุณเรียนจบบทนี้แล้ว!";
+                    if(doneBtn) doneBtn.disabled = true;
+                    if(doneBtn) doneBtn.classList.add('disabled');
+                    if(checkButton) checkButton.style.display = 'none';
+                    if(resultContainer) resultContainer.style.display = 'none';
+                    if(quizContainer) quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => { radio.disabled = true; });
+                }
+            }
+
+            buildEndOfChapterQuiz();
+            if(checkButton) checkButton.addEventListener('click', checkQuizAnswers);
+            if(doneBtn) doneBtn.addEventListener('click', finishLesson);
+            window.checkInitialDoneStatus();
+
+        }, 200);
+    }
+  </script>
+
+  <!-- Firebase XP & Level Up System -->
+  <script type="module">
+    import { onAuthStateChanged, doc, runTransaction, increment, arrayUnion, auth, db } from './js/firebase-init.js';
+
+  
+
+    const LEVEL_CONFIG = [
+        { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+        { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+        { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+        { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+        { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity },
+    ];
+
+    /**
+     * ฟังก์ชันหลักในการเพิ่ม XP, ตรวจสอบการเลเวลอัพ และบันทึกข้อมูลลง Firestore
+     * @param {string} uid - User ID ของ Firebase
+     * @param {number} amount - จำนวน XP ที่จะเพิ่ม
+     * @param {number} lessonId - ID ของบทเรียนที่เพิ่งเรียนจบ
+     * @returns {Promise<{success: boolean, message: string, isSuccessStatus: boolean}>} - ผลลัพธ์และข้อความที่จะแสดง
+     */
+    async function grantXpAndLevelUp(uid, amount, lessonId) {
+        if (!uid || !amount || amount <= 0) return { success: false, message: "Invalid input.", isSuccessStatus: false };
+        const userRef = doc(db, 'users', uid);
+        let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+        let isSuccessStatus = true;
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userSnap = await transaction.get(userRef);
+                if (!userSnap.exists()) throw new Error("User document not found.");
+                const userData = userSnap.data();
+                const completedLessons = userData.completedLessons || [];
+                if (completedLessons.includes(lessonId)) {
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว ได้รับ XP ไปแล้ว";
+                    isSuccessStatus = false;
+                    return; 
+                }
+                let xp = userData.xp || 0;
+                let level = userData.level || 1;
+                let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+                let totalCoinReward = 0;
+                xp += amount;
+                while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
+                    const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
+                    if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
+                        const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                        const rewardForThisLevel = 100 + (nextLevelInfo.level * 25);
+                        totalCoinReward += rewardForThisLevel;
+                        xp -= nextLevelXP;
+                        level = nextLevelInfo.level;
+                        nextLevelXP = nextLevelInfo.xpToNext;
+                        finalMessage += `\n🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${nextLevelInfo.name}!`;
+                    } else { break; }
+                }
+                const finalUpdateData = { xp, level, nextLevelXP, completedLessons: arrayUnion(lessonId) };
+                if (totalCoinReward > 0) {
+                    finalUpdateData.coins = increment(totalCoinReward);
+                    finalMessage += `\nได้รับ ${totalCoinReward} เหรียญ!`;
+                }
+                transaction.update(userRef, finalUpdateData);
+            });
+            return { success: true, message: finalMessage, isSuccessStatus: isSuccessStatus };
+        } catch (error) {
+            console.error("Error in transaction: ", error);
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล", isSuccessStatus: false };
+        }
+    }
+
+    /**
+     * ฟังก์ชันที่ถูกเรียกจากปุ่ม "เรียนจบบทนี้" เพื่อเริ่มกระบวนการให้ XP
+     * @param {number} lessonId - ID บทเรียน
+     * @param {number} xpToAdd - XP ที่จะให้
+     */
+    window.completeLessonInFirestore = async (lessonId, xpToAdd) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        if (doneBtn.disabled) return;
+        doneBtn.disabled = true;
+        doneStatus.textContent = "กำลังบันทึก...";
+        const user = auth.currentUser;
+        if (user) {
+            const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
+            showCustomAlert(result.success ? "สำเร็จ!" : "เกิดข้อผิดพลาด", result.message, result.isSuccessStatus);
+            doneStatus.textContent = result.message.split('\n')[0];
+            if(result.success) {
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                if (window.checkInitialDoneStatus) window.checkInitialDoneStatus();
+            } else {
+                doneBtn.disabled = false;
+            }
+        } else {
+            showCustomAlert("แจ้งเตือน", "กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP", false);
+            doneBtn.disabled = false;
+            doneStatus.textContent = "โปรดเข้าสู่ระบบ";
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+
+        if (doneBtn) {
+            if (!user) {
+                console.log("User is not logged in.");
+                doneBtn.disabled = true;
+                doneBtn.classList.add('disabled');
+                doneBtn.textContent = "กรุณาเข้าสู่ระบบ";
+                doneStatus.textContent = "";
+            } else {
+                console.log("User is logged in.", user.uid);
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus();
+                }
+                if (!doneBtn.disabled) {
+                    doneBtn.textContent = "เรียนจบบทนี้";
+                }
+            }
+        }
+    });
+  </script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="qcl" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#34B874"/><stop offset="1" stop-color="#19824F"/></linearGradient>
+    <linearGradient id="qco" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFDE7A"/><stop offset="1" stop-color="#F3A712"/></linearGradient>
+  </defs>
+  <rect x="9" y="9" width="24" height="31" rx="6" fill="url(#qcl)"/>
+  <rect x="16" y="6" width="10" height="7" rx="2.5" fill="#126a41"/>
+  <path d="M14 19.5 l2.2 2.2 3.4-4.2" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="22" y="18" width="8" height="2.6" rx="1.3" fill="#fff" opacity=".9"/>
+  <path d="M14 28 l2.2 2.2 3.4-4.2" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="22" y="26.5" width="8" height="2.6" rx="1.3" fill="#fff" opacity=".9"/>
+  <circle cx="35" cy="34" r="9.5" fill="url(#qco)" stroke="#DE9009" stroke-width="1.8"/>
+  <text x="35" y="38.5" font-size="12" font-family="'Segoe UI','Leelawadee UI',Tahoma,Arial,sans-serif" font-weight="700" fill="#8a5600" text-anchor="middle">฿</text>
+</svg>

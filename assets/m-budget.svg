@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="bbag" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#34B874"/><stop offset="1" stop-color="#19824F"/></linearGradient>
+    <linearGradient id="bco" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFDE7A"/><stop offset="1" stop-color="#F3A712"/></linearGradient>
+  </defs>
+  <path d="M18 15 q6 -3 12 0" stroke="#126a41" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M17.5 15 q6.5 -2 13 0 c5.5 3.4 8 11 8 16.5 0 6.4-5.2 9.5-14.5 9.5S9.5 37.9 9.5 31.5c0-5.5 2.5-13.1 8-16.5Z" fill="url(#bbag)"/>
+  <text x="24" y="33" font-size="16" font-family="'Segoe UI','Leelawadee UI',Tahoma,Arial,sans-serif" font-weight="800" fill="#EAF9F0" text-anchor="middle">฿</text>
+  <circle cx="35" cy="14" r="7.5" fill="url(#bco)" stroke="#DE9009" stroke-width="1.6"/>
+  <circle cx="12.5" cy="19" r="5.5" fill="url(#bco)" stroke="#DE9009" stroke-width="1.4"/>
+</svg>

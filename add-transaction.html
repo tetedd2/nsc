@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>💰 เพิ่มรายการ - MoneySkillz</title>
+  <meta name="theme-color" content="#1F8F4E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* =================================
+       รวมสไตล์จาก add-transaction.css และสไตล์สำหรับ Message Box
+       ================================= */
+
+    :root {
+      /* กำหนดค่าสีหลักของแอปพลิเคชั่น */
+      --primary-color: #26A69A;
+      --primary-darker: #00796B;
+      --background-color: #f4f7f6;
+      --card-background: #ffffff;
+      --text-color: #333;
+      --text-secondary: #666;
+      --border-color: #e0e0e0;
+      --shadow-color: rgba(0, 100, 100, 0.15);
+      --highlight-color: rgba(38, 166, 154, 0.2);
+      --danger-color: #f44336;
+      --warning-color: #ff9800;
+    }
+
+    /* สไตล์สำหรับ Dark Mode (หากมีการใช้งานในอนาคต) */
+    body.dark-mode {
+      --background-color: #1a1a1a;
+      --card-background: #282828;
+      --text-color: #e0e0e0;
+      --text-secondary: #aaaaaa;
+      --border-color: #444;
+      --shadow-color: rgba(0, 0, 0, 0.4);
+    }
+
+    /* ตั้งค่าพื้นฐาน */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Kanit', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    /* ส่วนหัว (Header) */
+    .header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-darker));
+      color: white;
+      padding: 40px 20px 80px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      font-weight: 300;
+      opacity: 0.9;
+    }
+
+    /* กล่องรูปโปรไฟล์ */
+    .avatar-box {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: var(--card-background);
+      box-shadow: 0 4px 15px var(--shadow-color);
+      border: 4px solid var(--card-background);
+      position: absolute;
+      bottom: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .avatar-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ปุ่มย้อนกลับ */
+    .back-btn {
+      position: absolute;
+      top: 35px;
+      left: 25px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #00796B;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      z-index: 10;
+    }
+
+    .back-btn:hover {
+      background: #ffffff;
+      transform: scale(1.05);
+    }
+
+    .back-btn .arrow {
+      font-size: 1.8em;
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    /* การ์ดฟอร์ม */
+    .container.card-section.form-box {
+      background-color: var(--card-background);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px var(--shadow-color);
+      margin: 0 auto;
+      margin-top: 80px;
+      margin-bottom: 30px;
+      max-width: 550px;
+      width: 90%;
+    }
+
+    .form-box h2 {
+      text-align: center;
+      color: var(--primary-darker);
+      margin-bottom: 25px;
+      font-size: 1.6em;
+      font-weight: 600;
+    }
+
+    body.dark-mode .form-box h2 {
+        color: var(--highlight-color);
+    }
+
+    /* สไตล์ฟอร์ม */
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 1em;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-size: 1rem;
+      font-family: 'Kanit', sans-serif;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px var(--highlight-color);
+    }
+    
+    input:disabled, select:disabled, textarea:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    /* ปุ่ม Submit */
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 1.2em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background-color: var(--primary-darker);
+      transform: translateY(-2px);
+    }
+    
+    .submit-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* แถบแจ้งเตือนการจำกัดการใช้จ่าย */
+    #spending-ban-alert {
+        display: none;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    /* ปุ่มโหมดฉุกเฉิน */
+    .emergency-btn {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 10px;
+        border: none;
+        border-radius: 8px;
+        background-color: var(--warning-color);
+        color: white;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .emergency-btn:hover {
+        background-color: #f57c00;
+    }
+
+    .emergency-note {
+        display: block;
+        margin-top: 8px;
+        font-size: 0.9em;
+        color: var(--text-secondary);
+        text-align: center;
+    }
+
+    /* กล่องข้อความแจ้งเตือน */
+    .message-box {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .message-box.show {
+        display: flex;
+        opacity: 1;
+    }
+    
+    .message-box-content {
+      background-color: var(--card-background, white);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 400px;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.3s ease-out;
+    }
+    
+    .message-box.show .message-box-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .message-box-content p {
+      font-size: 1.1em;
+      margin-bottom: 25px;
+      color: var(--text-color, #333);
+    }
+    
+    .message-box-content button {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      margin: 0 5px;
+    }
+    
+    .message-box-content button:hover {
+      background-color: var(--primary-darker);
+    }
+    
+    .message-box-content.success { 
+      border-top: 5px solid #4CAF50; 
+    }
+    
+    .message-box-content.error { 
+      border-top: 5px solid var(--danger-color); 
+    }
+    
+    .message-box-content.info { 
+      border-top: 5px solid #2196F3; 
+    }
+
+    /* Emergency Modal Styles */
+    #emergencyModal textarea {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-family: 'Kanit', sans-serif;
+        font-size: 1rem;
+        margin: 10px 0;
+    }
+
+    #emergencyModal .modal-title {
+        font-size: 1.3em;
+        font-weight: 600;
+        color: var(--warning-color);
+        margin-bottom: 15px;
+    }
+
+    #emergencyModal .button-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .cancel-btn {
+        background-color: #999 !important;
+    }
+
+    .cancel-btn:hover {
+        background-color: #777 !important;
+    }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+</head>
+<body>
+
+<header class="header">
+    <a href="dashboard.html" class="back-btn">
+      <span class="arrow">&larr;</span>
+    </a>
+    <h1>MoneySkillz</h1>
+    <p>บันทึกรายรับ-รายจ่ายของคุณ</p>
+    <div class="avatar-box">
+      <img src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" alt="Avatar">
+    </div>
+</header>
+
+<div class="container card-section form-box">
+    <h2>💰 เพิ่มรายการธุรกรรม</h2>
+    
+    <!-- แถบแจ้งเตือนการจำกัดการใช้จ่าย -->
+    <div id="spending-ban-alert">
+        🚨 เงินออมต่ำกว่า 30% - ระบบจำกัดการเพิ่มรายจ่าย
+    </div>
+    
+    <!-- ปุ่มโหมดฉุกเฉิน -->
+    <div id="emergency-controls" style="display:none;">
+        <button type="button" id="openEmergencyModal" class="emergency-btn">
+            ⚠️ ใช้โหมดฉุกเฉิน
+        </button>
+        <small class="emergency-note">
+            *โหมดฉุกเฉินอนุญาตให้เพิ่มรายจ่ายได้ 1 รายการ โดยต้องระบุเหตุผล
+        </small>
+    </div>
+    
+    <form id="transaction-form" style="display: none;">
+      <label for="type">ประเภท</label>
+      <select id="type" required>
+        <option value="expense">รายจ่าย</option>
+        <option value="income">รายรับ</option>
+      </select>
+
+      <label for="category">หมวดหมู่</label>
+      <select id="category" required>
+        <!-- ตัวเลือกหมวดหมู่จะถูกสร้างโดย JavaScript -->
+      </select>
+
+      <label for="amount">จำนวนเงิน (บาท)</label>
+      <input type="number" id="amount" placeholder="0.00" step="0.01" min="0.01" required>
+
+      <label for="date">วันที่</label>
+      <input type="date" id="date" required>
+
+      <label for="description">คำอธิบาย</label>
+      <textarea id="description" rows="3" placeholder="เช่น ค่ากาแฟ, เงินเดือน" required></textarea>
+
+      <input type="hidden" id="isEmergency" value="false" />
+      <input type="hidden" id="emergencyReason" value="" />
+      
+      <button type="submit" id="submit-btn" class="submit-btn">บันทึกรายการ</button>
+    </form>
+</div>
+
+<!-- Modal สำหรับใส่เหตุผลฉุกเฉิน -->
+<div id="emergencyModal" class="message-box">
+    <div class="message-box-content info">
+        <div class="modal-title">⚠️ โหมดฉุกเฉิน</div>
+        <p>กรุณาระบุเหตุผลที่จำเป็นต้องใช้จ่ายฉุกเฉิน</p>
+        <textarea id="emergencyReasonInput" rows="4" placeholder="ระบุเหตุผล (อย่างน้อย 10 ตัวอักษร)"></textarea>
+        <div class="button-group">
+            <button id="confirmEmergencyBtn" class="submit-btn">ยืนยัน</button>
+            <button id="cancelEmergencyBtn" class="cancel-btn">ยกเลิก</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal แจ้งเตือนทั่วไป -->
+<div id="messageBox" class="message-box">
+    <div id="messageBoxContent" class="message-box-content">
+      <p id="messageText"></p>
+      <button id="messageCloseBtn">ตกลง</button>
+    </div>
+</div>
+
+<script type="module">
+    // นำเข้า Firebase SDK
+    import { onAuthStateChanged, signInAnonymously, collection, addDoc, doc, updateDoc, getDoc, query, where, getDocs, serverTimestamp, increment, arrayUnion, auth, db } from './js/firebase-init.js';
+
+    // ================== Firebase Configuration ==================
+
+    // ================== Firebase Initialization ==================
+    let currentUser = null;
+
+    // ================== DOM Elements ==================
+    const transactionForm = document.getElementById('transaction-form');
+    const typeSelect = document.getElementById('type');
+    const categorySelect = document.getElementById('category');
+    const amountInput = document.getElementById('amount');
+    const dateInput = document.getElementById('date');
+    const descriptionInput = document.getElementById('description');
+    const submitButton = document.getElementById('submit-btn');
+    const spendingBanAlert = document.getElementById('spending-ban-alert');
+    const emergencyControls = document.getElementById('emergency-controls');
+    const emergencyModal = document.getElementById('emergencyModal');
+
+    // ================== Data Definitions ==================
+    const categories = {
+        expense: ["อาหาร", "เดินทาง", "ของใช้ส่วนตัว", "ความบันเทิง", "ที่อยู่อาศัย", "การศึกษา", "สุขภาพ", "ชำระบิล", "อื่นๆ"],
+        income: ["เงินเดือน", "รายได้เสริม", "ของขวัญ", "ดอกเบี้ย", "ขายของ", "อื่นๆ"]
+    };
+
+    const allBadges = [
+        { id: 'first_transaction', name: 'นักบันทึกมือใหม่', description: 'บันทึกธุรกรรมแรกของคุณ', icon: '✏️', xp: 20, coins: 30 }
+    ];
+
+    // ================== Utility Functions ==================
+    function showMessageBox(message, type = "info", callback = null) {
+        const messageBox = document.getElementById('messageBox');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageText = document.getElementById('messageText');
+        const closeBtn = document.getElementById('messageCloseBtn');
+
+        messageText.textContent = message;
+        messageBoxContent.className = `message-box-content ${type}`;
+        messageBox.classList.add('show');
+
+        closeBtn.onclick = () => {
+            messageBox.classList.remove('show');
+            if (callback) callback();
+        };
+
+        messageBox.onclick = (e) => {
+            if (e.target === messageBox) {
+                messageBox.classList.remove('show');
+                if (callback) callback();
+            }
+        };
+    }
+
+    // ================== Transaction Quota Check ==================
+    async function checkTransactionQuota(uid) {
+        if (!uid) return 0;
+        
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const transactionsRef = collection(db, 'users', uid, 'transactions');
+            const todayQuery = query(transactionsRef, where('date', '==', today));
+            const snapshot = await getDocs(todayQuery);
+            return snapshot.size;
+        } catch (error) {
+            console.error("Error checking transaction quota:", error);
+            return 0;
+        }
+    }
+
+    // ================== Financial Status Check ==================
+    async function checkSavingsPercentage(uid) {
+        if (!uid) return 100; // Default to 100% if no user
+        
+        try {
+            // Method 1: Try to get data from user document first
+            const userDocRef = doc(db, 'users', uid);
+            const userSnap = await getDoc(userDocRef);
+            
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                const storedIncome = userData.totalIncome || 0;
+                const storedExpenses = userData.totalExpenses || 0;
+                
+                console.log(`Stored data - Income: ${storedIncome}, Expenses: ${storedExpenses}`);
+                
+                if (storedIncome > 0) {
+                    const savings = storedIncome - storedExpenses;
+                    const savingsPercentage = (savings / storedIncome) * 100;
+                    console.log(`From stored data - Savings percentage: ${savingsPercentage}%`);
+                    return Math.max(0, savingsPercentage);
+                }
+            }
+            
+            // Method 2: Calculate from transactions if no stored data
+            console.log('No stored financial data, calculating from transactions...');
+            const transactionsRef = collection(db, 'users', uid, 'transactions');
+            const snapshot = await getDocs(transactionsRef);
+            
+            let totalIncome = 0;
+            let totalExpenses = 0;
+            
+            snapshot.forEach(doc => {
+                const transaction = doc.data();
+                const amount = parseFloat(transaction.amount) || 0;
+                
+                if (transaction.type === 'income') {
+                    totalIncome += amount;
+                } else if (transaction.type === 'expense') {
+                    totalExpenses += amount;
+                }
+            });
+            
+            console.log(`Calculated from transactions - Income: ${totalIncome}, Expenses: ${totalExpenses}`);
+            
+            if (totalIncome > 0) {
+                const savings = totalIncome - totalExpenses;
+                const savingsPercentage = (savings / totalIncome) * 100;
+                console.log(`Calculated savings percentage: ${savingsPercentage}%`);
+                
+                // Update user document with calculated totals
+                await updateDoc(userDocRef, {
+                    totalIncome: totalIncome,
+                    totalExpenses: totalExpenses
+                });
+                
+                return Math.max(0, savingsPercentage);
+            } else {
+                console.log('No income found, returning 100%');
+                return 100; // ถ้าไม่มีรายรับให้ถือว่า 100% (ไม่ถูกจำกัด)
+            }
+        } catch (error) {
+            console.error("Error checking savings percentage:", error);
+            return 100; // Default to safe value
+        }
+    }
+
+    async function updateSpendingRestriction(uid) {
+        const savingsPercentage = await checkSavingsPercentage(uid);
+        const isBlocked = savingsPercentage < 30;
+        
+        // Update localStorage for spending restriction
+        localStorage.setItem('isSpendingBlocked', isBlocked.toString());
+        localStorage.setItem('currentSavingsPercentage', savingsPercentage.toString());
+        
+        console.log(`Savings percentage: ${savingsPercentage}%, Is blocked: ${isBlocked}`);
+        
+        return isBlocked;
+    }
+
+    // ================== Emergency Management ==================
+    function isEmergencyMode() {
+        return sessionStorage.getItem('emergencyOverride') === 'true';
+    }
+
+    function setEmergencyMode(reason) {
+        sessionStorage.setItem('emergencyOverride', 'true');
+        sessionStorage.setItem('emergencyReason', reason || '');
+    }
+
+    function clearEmergencyMode() {
+        sessionStorage.removeItem('emergencyOverride');
+        sessionStorage.removeItem('emergencyReason');
+    }
+
+    function populateCategories() {
+        const selectedType = typeSelect.value;
+        categorySelect.innerHTML = '';
+        categories[selectedType].forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        });
+        updateFormState();
+    }
+
+    function setDefaultDate() {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    function updateFormState() {
+        const isBlocked = localStorage.getItem('isSpendingBlocked') === 'true';
+        const savingsPercentage = parseFloat(localStorage.getItem('currentSavingsPercentage') || '100');
+        const isExpense = typeSelect.value === 'expense';
+        const isEmergency = isEmergencyMode();
+        
+        console.log(`Form state - IsBlocked: ${isBlocked}, SavingsPercentage: ${savingsPercentage}, IsExpense: ${isExpense}, IsEmergency: ${isEmergency}`);
+        
+        // Update spending ban alert text with current percentage
+        const alertElement = document.getElementById('spending-ban-alert');
+        alertElement.innerHTML = `🚨 เงินออม ${savingsPercentage.toFixed(1)}% (ต่ำกว่า 30%) - ระบบจำกัดการเพิ่มรายจ่าย`;
+        
+        // Show/hide spending restriction UI only when:
+        // 1. Spending is blocked (savings < 30%)
+        // 2. User is trying to add expense
+        // 3. Emergency mode is not active
+        if (isBlocked && isExpense && !isEmergency) {
+            spendingBanAlert.style.display = 'block';
+            emergencyControls.style.display = 'block';
+            
+            // Disable form fields
+            submitButton.disabled = true;
+            submitButton.textContent = 'ไม่สามารถเพิ่มรายจ่ายได้';
+            amountInput.disabled = true;
+            descriptionInput.disabled = true;
+            categorySelect.disabled = true;
+        } else {
+            // Hide restriction UI when savings >= 30% OR not expense OR emergency mode active
+            spendingBanAlert.style.display = 'none';
+            emergencyControls.style.display = 'none';
+            
+            // Enable form fields
+            submitButton.disabled = false;
+            submitButton.textContent = 'บันทึกรายการ';
+            amountInput.disabled = false;
+            descriptionInput.disabled = false;
+            categorySelect.disabled = false;
+        }
+        
+        // Update hidden fields
+        document.getElementById('isEmergency').value = isEmergency ? 'true' : 'false';
+        document.getElementById('emergencyReason').value = isEmergency ? (sessionStorage.getItem('emergencyReason') || '') : '';
+    }
+
+    async function checkAndAwardBadge(uid, badgeId) {
+        if (!uid || !badgeId) return;
+
+        const userDocRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userDocRef);
+
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            const currentBadges = userData.badges || [];
+
+            if (!currentBadges.includes(badgeId)) {
+                const awardedBadge = allBadges.find(b => b.id === badgeId);
+                if (awardedBadge) {
+                    try {
+                        await updateDoc(userDocRef, {
+                            badges: arrayUnion(badgeId),
+                            xp: increment(awardedBadge.xp || 0),
+                            coins: increment(awardedBadge.coins || 0)
+                        });
+                        showMessageBox(`ยินดีด้วย! คุณได้รับเหรียญตราใหม่: ${awardedBadge.name}!`, "success");
+                    } catch (error) {
+                        console.error(`Error awarding badge ${badgeId}:`, error);
+                    }
+                }
+            }
+        }
+    }
+
+    async function saveTransaction(event) {
+        event.preventDefault();
+        
+        if (!currentUser) {
+            showMessageBox("กรุณาเข้าสู่ระบบก่อนบันทึกรายการ", "info");
+            return;
+        }
+
+        // ตรวจสอบจำนวนธุรกรรมในวันนั้น
+        const transactionCount = await checkTransactionQuota(currentUser.uid);
+
+        // จำกัดธุรกรรมไม่เกิน 10 รอบต่อวัน
+        if (transactionCount >= 10) {
+            showMessageBox('คุณทำธุรกรรมครบ 10 รอบแล้วในวันนี้', 'error');
+            return;
+        }
+
+        // Check current financial status
+        await updateSpendingRestriction(currentUser.uid);
+        
+        const isBlocked = localStorage.getItem('isSpendingBlocked') === 'true';
+        const isEmergency = isEmergencyMode();
+        
+        if (isBlocked && typeSelect.value === 'expense' && !isEmergency) {
+            const savingsPercentage = parseFloat(localStorage.getItem('currentSavingsPercentage') || '0');
+            showMessageBox(`ไม่สามารถเพิ่มรายจ่ายได้ เนื่องจากเงินออม ${savingsPercentage.toFixed(1)}% (ต่ำกว่า 30%)`, 'error');
+            return;
+        }
+
+        const transaction = {
+            type: typeSelect.value,
+            category: categorySelect.value,
+            amount: parseFloat(amountInput.value),
+            date: dateInput.value,
+            description: descriptionInput.value.trim(),
+            createdAt: serverTimestamp(),
+            isEmergency: isEmergency,
+            emergencyReason: isEmergency ? (sessionStorage.getItem('emergencyReason') || '') : ''
+        };
+        
+        if (!transaction.type || !transaction.category || !transaction.amount || 
+            transaction.amount <= 0 || !transaction.date || !transaction.description) {
+            showMessageBox("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง", "error");
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'กำลังบันทึก...';
+
+        try {
+            // Add transaction to Firestore
+            await addDoc(collection(db, 'users', currentUser.uid, 'transactions'), transaction);
+            
+            // Update user stats
+            const userRef = doc(db, 'users', currentUser.uid);
+            const updateData = {
+                xp: increment(10),
+                lastActivity: serverTimestamp()
+            };
+
+            // Update income/expense totals
+            if (transaction.type === 'income') {
+                updateData.totalIncome = increment(transaction.amount);
+            } else {
+                updateData.totalExpenses = increment(transaction.amount);
+            }
+
+            await updateDoc(userRef, updateData);
+
+            // Check and award badge
+            await checkAndAwardBadge(currentUser.uid, 'first_transaction');
+
+            // Clear emergency mode after successful transaction
+            if (isEmergency) {
+                clearEmergencyMode();
+            }
+
+            // Update spending restriction after transaction
+            await updateSpendingRestriction(currentUser.uid);
+
+            showMessageBox("บันทึกรายการสำเร็จ! ได้รับ 10 XP!", "success", () => {
+                window.location.href = "dashboard.html";
+            });
+
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            showMessageBox("เกิดข้อผิดพลาดในการบันทึก: " + error.message, "error");
+            submitButton.disabled = false;
+            submitButton.textContent = 'บันทึกรายการ';
+        }
+    }
+
+    // ================== Event Listeners ==================
+    
+    // Emergency Modal Controls
+    document.getElementById('openEmergencyModal')?.addEventListener('click', () => {
+        emergencyModal.classList.add('show');
+    });
+
+    document.getElementById('cancelEmergencyBtn')?.addEventListener('click', () => {
+        emergencyModal.classList.remove('show');
+        document.getElementById('emergencyReasonInput').value = '';
+    });
+
+    document.getElementById('confirmEmergencyBtn')?.addEventListener('click', () => {
+        const reason = document.getElementById('emergencyReasonInput').value.trim();
+        
+        if (reason.length < 10) {
+            showMessageBox('กรุณาระบุเหตุผลอย่างน้อย 10 ตัวอักษร', 'error');
+            return;
+        }
+        
+        setEmergencyMode(reason);
+        emergencyModal.classList.remove('show');
+        
+        // Force expense type and update form
+        typeSelect.value = 'expense';
+        populateCategories();
+        updateFormState();
+        
+        showMessageBox('เปิดใช้งานโหมดฉุกเฉินแล้ว คุณสามารถเพิ่มรายจ่ายได้ 1 รายการ', 'info');
+    });
+
+    // Auth State Observer
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            
+            // Check spending restriction when user logs in
+            console.log('User logged in, checking spending restriction...');
+            await updateSpendingRestriction(user.uid);
+            
+            transactionForm.style.display = 'block';
+            updateFormState();
+        } else {
+            currentUser = null;
+            console.log("ผู้ใช้ยังไม่ได้ล็อกอิน, กำลังพยายามล็อกอินแบบไม่ระบุตัวตน...");
+            signInAnonymously(auth).catch(err => {
+                console.error("การล็อกอินแบบไม่ระบุตัวตนล้มเหลว:", err);
+                showMessageBox("ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่อีกครั้ง", "error");
+            });
+        }
+    });
+
+    // Form Events
+    typeSelect.addEventListener('change', () => {
+        populateCategories();
+        updateFormState();
+    });
+    
+    transactionForm.addEventListener('submit', saveTransaction);
+    
+    // Initialize on DOM ready
+    document.addEventListener("DOMContentLoaded", async () => {
+        setDefaultDate();
+        populateCategories();
+        
+        // Wait a bit for auth to initialize, then check restrictions
+        setTimeout(async () => {
+            if (currentUser) {
+                console.log('DOM ready, checking spending restriction for existing user...');
+                await updateSpendingRestriction(currentUser.uid);
+                updateFormState();
+            }
+        }, 1000);
+    });
+
+    // Check for spending restrictions on page load
+    window.addEventListener('storage', async (e) => {
+        if (e.key === 'isSpendingBlocked') {
+            console.log('Storage event detected, updating form state...');
+            updateFormState();
+        }
+    });
+
+    // Force check restrictions every 5 seconds (for debugging)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        setInterval(async () => {
+            if (currentUser) {
+                console.log('Periodic check - updating spending restrictions...');
+                await updateSpendingRestriction(currentUser.uid);
+                updateFormState();
+            }
+        }, 5000);
+    }
+</script>
+</body>
+</html>

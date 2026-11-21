@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <title>รายละเอียดบทเรียน – บทที่ 5 การสร้างรายได้เสริม</title>
+  <meta name="theme-color" content="#1F8F4E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4;}
+    .header { background-color:#1F8F4E; color:white; padding:20px; text-align:center; }
+    .container { padding:20px; max-width:800px; margin:0 auto; }
+    .lesson-title { color:#0E4D2C; font-size:1.7rem; margin-bottom:18px; }
+    .lesson-content { font-size:1.07rem; color:#444; line-height:2.08; margin-bottom:24px; }
+    .pagination { text-align:center; margin:28px 0 10px 0;}
+    .page-btn { display:inline-block; background:#1F8F4E; color:#fff; padding:8px 20px; border-radius:7px; text-decoration:none; margin:0 12px; transition:background 0.2s;}
+    .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none;}
+    .back-btn { margin-top:30px; display:inline-block; background:#1F8F4E; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s;}
+    .back-btn:hover { background:#15713D; }
+    .action-btn { background:#1F8F4E; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer;}
+    .action-btn:hover { background:#15713D; }
+    .action-btn:disabled { background:#ccc !important; color:#888; pointer-events:none; }
+    .quiz-status { margin-left:16px; font-weight:bold; }
+    ul,ol { margin-bottom:1em; }
+    .emph { color:#d84315; font-weight:bold;}
+    .block { background:#fffde7; border-left:6px solid #fbc02d; margin:14px 0 18px 0; padding:10px 20px; border-radius:6px;}
+    .takeaway { color:#00695c; font-weight:bold; margin:18px 0 10px 0;}
+    .highlight { background:#e3f2fd; border-left:6px solid #42a5f5; padding:8px 15px; border-radius:6px; margin:14px 0;}
+    .example { background: #e0f7fa; border-left: 6px solid #00bcd4; padding: 8px 15px; border-radius: 6px; margin: 14px 0; }
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; margin: 24px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    
+    /* === QUIZ STYLES FROM PREVIOUS LESSONS === */
+    .end-of-chapter-quiz .question { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #1F8F4E; }
+    .end-of-chapter-quiz .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; }
+    .end-of-chapter-quiz .choices { display: flex; flex-direction: column; gap: 10px; }
+    .end-of-chapter-quiz .choice { background-color: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 10px; cursor: pointer; display: block; }
+    #quizResult.correct { color: #388e3c; }
+    #quizResult.incorrect { color: #d32f2f; }
+
+    /* Custom Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+    .modal-content h3 {
+        color: #0E4D2C;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    .modal-content p {
+        color: #333;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        white-space: pre-wrap; /* Preserve newlines from message */
+    }
+    .modal-content button {
+        background-color: #1F8F4E;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .modal-content button:hover {
+        background-color: #15713D;
+        transform: translateY(-1px);
+    }
+    /* Specific styles for success/error messages */
+    .modal-content.success h3 { color: #388e3c; }
+    .modal-content.error h3 { color: #d32f2f; }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+</head>
+<body>
+  <div class="header"><h1>รายละเอียดบทเรียน: การสร้างรายได้เสริม</h1></div>
+  <div class="container">
+    <div id="lessonDetails"></div>
+    <div class="pagination" id="pagination"></div>
+    <a href="lesson.html" class="back-btn">กลับสู่รายการบทเรียน</a>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="customAlertModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <button id="modalCloseBtn">ตกลง</button>
+    </div>
+  </div>
+
+  <script>
+    const lessonId = 5; // This should be dynamically set for each lesson page
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageNow = Number(urlParams.get("page")||1);
+
+    const pages = [
+      {
+        title: "บทที่ 5: นิยาม ภาพรวม และเหตุผลที่ต้องสร้างรายได้เสริม (หน้า 1/7)",
+        content: `
+          <div>
+            <b>รายได้เสริม</b> คือ รายได้ที่เราหามาเพิ่มนอกจากแหล่งรายได้หลัก เช่น ค่าขนม เงินเดือน หรือเงินสนับสนุนจากผู้ปกครอง<br>
+            <b>ทำไมถึงต้องมีรายได้เสริม?</b>
+            <ul>
+              <li>ช่วยเพิ่มความมั่นคงทางการเงิน มีเงินสำรองใช้ยามฉุกเฉิน หรือเติมเต็มความฝัน</li>
+              <li>ฝึกนิสัยรับผิดชอบ รู้จักคุณค่าของเงิน และเห็นโอกาสรอบตัว</li>
+              <li>สร้างทักษะใหม่ๆ ทั้งการบริหารเวลา การขาย ความคิดสร้างสรรค์ ฯลฯ</li>
+              <li>บางคนเริ่มต้นด้วยรายได้เสริม จนกลายเป็นธุรกิจส่วนตัวในอนาคต!</li>
+            </ul>
+            <div class="block">
+              <b>ตัวอย่าง:</b> ก้อยรับจ้างตัดต่อวิดีโอออนไลน์ตั้งแต่มัธยม จากเงินค่าขนมเดือนละ 700 กลายเป็นรายได้เสริมเดือนละ 2,000 บาทโดยไม่รบกวนพ่อแม่
+            </div>
+            <h3>เปรียบเทียบชีวิต "มีรายได้เสริม" กับ "ไม่มี"</h3>
+            <ul>
+              <li><b>ชีวิตไม่มีรายได้เสริม</b>: รอพึ่งเงินผู้ปกครอง เมื่อขาดเงินอาจต้องอด หรือก่อหนี้ ทักษะใหม่ ๆ โตช้ากว่าเพื่อน</li>
+              <li><b>ชีวิตมีรายได้เสริม</b>: รู้จักสร้างโอกาส มีเงินสำรอง ไม่ต้องยืมใคร พัฒนาไหวพริบ-ความคิดสร้างสรรค์</li>
+            </ul>
+            <div class="highlight"><b>Infobox:</b> วัยรุ่นไทยยุคใหม่หารายได้เสริมตั้งแต่อายุ 12-15 ปีเพิ่มขึ้นกว่า 30% ในรอบ 10 ปี</div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 5: ช่องทางสร้างรายได้เสริม (หน้า 2/7)",
+        content: `
+          <div>
+            <h3>ช่องทางสร้างรายได้เสริมสำหรับเยาวชน</h3>
+            <ul>
+              <li><b>ขายของออนไลน์/ออฟไลน์</b>
+                <ul>
+                  <li>สินค้าแฟชั่น เสื้อผ้า เครื่องประดับ ของใช้ DIY</li>
+                  <li>ขนม อาหารว่าง งานแฮนด์เมด</li>
+                  <li>ตั้งเพจ/IG/TikTok โปรโมตเอง สั่ง-ส่งง่าย</li>
+                  <li>เรียนรู้การตลาดจริงตั้งแต่ยังเด็ก</li>
+                </ul>
+              </li>
+              <li><b>งานรับจ้าง/บริการ</b>
+                <ul>
+                  <li>ล้างรถ ตัดหญ้า ดูแลสัตว์เลี้ยง</li>
+                  <li>ช่วยงานบ้าน งานสวน ช่วยงานร้านค้า</li>
+                  <li>ค่าตอบแทนรวดเร็ว ฝึกความรับผิดชอบ</li>
+                </ul>
+              </li>
+              <li><b>งานออนไลน์/คอนเทนต์</b>
+                <ul>
+                  <li>ตัดต่อวิดีโอ ออกแบบภาพ โพสต์ Social Media</li>
+                  <li>เขียนบทความ ทำเพจข่าว/ความรู้ หรือรีวิวสินค้า</li>
+                  <li>Content Creator - YouTube, TikTok, Facebook</li>
+                  <li>เปิดช่อง สร้างกลุ่มผู้ติดตาม มีรายได้จากยอดวิว/โฆษณา</li>
+                </ul>
+              </li>
+              <li><b>ติว/สอนพิเศษ</b>
+                <ul>
+                  <li>ติวเพื่อน/รุ่นน้องในวิชาที่ถนัด (เช่น คณิต อังกฤษ ศิลปะ ฯลฯ)</li>
+                  <li>จัดคลาสกลุ่มย่อยที่บ้าน/ออนไลน์</li>
+                  <li>ได้ทั้งความรู้และเงินค่าขนม</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="example"><b>กรณีศึกษา:</b> เมฆเริ่มถ่ายคลิปรีวิวมือถือแบบบ้าน ๆ ลง TikTok สองเดือนต่อมาเริ่มมีร้านส่งของมาให้รีวิว ได้ทั้งของฟรีและเงินค่าจ้าง!</div>
+            <div class="block">
+              <b>Tips:</b> เลือกช่องทางที่ “เหมาะกับเวลา-ความถนัด-ความปลอดภัย” และควรขอคำแนะนำจากผู้ปกครองเสมอ
+            </div>
+            <div class="highlight">
+              <b>ข้อควรระวัง:</b> งานออนไลน์บางประเภทอาจเสี่ยงโดนหลอก ควรตรวจสอบแหล่งที่มาทุกครั้ง
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 5: วางแผน เป้าหมาย และการจัดสรรเวลา (หน้า 3/7)",
+        content: `
+          <div>
+            <b>หัวข้อหลัก: วางแผนอย่างไรให้หารายได้เสริมสำเร็จ?</b>
+            <ul>
+              <li>
+                <b>1. การตั้งเป้าหมาย</b>
+                <ul>
+                  <li><b>เป้าหมายระยะสั้น</b> เช่น เก็บเงินซื้อหนังสือ</li>
+                  <li><b>เป้าหมายระยะกลาง</b> เช่น ออมเงินไปทัศนศึกษา</li>
+                  <li><b>เป้าหมายระยะยาว</b> เช่น สะสมเงินซื้อคอมพิวเตอร์</li>
+                  <li>เป้าหมายที่ดีควรเป็นแบบ <b>SMART</b> (Specific, Measurable, Achievable, Relevant, Time-bound)</li>
+                </ul>
+              </li>
+              <li>
+                <b>2. การจัดสรรเวลาอย่างมีประสิทธิภาพ</b>
+                <ul>
+                  <li>วางแผนแต่ละวันล่วงหน้า ใช้สมุดหรือแอปบันทึกตารางเวลา</li>
+                  <li>แบ่งเวลาเรียน-ทำงานเสริม-พักผ่อนให้สมดุล</li>
+                  <li>เลือกงานเสริมที่ไม่กระทบการเรียนและสุขภาพ</li>
+                </ul>
+              </li>
+              <li>
+                <b>3. การติดตามและประเมินผล</b>
+                <ul>
+                  <li>สรุปรายรับ–รายจ่ายทุกสัปดาห์</li>
+                  <li>ทบทวนเป้าหมายสม่ำเสมอและปรับแผนเมื่อจำเป็น</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="block">
+              <b>เทคนิค:</b> ใช้ “To-Do List” รายวัน ช่วยให้ไม่หลงลืมและเห็นความคืบหน้าชัดเจน
+            </div>
+            <div class="highlight">
+              <b>กรณีศึกษา:</b> ตองต้องการซื้อจักรยานราคา 3,000 บาท เขาจัดตารางล้างรถวันละ 1 คัน สัปดาห์ละ 4 วัน ได้ค่าจ้าง 100 บาท/วัน จนครบ 2 เดือนก็บรรลุเป้าหมาย
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 5: ทักษะจำเป็นและการพัฒนาตัวเอง (หน้า 4/7)",
+        content: `
+          <div>
+            <b>ทักษะสำคัญสำหรับการหารายได้เสริม</b>
+            <ul>
+              <li>
+                <b>1. ทักษะการสื่อสารและการนำเสนอ</b>
+                <ul>
+                  <li>พูดจาชัดเจน น่าเชื่อถือ รู้จักฟังและเจรจา</li>
+                  <li>การนำเสนอสินค้า/บริการให้โดนใจ</li>
+                </ul>
+              </li>
+              <li>
+                <b>2. ทักษะการตลาดเบื้องต้น</b>
+                <ul>
+                  <li>รู้จักสร้างจุดขาย เลือกช่องทางประชาสัมพันธ์ที่เหมาะสม</li>
+                  <li>ถ่ายภาพ ตัดต่อคลิป ตกแต่งกราฟิกให้น่าสนใจ</li>
+                  <li>ทดลองโปรโมตในหลายกลุ่มเป้าหมาย</li>
+                </ul>
+              </li>
+              <li>
+                <b>3. ทักษะบริหารจัดการเงิน</b>
+                <ul>
+                  <li>จดบันทึกค่าใช้จ่าย-รายได้ทุกครั้ง</li>
+                  <li>แยกบัญชีเงินออม เงินลงทุน เงินหมุนเวียน</li>
+                </ul>
+              </li>
+              <li>
+                <b>4. ทักษะคิดวิเคราะห์และแก้ปัญหา</b>
+                <ul>
+                  <li>คิดวางแผน จัดการเวลา แก้ปัญหาเฉพาะหน้าได้</li>
+                  <li>หากเจออุปสรรค ให้ลองเปลี่ยนแผนหรือขอคำแนะนำจากผู้อื่น</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="block">
+              <b>ตัวอย่าง:</b> พายฝึกแต่งรูปและเขียนโพสต์ขายสินค้าใน IG ทุกวัน จนกลายเป็นจุดเด่น ลูกค้าประจำมากขึ้น
+            </div>
+            <div class="example">
+              <b>เทคนิคเสริม:</b> ฝึกบันทึกเสียงแนะนำตัวเอง ลอง Live หรืออัดคลิปรีวิวของที่ขาย เสริมความมั่นใจและฝึกการนำเสนอ
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 5: อุปสรรคยอดฮิตและวิธีรับมือ (หน้า 5/7)",
+        content: `
+          <div>
+            <b>หัวข้อหลัก: อุปสรรคที่พบเจอและการเอาชนะ</b>
+            <ul>
+              <li>
+                <b>1. อุปสรรคทางเวลา</b>
+                <ul>
+                  <li>งาน-เรียน-ชีวิตส่วนตัวทับซ้อน</li>
+                  <li>วิธีแก้: วางแผนแต่ละวันล่วงหน้า หรือลดงานเสริมในช่วงสอบ</li>
+                </ul>
+              </li>
+              <li>
+                <b>2. อุปสรรคเรื่องทุนและความกลัว</b>
+                <ul>
+                  <li>ไม่มีทุนเริ่มต้น: เลือกงานที่ใช้แรงหรือทักษะแทนเงินลงทุน เช่น สอนพิเศษ รับจ้างทั่วไป</li>
+                  <li>กลัวถูกโกง/กลัวล้มเหลว: ควรศึกษาข้อมูล หาผู้ใหญ่แนะนำ และเริ่มจากงานเล็กๆ ก่อน</li>
+                </ul>
+              </li>
+              <li>
+                <b>3. อุปสรรคเรื่องความมั่นใจ</b>
+                <ul>
+                  <li>กลัวโดนปฏิเสธหรือเพื่อนล้อ: สร้างกำลังใจด้วยการตั้งเป้าหมายชัดเจนและเชื่อมั่นในคุณค่า</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="block">
+              <b>ตัวอย่าง:</b> หนุ่มรับจ้างส่งของแต่ขี่จักรยานไม่เก่ง จึงฝึกซ้อมกับเพื่อนทุกเย็น สุดท้ายกลายเป็นแชมป์ส่งของในหมู่บ้าน!
+            </div>
+            <div class="highlight">
+              <b>Tips:</b> ปรึกษาผู้ใหญ่หรือเพื่อนที่มีประสบการณ์ก่อนเริ่มต้นงานใหม่เสมอ
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 5: ข้อควรระวัง & หลุมพราง (หน้า 6/7)",
+        content: `
+          <div>
+            <b>ข้อควรระวังและกับดักการหารายได้เสริม</b>
+            <ul>
+              <li>
+                <b>1. งานออนไลน์ปลอม งานแชร์ลูกโซ่</b>
+                <ul>
+                  <li>เช่น งานคลิกโฆษณา งานลงทุนระยะสั้น งานขายฝัน</li>
+                  <li>อาจถูกหลอกให้โอนเงินก่อน แล้วไม่ได้งาน/ไม่ได้ค่าตอบแทน</li>
+                  <li>ควรเช็คชื่อเสียงบริษัท/รีวิวคนที่เคยทำจริง</li>
+                </ul>
+              </li>
+              <li>
+                <b>2. โฟกัสแต่เงินจนเสียสุขภาพ/เสียการเรียน</b>
+                <ul>
+                  <li>บางคนทุ่มเทเกินไปจนเหนื่อย เครียด ผลการเรียนตก</li>
+                  <li>ควรตั้งลิมิตเวลา หมั่นเช็คสุขภาพตัวเอง</li>
+                </ul>
+              </li>
+              <li>
+                <b>3. ขาดความรู้ ขาดที่ปรึกษา</b>
+                <ul>
+                  <li>ลงทุน/เริ่มต้นโดยไม่ศึกษาข้อมูลให้ดี</li>
+                  <li>ควรขอคำปรึกษาผู้ใหญ่หรือคนมีประสบการณ์ก่อนตัดสินใจ</li>
+                </ul>
+              </li>
+              <li>
+                <b>4. ไม่แจ้งพ่อแม่/ผู้ปกครองก่อนเริ่มงาน</b>
+                <ul>
+                  <li>ความปลอดภัยต้องมาก่อนเสมอ</li>
+                  <li>แจ้งให้รู้ไว้ล่วงหน้าเผื่อมีปัญหาจะได้ช่วยเหลือทัน</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="block"><b>ตัวอย่าง:</b> เพื่อนเคยลงทุนแชร์ออนไลน์เพราะเห็นโฆษณาได้เงินง่าย สุดท้ายถูกโกงเงินหมด ต้องเรียนรู้บทเรียนนี้</div>
+            <div class="example"><b>แนวคิด:</b> รายได้เสริมที่แท้จริง คือการสร้าง “คุณค่า” ให้ตัวเองและสังคม ไม่ใช่แค่ได้เงินเร็ว!</div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 5: สรุปและแบบทดสอบท้ายบท (หน้า 7/7)",
+        content: `
+          <div class="takeaway">
+            สรุป: การหารายได้เสริมไม่ใช่แค่เรื่องเงิน แต่เป็นการลงทุนในทักษะ ประสบการณ์ และอนาคตของตัวเอง การเริ่มจากก้าวเล็กๆ ที่มั่นคง คือหัวใจสู่ความสำเร็จ
+          </div>
+          <div class="video-container">
+            <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/GBg21reFL5c?si=czY9gRj7jJNPjXl_" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
+
+          <!-- NEW QUIZ STRUCTURE -->
+          <div class="end-of-chapter-quiz" id="end-of-chapter-quiz"></div>
+          <button type="button" class="action-btn" id="checkQuizBtn">ตรวจคำตอบ</button>
+          <span id="quizResult" class="quiz-status"></span>
+          <div style="margin-top:16px;">
+            <button id="doneBtn" class="action-btn disabled" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status" style="color:#388e3c;"></span>
+          </div>
+          <!-- ===== แหล่งที่มาบทที่ 5 ===== -->
+<div class="block" style="margin-top:32px;">
+  <h3>แหล่งที่มาที่น่าเชื่อถือ</h3>
+  <ul>
+    <li><a href="https://www.set.or.th/th/education/financial-planning/extra-income" target="_blank">ตลาดหลักทรัพย์แห่งประเทศไทย: สร้างรายได้เสริมอย่างไรให้ปลอดภัย</a></li>
+    <li><a href="https://www.doe.go.th/prd/assets/upload/files/youth/extra-income-for-youth.pdf" target="_blank">กรมการจัดหางาน: แนวทางหารายได้เสริมสำหรับเยาวชน</a></li>
+    <li><a href="https://www.bot.or.th/th/our-roles/monetary-policy/monetary-knowledge/income-ways.html" target="_blank">ธนาคารแห่งประเทศไทย: แนวทางเพิ่มรายได้</a></li>
+  </ul>
+</div>
+  
+        `
+      }
+    ];
+
+    let page = Math.min(Math.max(pageNow,1), pages.length);
+    let html = `<div class="lesson-title">${pages[page-1].title}</div>
+                <div class="lesson-content">${pages[page-1].content}</div>`;
+    document.getElementById("lessonDetails").innerHTML = html;
+
+    let pag = "";
+    if (page > 1) pag += `<a class="page-btn" href="lesson-detail5.html?page=${page-1}">หน้าก่อนหน้า</a>`;
+    if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail5.html?page=${page+1}">หน้าถัดไป</a>`;
+    document.getElementById("pagination").innerHTML = pag;
+
+
+    // --- SCRIPT FOR QUIZ PAGE (ADAPTED FROM PREVIOUS LESSONS) ---
+    if (page === pages.length) {
+        // --- Delay script to ensure HTML is rendered ---
+        setTimeout(() => {
+            // --- QUIZ CONFIGURATION ---
+            const quizData = [
+                {
+                    question: "1. ข้อใดคือความเสี่ยงของ 'งานออนไลน์ปลอม' ที่ควรระวังที่สุด?",
+                    choices: ["ก. ได้ค่าตอบแทนน้อยกว่าที่คาดไว้", "ข. ถูกหลอกให้โอนเงินก่อนเริ่มงาน", "ค. งานน่าเบื่อและใช้เวลานาน"],
+                    answer: "ข. ถูกหลอกให้โอนเงินก่อนเริ่มงาน"
+                },
+                {
+                    question: "2. หากไม่มีเงินทุนเริ่มต้น ควรเลือกหารายได้เสริมด้วยวิธีใด?",
+                    choices: ["ก. ลงทุนในหุ้นตามเพื่อน", "ข. กู้เงินมาเพื่อซื้อของมาขาย", "ค. ใชทักษะที่มี เช่น รับจ้างสอนพิเศษ หรือออกแบบกราฟิก"],
+                    answer: "ค. ใชทักษะที่มี เช่น รับจ้างสอนพิเศษ หรือออกแบบกราฟิก"
+                },
+                {
+                    question: "3. สิ่งที่สำคัญที่สุดที่ควรทำก่อนเริ่มหารายได้เสริมคืออะไร?",
+                    choices: ["ก. ออกแบบโลโก้ให้สวยงาม", "ข. แบ่งเวลาให้สมดุลและไม่กระทบการเรียน", "ค. ซื้อของมาสต็อกไว้เยอะๆ เพื่อรอขาย"],
+                    answer: "ข. แบ่งเวลาให้สมดุลและไม่กระทบการเรียน"
+                }
+            ];
+
+            // --- GET ELEMENTS ---
+            const quizContainer = document.getElementById('end-of-chapter-quiz');
+            const checkButton = document.getElementById('checkQuizBtn');
+            const resultContainer = document.getElementById('quizResult');
+            const doneBtn = document.getElementById("doneBtn");
+            const doneStatus = document.getElementById("doneStatus");
+
+            // --- FUNCTION: Build Quiz HTML ---
+            function buildEndOfChapterQuiz() {
+                quizData.forEach((currentQuestion, questionNumber) => {
+                    const choicesHTML = currentQuestion.choices.map(choice => `
+                        <label class="choice">
+                            <input type="radio" name="chapter_question${questionNumber}" value="${choice}">
+                            ${choice}
+                        </label>
+                    `).join('');
+                    const questionHTML = `
+                        <div class="question">
+                            <div class="question-text">${currentQuestion.question}</div>
+                            <div class="choices">${choicesHTML}</div>
+                        </div>
+                    `;
+                    if(quizContainer) quizContainer.innerHTML += questionHTML;
+                });
+            }
+
+            // --- FUNCTION: Check Answers ---
+            function checkQuizAnswers() {
+                if(!quizContainer) return;
+                const answerContainers = quizContainer.querySelectorAll('.choices');
+                let numCorrect = 0;
+                let allAnswered = true;
+
+                quizData.forEach((currentQuestion, questionNumber) => {
+                    const selector = `input[name=chapter_question${questionNumber}]:checked`;
+                    const userAnswerNode = (answerContainers[questionNumber]) ? answerContainers[questionNumber].querySelector(selector) : null;
+                    if (!userAnswerNode) { 
+                        allAnswered = false; 
+                        return; 
+                    }
+                    if (userAnswerNode.value === currentQuestion.answer) {
+                        numCorrect++;
+                    }
+                });
+                
+                if (!allAnswered) {
+                    resultContainer.textContent = "กรุณาตอบคำถามให้ครบทุกข้อ";
+                    resultContainer.className = "quiz-status incorrect";
+                    doneBtn.disabled = true; // Keep done button disabled if not all questions are answered
+                    doneBtn.classList.add('disabled');
+                    return;
+                }
+
+                if (numCorrect === quizData.length) {
+                    resultContainer.textContent = "ยอดเยี่ยม! คุณตอบถูกทุกข้อ";
+                    resultContainer.className = "quiz-status correct";
+                    doneBtn.disabled = false;
+                    doneBtn.classList.remove('disabled');
+                    doneStatus.textContent = "ตอนนี้คุณสามารถกดยืนยันเพื่อจบบทเรียนได้แล้ว!";
+                } else {
+                    resultContainer.textContent = `พยายามอีกนิด! คุณตอบถูก ${numCorrect} จาก ${quizData.length} ข้อ`;
+                    resultContainer.className = "quiz-status incorrect";
+                    doneBtn.disabled = true;
+                    doneBtn.classList.add('disabled');
+                    doneStatus.textContent = "";
+                }
+            }
+            
+            // --- FUNCTION: Handle Finishing Lesson ---
+            // This function will now call the Firebase integration function
+            function finishLesson() {
+                // Call the Firebase function to complete the lesson and grant XP
+                // Assuming completeLessonInFirestore is exposed globally by the Firebase script
+                if (window.completeLessonInFirestore) {
+                    window.completeLessonInFirestore(lessonId, 80); // Award 80 XP for this lesson
+                } else {
+                    // Fallback for when Firebase script might not be loaded (e.g., local testing without Firebase)
+                    console.error("Firebase script not loaded. Saving to localStorage only.");
+                    localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                    window.checkInitialDoneStatus(); // Update UI based on local storage
+                    // Show a custom alert for localStorage save
+                    showCustomAlert("บันทึกความคืบหน้า", "บทเรียนนี้ถูกบันทึกเป็นเสร็จสิ้นแล้ว! (บันทึกในเครื่อง)", true);
+                }
+            }
+
+            // --- FUNCTION: Initial State Setup ---
+            // This function checks if the lesson was already completed (from localStorage or Firebase)
+            window.checkInitialDoneStatus = function() {
+                if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
+                    doneStatus.textContent = "คุณเรียนจบบทนี้แล้ว!";
+                    if(doneBtn) doneBtn.disabled = true;
+                    if(doneBtn) doneBtn.classList.add('disabled');
+                    if(checkButton) checkButton.style.display = 'none';
+                    if(resultContainer) resultContainer.style.display = 'none';
+
+                    // Disable radio buttons after completion
+                    if(quizContainer) {
+                        quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
+                            radio.disabled = true;
+                        });
+                    }
+                }
+            }
+
+            // --- INITIALIZE ---
+            buildEndOfChapterQuiz();
+            if(checkButton) checkButton.addEventListener('click', checkQuizAnswers);
+            if(doneBtn) doneBtn.addEventListener('click', finishLesson);
+            checkInitialDoneStatus(); // Check status on page load
+
+        }, 200); // Small delay to ensure all HTML elements are loaded
+    }
+  </script>
+
+  <!-- =============================================================== -->
+  <!-- ===== NEW SCRIPT FOR FIREBASE XP & LEVEL UP SYSTEM ===== -->
+  <!-- =============================================================== -->
+  <script type="module">
+    // Firebase SDK Imports
+    import { onAuthStateChanged, doc, runTransaction, increment, arrayUnion, auth, db } from './js/firebase-init.js';
+
+    // Firebase Configuration - REPLACE WITH YOUR ACTUAL CONFIG IF DIFFERENT
+  
+    // Initialize Firebase
+
+    // XP & Leveling System Configuration
+    const LEVEL_CONFIG = [
+        { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+        { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+        { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+        { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+        { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity },
+    ];
+
+    /**
+     * ฟังก์ชันหลักในการเพิ่ม XP, ตรวจสอบการเลเวลอัพ และบันทึกข้อมูลลง Firestore
+     * @param {string} uid - User ID ของ Firebase
+     * @param {number} amount - จำนวน XP ที่จะเพิ่ม
+     * @param {number} lessonId - ID ของบทเรียนที่เพิ่งเรียนจบ
+     * @returns {Promise<{success: boolean, message: string, isSuccessStatus: boolean}>} - ผลลัพธ์และข้อความที่จะแสดง (isSuccessStatus ใช้สำหรับ modal style)
+     */
+    async function grantXpAndLevelUp(uid, amount, lessonId) {
+        if (!uid || !amount || amount <= 0) return { success: false, message: "Invalid input.", isSuccessStatus: false };
+        
+        const userRef = doc(db, 'users', uid);
+        let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+        let isSuccessStatus = true; // Default to success for modal style
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userSnap = await transaction.get(userRef);
+                if (!userSnap.exists()) {
+                    // Create user document if it doesn't exist
+                    console.warn("User document not found. Creating new user profile.");
+                    transaction.set(userRef, {
+                        xp: 0,
+                        level: 1,
+                        nextLevelXP: LEVEL_CONFIG[0].xpToNext,
+                        coins: 0,
+                        completedLessons: []
+                    });
+                }
+                
+                const userData = userSnap.data();
+                const completedLessons = userData.completedLessons || [];
+
+                // Check if lesson already completed
+                if (completedLessons.includes(lessonId)) {
+                    console.log(`Lesson ${lessonId} already completed. No XP awarded.`);
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว ได้รับ XP ไปแล้ว";
+                    isSuccessStatus = false; // Not a new success, so show as neutral/error style
+                    return; // Exit transaction without awarding XP again
+                }
+
+                let xp = userData.xp || 0;
+                let level = userData.level || 1;
+                let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+                let totalCoinReward = 0;
+                
+                xp += amount; // Add XP
+
+                // Loop to check for multiple level-ups
+                while (level < LEVEL_CONFIG.length && xp >= nextLevelXP) {
+                    const currentLevelInfo = LEVEL_CONFIG.find(l => l.level === level);
+                    if (currentLevelInfo && currentLevelInfo.level < LEVEL_CONFIG[LEVEL_CONFIG.length - 1].level) {
+                        const nextLevelInfo = LEVEL_CONFIG.find(l => l.level === currentLevelInfo.level + 1);
+                        if (nextLevelInfo) {
+                            const rewardForThisLevel = 100 + (nextLevelInfo.level * 25); // Calculate reward
+                            totalCoinReward += rewardForThisLevel;
+                            xp -= nextLevelXP; // Deduct XP used for level up
+                            level = nextLevelInfo.level; // Update new level
+                            nextLevelXP = nextLevelInfo.xpToNext; // Set XP for next level
+                            finalMessage += `\n🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${nextLevelInfo.name}!`;
+                        } else {
+                            break; // No next level info found, or max level reached
+                        }
+                    } else {
+                        break; // Max level reached or currentLevelInfo not found
+                    }
+                }
+                
+                const finalUpdateData = {
+                    xp: xp,
+                    level: level,
+                    nextLevelXP: nextLevelXP,
+                    completedLessons: arrayUnion(lessonId)
+                };
+
+                if (totalCoinReward > 0) {
+                    finalUpdateData.coins = increment(totalCoinReward);
+                    finalMessage += `\nได้รับ ${totalCoinReward} เหรียญ!`;
+                }
+                
+                transaction.update(userRef, finalUpdateData);
+            });
+            
+            return { success: true, message: finalMessage, isSuccessStatus: isSuccessStatus };
+        } catch (error) {
+            console.error("Error in transaction: ", error);
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล", isSuccessStatus: false };
+        }
+    }
+    
+    /**
+     * ฟังก์ชันที่ถูกเรียกจากปุ่ม "เรียนจบบทนี้" เพื่อเริ่มกระบวนการให้ XP
+     * @param {number} lessonId - ID บทเรียน
+     * @param {number} xpToAdd - XP ที่จะให้
+     */
+    window.completeLessonInFirestore = async (lessonId, xpToAdd) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        
+        if (doneBtn.disabled) return; // Prevent multiple clicks
+        doneBtn.disabled = true; // Disable button immediately to prevent double submission
+        doneStatus.textContent = "กำลังบันทึก..."; // Show loading status
+        
+        const user = auth.currentUser;
+        if (user) {
+            const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
+            
+            // Show custom alert based on the result
+            showCustomAlert(result.success ? "สำเร็จ!" : "เกิดข้อผิดพลาด", result.message, result.isSuccessStatus);
+            
+            // Update doneStatus text, showing only the first line of the message
+            doneStatus.textContent = result.message.split('\n')[0];
+
+            if(result.success) {
+                // Mark lesson as done in localStorage for immediate UI update
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                // Trigger initial status check to update UI (e.g., disable quiz, hide check button)
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus();
+                }
+            } else {
+                // Re-enable button if the Firebase operation failed
+                doneBtn.disabled = false;
+            }
+        } else {
+            // If user is not logged in, inform them via custom alert
+            showCustomAlert("แจ้งเตือน", "กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP", false);
+            doneBtn.disabled = false; // Re-enable button
+            doneStatus.textContent = "โปรดเข้าสู่ระบบ"; // Update status text
+        }
+    };
+
+    // Firebase Auth State Listener
+    onAuthStateChanged(auth, (user) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+
+        if (doneBtn) { // Ensure the done button exists on the page
+            if (!user) {
+                console.log("User is not logged in.");
+                doneBtn.disabled = true;
+                doneBtn.classList.add('disabled'); // Add disabled style
+                doneBtn.textContent = "กรุณาเข้าสู่ระบบ"; // Inform user to log in
+                doneStatus.textContent = ""; // Clear status
+            } else {
+                console.log("User is logged in.", user.uid);
+                // If user is logged in, check if lesson was already completed
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus(); // This function will enable/disable the button based on localStorage
+                }
+                // If the button is not disabled by checkInitialDoneStatus (i.e., lesson not yet completed),
+                // ensure its text is correct.
+                if (!doneBtn.disabled) {
+                    doneBtn.textContent = "เรียนจบบทนี้";
+                }
+            }
+        }
+    });
+  </script>
+ <script src="darkmode-toggle.js"></script>
+</body>
+</html>

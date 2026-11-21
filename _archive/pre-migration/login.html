@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>🔒 MoneySkillz – เข้าสู่ระบบ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', 'Leelawadee UI', 'Tahoma', sans-serif;
+      background: linear-gradient(135deg, #eaf4f4, #b2dfdb 75%, #b2ebf2);
+      min-height: 100vh; margin: 0;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .login-box {
+      background: #fff;
+      padding: 2.7rem 2rem 2.1rem;
+      border-radius: 24px;
+      box-shadow: 0 10px 36px #00968823;
+      width: 360px; max-width: 98vw;
+      text-align: center;
+      position: relative;
+    }
+    .avatar-login {
+      width: 82px; height: 82px;
+      border-radius: 50%;
+      background: #fff url('https://cdn-icons-png.flaticon.com/512/4712/4712035.png') center/84% no-repeat;
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 16px rgba(0, 150, 136, 0.2);
+    }
+    h1 {
+      font-size: 2.1rem;
+      color: #00796B;
+      margin-top: 30px;
+      margin-bottom: 25px;
+      font-weight: 800;
+    }
+    .password-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #b2dfdb;
+      border-radius: 8px;
+      font-size: 1.04rem;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+    .password-container input {
+        padding-right: 40px;
+        margin-bottom: 0;
+    }
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+        font-size: 1.2rem;
+        user-select: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #009688;
+      color: white;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    button:active {
+        transform: scale(0.98);
+    }
+    .google-btn {
+      background-color: #db4437;
+    }
+    .google-btn:hover {
+        background-color: #c53c2e;
+    }
+    .links {
+      margin-top: 25px;
+      font-size: 0.9em;
+    }
+    .links a {
+      color: #00796B;
+      text-decoration: none;
+      margin: 0 8px;
+    }
+    #messageDiv {
+      margin-top: 20px;
+      font-size: 0.95em;
+      color: red;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="avatar-login"></div>
+    <h1>MoneySkillz</h1>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="อีเมล" required />
+      <div class="password-container">
+        <input type="password" id="password" placeholder="รหัสผ่าน" required />
+        <span class="toggle-password">👁️</span>
+      </div>
+      <button type="submit" id="loginBtn">เข้าสู่ระบบ</button>
+      <button type="button" id="googleSignIn" class="google-btn">เข้าสู่ระบบด้วย Google</button>
+    </form>
+    <div id="messageDiv"></div>
+    <div class="links">
+      <a href="Signup.html">ลงทะเบียน</a> | <a href="forgetpassword.html">ลืมรหัสผ่าน?</a>
+    </div>
+  </div>
+
+  <!-- 🔄 [UPDATED] Firebase SDK Scripts (using modern modular v9+ syntax) -->
+  <script type="module">
+    // Import functions from the Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      signInWithEmailAndPassword, 
+      GoogleAuthProvider, 
+      signInWithPopup 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ✅ Your web app's Firebase configuration
+    // IMPORTANT: Keep this secure and do not expose it publicly in production
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4", // Replace with your actual API key
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.firebasestorage.app",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78",
+      measurementId: "G-Z2ZBWGB245"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- Main Application Logic ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginForm = document.getElementById('loginForm');
+      const googleSignInBtn = document.getElementById('googleSignIn');
+      const messageDiv = document.getElementById('messageDiv');
+
+      // Observer for authentication state changes
+      onAuthStateChanged(auth, user => {
+          if (user) {
+              console.log("ผู้ใช้ล็อกอินอยู่ กำลังเปลี่ยนเส้นทางไป dashboard...");
+              // Use a slight delay to ensure Firestore operations can complete
+              setTimeout(() => {
+                window.location.href = "dashboard.html";
+              }, 500);
+          } else {
+              console.log("ไม่มีผู้ใช้ล็อกอินอยู่");
+          }
+      });
+
+      // Handle Email & Password Login
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        messageDiv.textContent = "";
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            console.log("เข้าสู่ระบบด้วยอีเมลสำเร็จ:", userCredential.user);
+            // onAuthStateChanged will handle the redirect
+          })
+          .catch(error => { 
+            console.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ:", error);
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                messageDiv.textContent = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+            } else {
+                messageDiv.textContent = "เกิดข้อผิดพลาด: " + error.message;
+            }
+          });
+      });
+
+      // Handle Google Sign-In with Popup
+      googleSignInBtn.addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        messageDiv.textContent = "";
+        console.log("กำลังเริ่มกระบวนการล็อกอินด้วย Google (Popup)...");
+
+        try {
+          const result = await signInWithPopup(auth, provider);
+          console.log("ล็อกอินด้วย Google สำเร็จ:", result);
+          const user = result.user;
+          const userRef = doc(db, 'users', user.uid);
+
+          // Check if the user is new
+          const userDoc = await getDoc(userRef);
+          
+          if (!userDoc.exists()) {
+            // If it's a new user, create their data in Firestore
+            console.log(`ผู้ใช้ใหม่ (UID: ${user.uid}) กำลังสร้างข้อมูลใน Firestore...`);
+            await setDoc(userRef, {
+              displayName: user.displayName,
+              email: user.email,
+              createdAt: serverTimestamp(),
+              level: 1,
+              xp: 0,
+              nextLevelXP: 100,
+              quote: "เริ่มต้นเล็กๆ สร้างนิสัยยิ่งใหญ่!",
+              badges: [],
+              coins: 0,
+              inventory: [],
+              lastLoginReward: '',
+              completedLessons: []
+            });
+            console.log("สร้างข้อมูลผู้ใช้ใหม่สำเร็จ");
+          } else {
+            console.log(`ผู้ใช้เก่า (UID: ${user.uid}) กลับมาล็อกอิน`);
+          }
+          // Redirect is handled by onAuthStateChanged
+        } catch (error) {
+          console.error("เกิดข้อผิดพลาดกับ Google Sign-In (Popup):", error);
+          messageDiv.textContent = "เกิดข้อผิดพลาดกับ Google Sign-In: " + error.message; 
+        }
+      });
+
+      // Toggle password visibility
+      document.querySelector('.toggle-password').addEventListener('click', function() {
+          const passwordInput = document.getElementById('password');
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          this.textContent = type === 'password' ? '👁️' : '🙈';
+      });
+    });
+  </script>
+</body>
+</html>

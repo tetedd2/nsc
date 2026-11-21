@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>🏆 Leaderboard - MoneySkillz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme-darkmode.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0f7fa 80%, #b2ebf2 100%);
+            font-family: 'Kanit', sans-serif;
+            margin: 0;
+            padding: 20px 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #004d40;
+        }
+        .container {
+            max-width: 570px;
+            margin: 22px auto;
+            padding: 19px 9px 30px 9px;
+            border-radius: 23px;
+            background: rgba(255,255,255,0.83);
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.12), 0 1.5px 5px #b2dfdb33;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            width: 95%;
+        }
+        h1 {
+            color: #00796b;
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        .leaderboard-list {
+            width: 90%;
+            max-width: 450px;
+            margin-top: 20px;
+        }
+        .leaderboard-item {
+            background: #e0f2f1bd;
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #00796b;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+            border: 1px solid #b2dfdb;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .leaderboard-item:hover {
+            transform: scale(1.03);
+        }
+        .leaderboard-item:nth-child(1) {
+            background: linear-gradient(90deg, #ffd700 0%, #ffeb3b 100%); /* Gold */
+            color: #8B4513;
+            font-size: 1.3em;
+            font-weight: 700;
+            border-color: #ffc107;
+            box-shadow: 0 3px 15px rgba(255,215,0,0.4);
+        }
+        .leaderboard-item:nth-child(2) {
+            background: linear-gradient(90deg, #c0c0c0 0%, #e0e0e0 100%); /* Silver */
+            color: #424242;
+            font-size: 1.25em;
+            font-weight: 700;
+            border-color: #bdbdbd;
+            box-shadow: 0 3px 15px rgba(192,192,192,0.4);
+        }
+        .leaderboard-item:nth-child(3) {
+            background: linear-gradient(90deg, #cd7f32 0%, #e6be9c 100%); /* Bronze */
+            color: #5d4037;
+            font-size: 1.2em;
+            font-weight: 700;
+            border-color: #a1887f;
+            box-shadow: 0 3px 15px rgba(205,127,50,0.4);
+        }
+        /* Style for the current user's score */
+        .leaderboard-item.current-user {
+            background: linear-gradient(90deg, #81d4fa 0%, #4fc3f7 100%);
+            color: #01579b;
+            border-color: #03a9f4;
+            box-shadow: 0 3px 15px rgba(3, 169, 244, 0.4);
+        }
+        .leaderboard-item.current-user .score {
+            color: #01579b;
+        }
+        .leaderboard-item.current-user .name::after {
+            content: " (คุณ)";
+            font-weight: normal;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        .leaderboard-item .rank {
+            font-size: 1.2em;
+            margin-right: 10px;
+            min-width: 25px;
+            text-align: center;
+        }
+        .leaderboard-item .name {
+            flex-grow: 1;
+            text-align: left;
+            padding-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .leaderboard-item .score-combo {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .leaderboard-item .score {
+            font-size: 1.1em;
+            color: #26a69a;
+            font-weight: 700;
+            margin-right: 5px;
+        }
+        .leaderboard-item:nth-child(1) .score, .leaderboard-item:nth-child(1).current-user .score { color: #8B4513; }
+        .leaderboard-item:nth-child(2) .score, .leaderboard-item:nth-child(2).current-user .score { color: #424242; }
+        .leaderboard-item:nth-child(3) .score, .leaderboard-item:nth-child(3).current-user .score { color: #5d4037; }
+
+        .back-btn {
+            background: linear-gradient(90deg, #ba68c8 70%, #e0b4e0 100%);
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.09em;
+            padding: 11px 32px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 3px 16px #ba68c825;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 1px 7px #ba68c81a;
+        }
+        .loading-text {
+            text-align: center; color: #555; margin-top: 20px; font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Leaderboard 🏆</h1>
+        <div class="leaderboard-list" id="leaderboardList">
+            <p class="loading-text">กำลังโหลดข้อมูล...</p>
+        </div>
+        <a href="game.html" class="back-btn">กลับหน้าเมนู</a>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+            authDomain: "myapplication-bd04c034.firebaseapp.com",
+            projectId: "myapplication-bd04c034",
+            storageBucket: "myapplication-bd04c034.appspot.com",
+            messagingSenderId: "49782830313",
+            appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // Variable to hold the current user's ID
+        let currentUserId = null;
+
+        async function fetchAndRenderLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '<p class="loading-text">กำลังโหลดข้อมูล...</p>';
+
+            try {
+                const leaderboardQuery = query(
+                    collection(db, "leaderboard"), 
+                    orderBy("score", "desc"), 
+                    limit(20)
+                );
+
+                const querySnapshot = await getDocs(leaderboardQuery);
+                
+                leaderboardList.innerHTML = ''; 
+
+                if (querySnapshot.empty) {
+                    leaderboardList.innerHTML = '<p class="loading-text">ยังไม่มีคะแนนใน Leaderboard</p>';
+                    return;
+                }
+
+                let rank = 1;
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const trophy = getTrophyIcon(rank);
+
+                    const div = document.createElement('div');
+                    div.classList.add('leaderboard-item');
+                    
+                    // --- Check if this entry belongs to the current user ---
+                    if (item.userId && item.userId === currentUserId) {
+                        div.classList.add('current-user');
+                    }
+                    
+                    div.innerHTML = `
+                        <span class="rank">${trophy} ${rank}.</span>
+                        <span class="name">${item.username || 'ผู้เล่นนิรนาม'}</span>
+                        <span class="score-combo">
+                            <span class="score">${item.score}</span> คะแนน
+                        </span>
+                    `;
+                    leaderboardList.appendChild(div);
+                    rank++;
+                });
+
+            } catch (error) {
+                console.error("Error getting leaderboard: ", error);
+                leaderboardList.innerHTML = '<p class="loading-text" style="color: red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>';
+            }
+        }
+
+        function getTrophyIcon(rank) {
+            switch (rank) {
+                case 1: return '🥇';
+                case 2: return '🥈';
+                case 3: return '🥉';
+                default: return '';
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // --- Store the current user's ID ---
+                currentUserId = user.uid;
+                console.log("User is available:", currentUserId);
+                await fetchAndRenderLeaderboard();
+            } else {
+                try {
+                    console.log("No user found, signing in anonymously...");
+                    await signInAnonymously(auth);
+                    // The onAuthStateChanged listener will fire again with the new anonymous user
+                } catch (error) {
+                    console.error("Error signing in anonymously:", error);
+                    const leaderboardList = document.getElementById('leaderboardList');
+                    leaderboardList.innerHTML = '<p class="loading-text" style="color: red;">ไม่สามารถยืนยันตัวตนเพื่อดูข้อมูลได้</p>';
+                }
+            }
+        });
+    </script>
+    <script src="darkmode-toggle.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เกมปลดหนี้ – MoneySkillz</title>
+  <meta name="theme-color" content="#06140d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="match-game-style.css">
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <style>
+    .hud {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px;
+    }
+    .hud .box {
+      background: rgba(255,255,255,.85); border: 1.5px solid #e0f2f1; border-radius: 12px;
+      padding: 8px 6px; text-align: center; box-shadow: 0 2px 8px rgba(178,223,219,.3);
+    }
+    .hud .box .k { font-size: .72em; color: #777; }
+    .hud .box .v { font-weight: 700; font-size: 1.05em; color: #00695c; }
+    .hud .box.budget .v { color: #00897b; }
+    .hud .box.interest .v { color: #d84315; }
+
+    .debt-card {
+      background: #fff; border: 1.5px solid #d3e5e4; border-radius: 16px;
+      padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(178,223,219,.25);
+      transition: opacity .3s;
+    }
+    .debt-card.cleared { opacity: .55; }
+    .debt-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .debt-icon { font-size: 1.5em; }
+    .debt-name { font-weight: 700; color: #00695c; flex: 1; }
+    .debt-rate { font-size: .78em; color: #fff; background: #ef6c00; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .debt-bal { margin: 8px 0 6px; font-weight: 700; color: #c62828; }
+    .debt-card.cleared .debt-bal { color: #2e7d32; }
+    .debt-bar-track { height: 8px; background: #eceff1; border-radius: 4px; overflow: hidden; }
+    .debt-bar { height: 100%; background: linear-gradient(90deg, #ef9a9a, #e53935); border-radius: 4px; transition: width .35s ease; }
+    .pay-btn {
+      margin-top: 10px; width: 100%; border: none; border-radius: 12px; padding: 11px;
+      font-family: 'Kanit', sans-serif; font-weight: 700; font-size: .98em; color: #fff; cursor: pointer;
+      background: linear-gradient(135deg, #26a69a, #00897b); transition: transform .1s;
+    }
+    .pay-btn:active { transform: scale(.97); }
+
+    .sum-box { text-align: left; margin: 10px auto; max-width: 300px; }
+    .sum-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #cfd8dc; font-size: .95em; }
+    .tip { font-size: .85em; color: #00695c; background: #e0f2f1; border-radius: 10px; padding: 8px 10px; margin-top: 12px; }
+
+    body.dark-mode .hud .box,
+    body.dark-mode .debt-card { background: #262b33; border-color: #333a44; }
+    body.dark-mode .debt-name, body.dark-mode .hud .box .v { color: #80cbc4; }
+    body.dark-mode .tip { background: #1f3b38; color: #b2dfdb; }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+  <link rel="stylesheet" href="game-neon.css">
+</head>
+<body>
+  <div class="container">
+    <a href="game.html" class="back-btn"><span class="arrow">&#8592;</span> กลับหน้าเมนู</a>
+    <div class="game-header">
+      <div class="game-title">เกมปลดหนี้</div>
+      <div style="font-size:1.01em;color:#388e3c;margin-bottom:7px;">เลือกโปะให้ฉลาด จ่ายดอกเบี้ยให้น้อยที่สุด!</div>
+    </div>
+
+    <div class="level-info">
+      <div class="level">Level: <span id="playerLevel">1</span></div>
+      <div class="exp">EXP: <span id="playerExp">0</span>/<span id="expToNext">100</span></div>
+    </div>
+    <div class="exp-bar"><div class="exp-fill" id="expFill"></div></div>
+
+    <div class="hud">
+      <div class="box budget"><div class="k">เงินโปะ/เดือน</div><div class="v" id="extraPerMonth">฿0</div></div>
+      <div class="box"><div class="k">เดือนที่</div><div class="v" id="monthCount">0</div></div>
+      <div class="box interest"><div class="k">ดอกเบี้ยที่จ่าย</div><div class="v" id="interestPaid">฿0</div></div>
+    </div>
+
+    <div id="debtList"></div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+
+  <script>
+    (function () {
+      if (localStorage.getItem('moneySkillzDarkMode') === 'true') document.body.classList.add('dark-mode');
+    })();
+  </script>
+  <script src="js/confetti.js"></script>
+  <script type="module" src="js/debt-game.js"></script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

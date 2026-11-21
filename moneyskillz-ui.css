@@ -1,0 +1,263 @@
+/* ============================================================================
+ *  MoneySkillz — Design System Overlay v2  (ทันสมัย เขียวการเงิน มือถือเป็นหลัก)
+ *  โหลดต่อท้าย dashboard.css + theme-darkmode.css ทุกหน้า
+ *  แนวคิด: โทนเขียวป่า (money green) · การ์ดแบนสะอาด · ปุ่มแตะได้ (ไม่พึ่ง hover/3D)
+ * ========================================================================== */
+
+:root{
+  /* ---- Forest / money green ---- */
+  --primary-color:   #1F8F4E;
+  --primary-darker:  #146B39;
+  --primary-deep:    #0E4D2C;
+  --highlight-color: #37C06A;
+  --accent-gold:     #FFC107;
+  --accent-gold-dk:  #E6A200;
+
+  /* ---- Surfaces / ink ---- */
+  --background-color: #F3F9F5;
+  --card-background:  #ffffff;
+  --text-color:       #12301F;
+  --text-secondary:   #5B7A68;
+  --border-color:     #E4EEE8;
+  --line:             #E7F0EA;
+  --surface-tint:     #E8F6EE;
+  --surface-tint-2:   #D7EEDF;
+  --shadow-color:     rgba(16,42,40,.10);
+  --success-color:    #1F9D54;
+  --danger-color:     #E2483B;
+
+  /* ---- Tokens ---- */
+  --r-sm: 14px;
+  --r:    18px;
+  --r-lg: 24px;
+  --r-pill: 999px;
+  --shadow-soft: 0 1px 3px rgba(16,42,40,.05), 0 6px 20px rgba(16,42,40,.06);
+  --shadow-card: 0 2px 10px rgba(16,42,40,.06);
+  --ease: cubic-bezier(.2,.8,.2,1);
+}
+
+/* Dark mode: เขียวเข้ม */
+body.dark-mode{
+  --background-color:#0b1a12;
+  --card-background:#122018;
+  --text-color:#EAF6EE;
+  --text-secondary:#9FBBAB;
+  --border-color:#1e3528;
+  --line:#1e3528;
+  --surface-tint:#10311f;
+  --surface-tint-2:#0f2a1b;
+}
+
+body{
+  background: var(--background-color);
+  color: var(--text-color);
+  letter-spacing:.1px;
+  -webkit-tap-highlight-color: transparent;   /* มือถือ: ไม่โชว์กล่องไฮไลต์เทา */
+}
+
+/* ============================ Header (หน้าที่ยังใช้ .header) ============================ */
+.header{
+  background: linear-gradient(140deg, var(--primary-deep), var(--primary-color));
+  border-bottom-left-radius: 26px; border-bottom-right-radius: 26px;
+  box-shadow: 0 8px 24px rgba(14,77,44,.22);
+  padding: 40px 20px 56px;
+}
+.header h1{ font-weight:700; }
+.avatar-box{ border:5px solid #fff; box-shadow:0 8px 22px rgba(14,77,44,.28); }
+.user-info{ background: linear-gradient(180deg, var(--highlight-color) 0%, var(--card-background) 44%); box-shadow: var(--shadow-soft); }
+.username-display{ font-weight:700; color: var(--primary-darker); }
+
+.user-level{
+  background: var(--surface-tint); color: var(--primary-darker);
+  border:1.5px solid var(--surface-tint-2); border-radius: var(--r-pill);
+  font-weight:600; padding:7px 20px; box-shadow:none;
+}
+body.dark-mode .user-level{ background:#10311f; border-color:#1e5536; color:#8fe6b0; }
+
+/* ============================ Progress bars ============================ */
+.progress-outer, .goal-progress-bar-container{
+  background:#dcefe3; border-radius: var(--r-pill); height:18px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.08);
+}
+body.dark-mode .progress-outer, body.dark-mode .goal-progress-bar-container{ background:#0f2a1b; }
+.progress-inner, .goal-progress-bar{
+  background: linear-gradient(90deg, var(--primary-color), var(--highlight-color));
+  border-radius: var(--r-pill); box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* ============================ Cards ============================ */
+.card-section{
+  border:1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card); padding:22px 20px;
+}
+.card-section h2{
+  border-bottom:0; padding-bottom:0; margin-bottom:16px;
+  font-weight:700; font-size:1.25em; color: var(--primary-darker); gap:11px;
+}
+.card-section h2 .icon, .card-section h2 .material-symbols-rounded.icon{
+  width:40px; height:40px; margin-right:0; display:inline-grid; place-items:center;
+  background: var(--surface-tint); color: var(--primary-color);
+  border-radius:12px; font-size:23px;
+}
+.badge-section h2 .icon{ background:#fff4d6; color: var(--accent-gold-dk); }
+body.dark-mode .card-section h2 .icon{ background:#10311f; }
+
+/* ============================ Menu grid (แบน ทันสมัย แตะได้) ============================ */
+.main-menu-grid{ gap:16px; }
+.menu-card{
+  border:1px solid var(--line); border-radius: var(--r);
+  background: var(--card-background); box-shadow: var(--shadow-card);
+  padding:20px 14px;
+  transition: transform .12s var(--ease), background .15s var(--ease), box-shadow .15s var(--ease);
+}
+.menu-card:active{ transform: scale(.97); background:#eef8f1; }        /* ฟีดแบ็กตอนแตะ (ได้ทั้งมือถือ) */
+@media (hover:hover){ .menu-card:hover{ background:#f1faf4; box-shadow:0 6px 18px rgba(16,42,40,.10); } }
+body.dark-mode .menu-card:active{ background:#15301f; }
+
+.menu-card span.material-symbols-rounded, .menu-card > span:first-child{
+  width:56px; height:56px; margin:0 auto 12px; display:grid; place-items:center;
+  border-radius:16px; font-size:29px !important; color: var(--primary-color);
+  background: var(--surface-tint);
+}
+.menu-card p{ font-weight:600; font-size:1.02em; color: var(--text-color); }
+body.dark-mode .menu-card span.material-symbols-rounded{ background:#10311f; color:#5fe39a; }
+
+/* ============================ ปุ่ม (แบน ทันสมัย ไม่พึ่ง hover/3D) ============================ */
+.modal-content button:not(.cancel-btn),
+.add-savings-btn, #aiChatForm button, .msk-btn, .home-btn{
+  background: var(--primary-color); color:#fff; border:0; border-radius: var(--r-sm);
+  box-shadow: 0 4px 14px rgba(31,143,78,.26);
+  font-weight:700; font-family:'Kanit',sans-serif; cursor:pointer;
+  transition: transform .12s var(--ease), filter .15s, box-shadow .15s;
+}
+.modal-content button:not(.cancel-btn):active,
+.add-savings-btn:active, #aiChatForm button:active, .msk-btn:active, .home-btn:active{
+  transform: scale(.97); filter: brightness(.95);
+}
+@media (hover:hover){
+  .modal-content button:not(.cancel-btn):hover,
+  .add-savings-btn:hover, #aiChatForm button:hover, .msk-btn:hover, .home-btn:hover{ filter: brightness(1.04); }
+}
+.add-savings-btn{ padding:13px 22px; font-size:1em; }
+
+.modal-content .cancel-btn{
+  background:#eef2f0; color:#566; box-shadow:none; border:0; border-radius: var(--r-sm); font-weight:700;
+}
+.modal-content .cancel-btn:active{ transform: scale(.97); }
+
+.goal-nav-btn{
+  background: var(--surface-tint); color: var(--primary-color); box-shadow:none; border:0;
+  transition: transform .1s var(--ease), background .15s;
+}
+.goal-nav-btn:active{ transform: scale(.9); }
+@media (hover:hover){ .goal-nav-btn:hover{ background: var(--primary-color); color:#fff; transform:none; } }
+
+/* ============================ Badges / coins ============================ */
+.badge{ border-radius:20px; box-shadow: var(--shadow-card); transition: transform .12s var(--ease); }
+.badge:active{ transform: scale(.95); }
+
+/* ============================ Inputs ============================ */
+.modal-content input, .modal-content select{
+  border:2px solid var(--line); border-radius: var(--r-sm);
+  transition: border-color .15s, box-shadow .15s;
+}
+.modal-content input:focus, .modal-content select:focus{
+  outline:0; border-color: var(--primary-color); box-shadow:0 0 0 4px rgba(31,143,78,.14);
+}
+
+/* ============================ Modal ============================ */
+.modal-content{ border-radius: var(--r-lg); box-shadow:0 20px 60px rgba(0,0,0,.28); }
+
+/* ============================ Transactions ============================ */
+.transaction-item{ border-radius:14px; padding:12px 10px; border-bottom:1px solid var(--line); }
+@media (hover:hover){ .transaction-item:hover{ background:#f1faf4; } }
+.summary-item{ border-radius:12px; padding:10px 12px; }
+
+/* ============================ Page surfaces (game-mode ฯลฯ) ============================ */
+.game-header, .page-header, .quiz-header{
+  border-bottom-left-radius:26px; border-bottom-right-radius:26px;
+  background: linear-gradient(140deg, var(--primary-deep), var(--primary-color)) !important;
+}
+/* Header sits on a dark gradient — force its title/subtitle to read white */
+.game-header .game-title, .page-header .page-title, .quiz-header .quiz-title{
+  color:#fff !important;
+}
+.game-header > div, .page-header > div, .quiz-header > div{
+  color: rgba(255,255,255,.92) !important;
+}
+/* .lesson-header is a per-card title row, not a page banner — keep it transparent */
+.lesson-item .lesson-header, .test-item .lesson-header{
+  background: transparent !important; border-radius:0 !important;
+  gap:10px; flex-wrap:wrap;
+}
+.lesson-item .lesson-number{ color: var(--primary-color) !important; }
+.test-item .lesson-number{ color: #E8912A !important; }
+.lesson-item .lesson-title{ color: var(--primary-deep) !important; }
+.lesson-item, .test-item{ border-left-color: var(--primary-color) !important; }
+.test-item{ border-left-color: #F2A93B !important; }
+.game-card{
+  border:1px solid var(--line) !important; border-radius: var(--r) !important;
+  box-shadow: var(--shadow-card) !important;
+  transition: transform .12s var(--ease), background .15s var(--ease);
+}
+.game-card:active{ transform: scale(.98); background:#eef8f1 !important; }
+@media (hover:hover){ .game-card:hover{ background:#f1faf4 !important; } }
+.game-card .material-symbols-rounded{
+  width:60px; height:60px; margin:0 auto 12px; display:grid; place-items:center;
+  border-radius:16px; font-size:30px !important; color: var(--primary-color);
+  background: var(--surface-tint);
+}
+body.dark-mode .game-card .material-symbols-rounded{ background:#10311f; color:#5fe39a; }
+
+.btn-primary, .primary-btn, .main-btn{
+  background: var(--primary-color); color:#fff; border:0; border-radius: var(--r-sm);
+  box-shadow:0 4px 14px rgba(31,143,78,.26); font-weight:700;
+  transition: transform .12s var(--ease), filter .15s;
+}
+.btn-primary:active, .primary-btn:active, .main-btn:active{ transform: scale(.97); filter:brightness(.95); }
+
+/* ปุ่มหลักร่วมในหน้าอื่นๆ → ธีมเขียวให้เข้าชุด (คงรูปทรง/ขนาดเดิมของแต่ละหน้า เปลี่ยนแค่สี) */
+.back-btn, .submit-btn, .start-btn, .play-btn, .next-btn, .confirm-btn{
+  background: linear-gradient(135deg, var(--primary-color), var(--highlight-color)) !important;
+  color:#fff !important; border:0 !important;
+  box-shadow: 0 4px 14px rgba(31,143,78,.26) !important;
+  transition: transform .12s var(--ease), filter .15s !important;
+}
+.back-btn *, .submit-btn *, .start-btn *, .play-btn *{ color:#fff !important; }
+.back-btn:active, .submit-btn:active, .start-btn:active, .play-btn:active,
+.next-btn:active, .confirm-btn:active{ transform: scale(.96); filter:brightness(.96); }
+@media (hover:hover){
+  .back-btn:hover, .submit-btn:hover, .start-btn:hover, .play-btn:hover{ filter: brightness(1.04); }
+}
+
+/* ============================ Loading spinner ============================ */
+.msk-spinner{
+  width:34px; height:34px; border-radius:50%;
+  border:3.5px solid var(--surface-tint, #E8F6EE);
+  border-top-color: var(--primary-color, #1F8F4E);
+  animation: msk-spin .7s linear infinite;
+  margin:14px auto; display:block;
+}
+.msk-loading{ display:flex; flex-direction:column; align-items:center; gap:4px; color: var(--text-secondary, #5B7A68); padding:18px 0; }
+@keyframes msk-spin{ to{ transform: rotate(360deg); } }
+
+/* ============================ Entrance animations (Duolingo-ish) ============================ */
+@keyframes msk-fade-up{ from{ opacity:0; transform: translateY(12px); } to{ opacity:1; transform:none; } }
+@keyframes msk-pop{ 0%{ transform:scale(.85); opacity:0; } 60%{ transform:scale(1.03); } 100%{ transform:scale(1); opacity:1; } }
+
+.menu-list > a, .lesson-item, .test-item, .mission-card, .game-card, .menu-card{
+  animation: msk-fade-up .5s var(--ease) both;
+}
+/* staggered cascade within a list */
+.menu-list > a:nth-child(2), .mission-card:nth-child(2){ animation-delay:.05s; }
+.menu-list > a:nth-child(3), .mission-card:nth-child(3){ animation-delay:.10s; }
+.menu-list > a:nth-child(4), .mission-card:nth-child(4){ animation-delay:.15s; }
+.menu-list > a:nth-child(5), .mission-card:nth-child(5){ animation-delay:.20s; }
+.menu-list > a:nth-child(6){ animation-delay:.25s; }
+.menu-list > a:nth-child(7){ animation-delay:.30s; }
+.menu-list > a:nth-child(8){ animation-delay:.35s; }
+.lesson-item:nth-child(even){ animation-delay:.07s; }
+.lesson-item:nth-child(3n){ animation-delay:.13s; }
+
+/* ============================ Reduced motion ============================ */
+@media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }

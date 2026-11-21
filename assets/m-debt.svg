@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="dcard" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34B874"/><stop offset="1" stop-color="#19824F"/></linearGradient>
+    <linearGradient id="dco" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFDE7A"/><stop offset="1" stop-color="#F3A712"/></linearGradient>
+  </defs>
+  <rect x="6" y="13" width="31" height="21" rx="4.5" fill="url(#dcard)"/>
+  <rect x="6" y="18.5" width="31" height="4.5" fill="#0f6038"/>
+  <rect x="10" y="27" width="11" height="3" rx="1.5" fill="#EAF9F0" opacity=".85"/>
+  <rect x="24" y="27" width="6" height="3" rx="1.5" fill="#EAF9F0" opacity=".55"/>
+  <circle cx="36" cy="35" r="9.5" fill="url(#dco)" stroke="#DE9009" stroke-width="1.8"/>
+  <path d="M36 30.5 v7.2 M32.8 35 l3.2 3.2 3.2-3.2" stroke="#8a5600" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

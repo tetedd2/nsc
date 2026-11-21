@@ -1,0 +1,186 @@
+/* ============================================================
+ *  MoneySkillz — Neon Arcade skin (ใช้กับ "หน้าเกม" เท่านั้น)
+ *  โหลดเป็นไฟล์สุดท้าย (หลัง moneyskillz-ui.css) เพื่อทับธีมเขียวเดิม
+ *  หน้า: match, budget-game, debt-game, investment-game,
+ *        timed-score, leaderboard, game-mode
+ *  (game.html / money-quiz.html มีนีออนในตัวอยู่แล้ว)
+ * ============================================================ */
+
+html, body { color: #eafff2; }
+body {
+  background:
+    radial-gradient(130% 70% at 50% -8%, rgba(43,196,106,.40), rgba(43,196,106,0) 60%),
+    radial-gradient(90% 50% at 86% 9%, rgba(77,163,255,.20), transparent 55%),
+    radial-gradient(90% 50% at 10% 15%, rgba(155,107,255,.18), transparent 55%),
+    linear-gradient(180deg, #07160f 0%, #040c08 60%, #030906 100%) !important;
+  background-attachment: fixed;
+  position: relative;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; left: -20%; right: -20%; top: -18%; height: 58%;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(55,192,106,.24), transparent 70%);
+  filter: blur(34px); pointer-events: none; z-index: 0;
+  animation: gn-aurora 7s ease-in-out infinite alternate;
+}
+@keyframes gn-aurora { from { opacity:.5; transform:translateX(-6%);} to { opacity:.9; transform:translateX(6%);} }
+@media (prefers-reduced-motion: reduce){ body::before { animation: none; } }
+
+/* ---- แผง/คอนเทนเนอร์ (เดิมเป็นกระจกขาว) → โปร่ง ---- */
+.container, .page-wrap {
+  position: relative; z-index: 1;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ---- ปุ่มกลับ → นีออน ---- */
+.back-btn, .top-left-back-btn {
+  background: rgba(10,30,20,.62) !important;
+  color: #9affc4 !important;
+  border: 1.5px solid rgba(55,192,106,.5) !important;
+  box-shadow: 0 0 16px -3px rgba(55,192,106,.6) !important;
+}
+
+/* ---- หัวข้อเกม → กรอบเรืองแสง ---- */
+.game-header, .quiz-header, .header {
+  position: relative;
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(43,196,106,.2), rgba(8,22,15,.35) 70%),
+    linear-gradient(180deg, rgba(14,40,26,.72), rgba(8,22,15,.72)) !important;
+  border: 1.6px solid rgba(55,192,106,.55) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 0 24px -5px rgba(55,192,106,.6), inset 0 0 22px rgba(55,192,106,.1) !important;
+  padding: 16px !important;
+  margin-bottom: 14px !important;
+  color: #fff !important;
+}
+.game-title, .game-header .game-title, .title, .header .title,
+.container > h1, .page-wrap .game-header h1 {
+  color: #fff !important;
+  background: none !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: 0 0 14px rgba(55,192,106,.55) !important;
+}
+.game-header > div, .quiz-header p, .header p, .app-desc { color: #cdeed9 !important; }
+
+/* ---- แถบ Level / EXP / score ---- */
+.level-info {
+  background: rgba(14,36,24,.8) !important;
+  color: #bfe8cf !important;
+  border: 1px solid rgba(55,192,106,.3) !important;
+  box-shadow: 0 0 14px -6px rgba(55,192,106,.55) !important;
+}
+.level-info .level { color: #ffc13b !important; }
+.level-info .exp { color: #58e08d !important; }
+/* HUD (เกมปลดหนี้): กล่องสถานะ 3 ช่อง */
+.hud .box {
+  background: rgba(14,36,24,.82) !important;
+  border: 1px solid rgba(55,192,106,.3) !important;
+  box-shadow: 0 0 12px -5px rgba(55,192,106,.5) !important;
+}
+.hud .box .k { color: #9fc4b0 !important; }
+.hud .box .v { color: #ffffff !important; }
+.hud .box.budget .v { color: #58e08d !important; }
+.hud .box.interest .v { color: #ff9a8f !important; }
+.exp-bar, .bucket-bar-track, .debt-bar-track, .asset-bar-track {
+  background: rgba(255,255,255,.08) !important;
+}
+.exp-fill { background: linear-gradient(90deg, #2BC46A, #37C06A) !important; box-shadow: 0 0 10px -1px #2BC46A; }
+
+.score-item, .status-item {
+  background: rgba(14,36,24,.82) !important;
+  color: #9affc4 !important;
+  border: 1px solid rgba(55,192,106,.3) !important;
+  box-shadow: 0 0 12px -5px rgba(55,192,106,.5) !important;
+}
+.score-item.timer, .timer {
+  color: #ffb3a0 !important;
+  background: rgba(60,25,20,.7) !important;
+  border-color: rgba(226,72,59,.4) !important;
+}
+.status-item.high-score, .personal-best { color: #ffd98a !important; }
+
+/* ---- การ์ดจับคู่ (match) ---- */
+.card {
+  background: #15271d !important;
+  border: 1.5px solid #2d4a3a !important;
+  color: #eafff2 !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.4) !important;
+}
+.card.flipped { background: #14301f !important; border-color: #1F8F4E !important; color: #bff0d2 !important; }
+.card.wrong   { background: #3a1d1b !important; border-color: #e5726a !important; color: #ff9a8f !important; }
+
+/* ---- การ์ด/แบนเนอร์เฉพาะเกม → มืดนีออน ---- */
+.income-banner, .invest-banner {
+  background: linear-gradient(135deg, rgba(43,196,106,.92), rgba(14,77,44,.95)) !important;
+  color: #fff !important;
+  box-shadow: 0 0 20px -6px rgba(43,196,106,.7) !important;
+}
+.bucket, .item-card, .debt-card, .asset-row {
+  background: #15271d !important;
+  border: 1.5px solid #2a4435 !important;
+  color: #eafff2 !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.35) !important;
+}
+.item-card .i-name, .asset-name, .debt-name { color: #bff0d2 !important; }
+.asset-desc { color: #9fc4b0 !important; }
+.bucket .b-total, .asset-pct { color: #ffffff !important; }
+.bucket .b-target, .years-row { color: #9fc4b0 !important; }
+.progress-text, .alloc-hint { color: #bfe8cf !important; }
+.sum-box, .sum-row { color: #dff3e8 !important; }
+.sum-row { border-bottom-color: rgba(255,255,255,.12) !important; }
+.tip {
+  background: rgba(14,40,26,.72) !important;
+  color: #bfe8cf !important;
+  border: 1px solid rgba(55,192,106,.25) !important;
+}
+
+/* ---- โมดัลผลลัพธ์ ---- */
+.modal-content {
+  background: #12201a !important;
+  color: #eafff2 !important;
+  border: 1.5px solid rgba(55,192,106,.4) !important;
+  box-shadow: 0 0 30px -4px rgba(55,192,106,.4), 0 10px 40px rgba(0,0,0,.55) !important;
+}
+.modal-content h2 { color: #fff !important; }
+.modal-btn {
+  background: linear-gradient(135deg, #2BC46A, #1F8F4E) !important;
+  color: #fff !important;
+  box-shadow: 0 0 18px -4px rgba(43,196,106,.6) !important;
+}
+.main-btn { box-shadow: 0 0 18px -3px rgba(43,196,106,.6) !important; }
+.result-box, .result-line { color: #dff3e8 !important; }
+
+/* ---- timed-score: บอร์ด/คะแนน ---- */
+.board {
+  background: #15271d !important;
+  border: 1.5px solid #2a4435 !important;
+  box-shadow: 0 6px 22px rgba(0,0,0,.4), 0 0 20px -8px rgba(55,192,106,.5) !important;
+}
+.score-lg, .high-lg, .combo-lg, .emoji-grade { color: #eafff2 !important; }
+
+/* ---- leaderboard: รายการอันดับ ---- */
+.leaderboard-list > * {
+  background: rgba(14,36,24,.7) !important;
+  border: 1px solid rgba(55,192,106,.25) !important;
+  color: #eafff2 !important;
+}
+.leaderboard-list .rank { color: #ffd24d !important; }
+.leaderboard-list .name { color: #eafff2 !important; }
+.leaderboard-list .score, .leaderboard-list .score-combo { color: #58e08d !important; }
+.loading-text { color: #bfe8cf !important; }
+
+/* ---- game-mode: การ์ดเมนูเกม ---- */
+.game-card {
+  background: #15271d !important;
+  border: 1.5px solid #2a4435 !important;
+  box-shadow: 0 6px 22px rgba(0,0,0,.4), 0 0 20px -8px rgba(55,192,106,.5) !important;
+}
+.game-card p, .game-card span:not(.material-symbols-rounded) { color: #eafff2 !important; }
+.game-card .material-symbols-rounded {
+  background: linear-gradient(135deg, #2BC46A, #0E4D2C) !important;
+  color: #eafff2 !important;
+  box-shadow: 0 0 16px -3px rgba(43,196,106,.7) !important;
+}

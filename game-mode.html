@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>🎮 โหมดเกม - MoneySkillz</title>
+  <meta name="theme-color" content="#06140d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+
+  <!-- Theme (ของโปรเจ็กต์) -->
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="theme-darkmode.css">
+
+  <style>
+    :root { --header-h: 96px; }
+
+    body{
+      font-family:'Kanit',sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      margin:0; padding:0;
+      min-height:100vh;
+      display:flex; flex-direction:column;
+    }
+
+    /* ===== Header กราเดียนต์โทนเดียวกับ Dashboard ===== */
+    .game-header{
+      position:fixed; inset:0 0 auto 0; z-index:1000;
+      height: var(--header-h);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; color:#fff;
+      background: linear-gradient(100deg, var(--primary-color), var(--highlight-color));
+      box-shadow: 0 4px 12px var(--shadow-color);
+    }
+    .game-header::after{
+      content:""; position:absolute; inset:auto 0 -16px 0; height:34px;
+      background: linear-gradient(100deg, var(--primary-color), var(--highlight-color));
+      filter: blur(16px); opacity:.55; pointer-events:none;
+      border-bottom-left-radius:50% 100%; border-bottom-right-radius:50% 100%;
+    }
+    .game-header h1{ margin:0; font-size:2rem; font-weight:700; }
+    .game-header p{ margin:6px 0 0; opacity:.95; }
+
+    /* ===== จัดเนื้อหาไว้กึ่งกลางและเผื่อพื้นที่เมนูล่าง ===== */
+    .page-wrap{
+      flex:1;
+      display:flex; align-items:center; justify-content:center;
+      padding: calc(var(--header-h) + 12px) 16px 110px; /* เว้นที่ให้ bottom-nav */
+      box-sizing:border-box;
+    }
+
+    /* ===== การ์ดเมนูเกม โทนเดียวกับ Dashboard ===== */
+    .game-menu{
+      width:100%; max-width:520px;
+      display:grid; grid-template-columns: 1fr;
+      gap:20px;
+    }
+    @media(min-width:560px){ .game-menu{ grid-template-columns:1fr 1fr; } }
+
+    .game-card{
+      background: var(--card-background);
+      border: 1.5px solid var(--border-color);
+      border-radius: 18px;
+      padding: 24px 20px;
+      text-align:center; text-decoration:none; color: var(--text-color);
+      box-shadow:
+        0 4px 8px rgba(0,0,0,.06),
+        0 8px 20px rgba(0,0,0,.08),
+        inset 0 1px 0 rgba(255,255,255,.5);
+      transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:140px;
+    }
+    .game-card:hover{
+      background:#f4faf9;
+      transform: translateY(-6px);
+      box-shadow:
+        0 6px 10px rgba(0,0,0,.08),
+        0 12px 25px rgba(0,0,0,.15),
+        inset 0 1px 0 rgba(255,255,255,.5);
+    }
+    .game-card .material-symbols-rounded{
+      font-size:40px; color: var(--primary-color);
+      margin-bottom:10px; line-height:1;
+    }
+    .game-card p{ margin:0; font-weight:600; font-size:1.12rem; }
+
+    /* เน้นปุ่ม “เกม” ในเมนูล่างให้ active */
+    .bottom-nav-item.active{
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+  <link rel="stylesheet" href="game-neon.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="game-header">
+    <h1>โหมดเกม</h1>
+    <p>สนุกกับการเรียนรู้เรื่องการเงิน!</p>
+  </header>
+
+  <!-- Content -->
+  <main class="page-wrap">
+    <div class="game-menu">
+      <a href="game.html" class="game-card" aria-label="เกมหลัก">
+        <span class="material-symbols-rounded">sports_esports</span>
+        <p>เกมหลัก</p>
+      </a>
+      <a href="money-quiz.html" class="game-card" aria-label="แบบทดสอบการเงิน">
+        <span class="material-symbols-rounded">quiz</span>
+        <p>แบบทดสอบการเงิน</p>
+      </a>
+    </div>
+  </main>
+
+  <!-- Bottom Nav: ใช้ component ร่วม js/bottom-nav.js (5 แท็บ) -->
+
+  <!-- game-mode เป็นหน้าเมนูเกม ไม่ใช้ Firebase (เอา SDK v8 + dashboard.js ที่ไม่เกี่ยวออก) -->
+  <script src="darkmode-toggle.js"></script>
+  <script src="js/bottom-nav.js" defer></script>
+  <script type="module" src="js/nong-see-widget.js"></script>
+</body>
+</html>

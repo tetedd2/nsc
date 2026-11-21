@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>MoneySkillz – เมนูเกมการเงิน</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      background: linear-gradient(135deg, #e0f7fa 80%, #b2ebf2 100%);
+      font-family: 'Kanit', sans-serif;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .main-container {
+      max-width: 430px;
+      margin: 0 auto;
+      margin-top: 42px;
+      margin-bottom: 42px;
+      padding: 24px 12px 24px 12px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.69);
+      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.11), 0 2px 6px #b2dfdb44;
+      backdrop-filter: blur(9px);
+      border: 1.7px solid rgba(120,200,200,0.10);
+      min-height: 85vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+    }
+    .logo-circle {
+      width: 76px; height: 76px; background: #23b1ab;
+      border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+      margin: 0 auto 18px auto;
+      box-shadow: 0 2px 17px #23b1ab42;
+    }
+    .logo-circle span {
+      color: #fff; font-size: 2.7em; font-weight: bold; letter-spacing: 1px;
+      text-shadow: 0 3px 18px #ffffff44;
+    }
+    .app-title {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #00796b;
+      margin-bottom: 3px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    .app-desc {
+      color: #008c7d;
+      text-align: center;
+      font-size: 1.08em;
+      margin-bottom: 24px;
+      margin-top: 2px;
+      font-weight: 400;
+    }
+    .menu-list {
+      display: flex; flex-direction: column; gap: 17px;
+      width: 100%;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+
+    /* ปุ่มจับคู่ระดับง่าย, ปานกลาง, ยาก (สีเดียวกัน) */
+    .menu-btn-common {
+      display: flex; align-items: center;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 17px 18px;
+      background-color: #23b1ab; /* สีเขียว */
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1em;
+      border: none; border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.17s, transform 0.14s;
+      outline: none;
+      letter-spacing: 0.5px;
+      text-align: left;
+      position: relative;
+      margin: 0;
+      justify-content: flex-start;
+      text-decoration: none;
+    }
+
+    /* ปุ่มจับเวลาเก็บแต้ม (สีส้ม) */
+    .menu-btn-timed {
+      display: flex; align-items: center;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 17px 18px;
+      background-color: #ff9800; /* สีส้ม */
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1em;
+      border: none; border-radius: 14px;
+      cursor: pointer;
+      transition: background 0.17s, transform 0.14s;
+      outline: none;
+      letter-spacing: 0.5px;
+      text-align: left;
+      position: relative;
+      margin: 0;
+      justify-content: flex-start;
+      text-decoration: none;
+    }
+
+    /* เอฟเฟคปุ่มเมื่อ hover */
+    .menu-btn:hover {
+      transform: scale(1.05); /* ขยายเล็กน้อยตอน hover */
+    }
+
+    /* เอฟเฟคปุ่มเมื่อกด */
+    .menu-btn:active {
+      transform: scale(0.97); /* ขยับขนาดเมื่อกด */
+    }
+
+    .score-summary {
+      width: 100%;
+      text-align: center;
+      font-size: 1.14em;
+      margin-top: 12px;
+      margin-bottom: 5px;
+      color: #159988;
+      background: #e0f7fae6;
+      border-radius: 11px;
+      padding: 9px 0 7px 0;
+      font-weight: 600;
+      box-shadow: 0 1px 9px #b2dfdb24;
+      letter-spacing: 0.5px;
+    }
+
+    /* สไตล์ใหม่สำหรับคะแนนสูงสุด */
+    .high-score-summary {
+      width: 100%;
+      text-align: center;
+      font-size: 1.14em;
+      margin-top: 8px;
+      margin-bottom: 5px;
+      color: #fff;
+      background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+      border-radius: 11px;
+      padding: 9px 0 7px 0;
+      font-weight: 600;
+      box-shadow: 0 3px 12px #4caf5033;
+      letter-spacing: 0.5px;
+    }
+
+    /* สไตล์สำหรับ EXP */
+    .exp-summary {
+      width: 100%;
+      text-align: center;
+      font-size: 1.14em;
+      margin-top: 8px;
+      margin-bottom: 5px;
+      color: #fff;
+      background: linear-gradient(135deg, #87dbc8 0%, #0e9b57 100%); /* สีม่วง */
+      border-radius: 11px;
+      padding: 9px 0 7px 0;
+      font-weight: 600;
+      box-shadow: 0 3px 12px #9c27b033;
+      letter-spacing: 0.5px;
+    }
+
+    .leaderboard-preview {
+      width: 100%; margin-top: 16px; margin-bottom: 5px;
+      background: #f8fdfd; border-radius: 12px;
+      box-shadow: 0 1px 10px #b2dfdb20;
+      padding: 9px 9px 3px 9px;
+      color: #0a827a;
+      font-size: 1em;
+    }
+    .leaderboard-preview-title {
+      color: #13aaa7; font-weight: bold; margin-bottom: 6px;
+      font-size: 1.05em;
+      letter-spacing: 0.2px;
+      text-align: left;
+    }
+    .leaderboard-row {
+      display: flex; justify-content: space-between; margin-bottom: 4px;
+      font-size: 1em; font-weight: 500;
+    }
+
+    .footer {
+      margin-top: auto; text-align:center; color:#9abfc1; font-size:0.97em;
+      letter-spacing: 0.5px;
+      padding-top: 20px;
+    }
+    
+    /* === โค้ด CSS ใหม่สำหรับปุ่ม Back มุมซ้ายบน === */
+    .top-left-back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #00796B;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em; /* ขนาดไอคอนลูกศร */
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1001;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.2s ease-in-out;
+    }
+    .top-left-back-btn:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 1);
+    }
+    .top-left-back-btn:active {
+      transform: scale(0.95);
+    }
+    body.dark-mode .top-left-back-btn {
+      background: rgba(40, 40, 40, 0.8);
+      color: #4DB6AC;
+    }
+    /* === สิ้นสุดโค้ด CSS ใหม่ === */
+
+
+    @media (max-width:540px) {
+      .main-container { max-width: 99vw; min-height: 99vh;}
+      .menu-btn { font-size: 0.99em; padding: 14px 8px;}
+      .logo-circle { width: 60px; height: 60px;}
+      .logo-circle span { font-size: 2em;}
+      .score-summary { font-size: 1em;}
+      .high-score-summary { font-size: 1em;}
+      .exp-summary { font-size: 1em;}
+      .leaderboard-preview { font-size: 0.97em;}
+    }
+  </style>
+</head>
+<body>
+  <a href="game-mode.html" class="top-left-back-btn">←</a>
+
+  <div class="main-container">
+    <div class="logo-circle"><span>฿</span></div>
+    <div class="app-title">MoneySkillz</div>
+    <div class="app-desc">
+      เกมทักษะการเงิน<br>เลือกเล่นโหมดที่ต้องการได้เลย!
+    </div>
+
+    <div class="score-summary" id="totalScore">
+      คะแนนรวมโหมดจับเวลา: <span id="totalScoreValue">0</span>
+    </div>
+
+    <div class="high-score-summary" id="highScore">
+      🏆 คะแนนสูงสุด: <span id="highScoreValue">0</span>
+    </div>
+
+    <div class="exp-summary" id="totalExp">
+      🌟 EXP รวม: <span id="totalExpValue">0</span>
+      <span id="userIdDisplay" style="font-size:0.7em; margin-left: 10px;"></span>
+    </div>
+
+    <div class="menu-list">
+      <a href="match-easy.html" class="menu-btn menu-btn-common" data-difficulty="easy">จับคู่ระดับง่าย</a>
+      <a href="match-medium.html" class="menu-btn menu-btn-common" data-difficulty="medium">จับคู่ระดับปานกลาง</a>
+      <a href="match-hard.html" class="menu-btn menu-btn-common" data-difficulty="hard">จับคู่ระดับยาก</a>
+      <a href="timed-score.html" class="menu-btn menu-btn-timed" data-difficulty="timed">จับเวลาเก็บแต้ม</a>
+      <a href="leaderboard.html" class="menu-btn menu-btn-common">กระดานคะแนน</a>
+    </div>
+
+    <div class="leaderboard-preview" id="leaderboardPreview" style="display:none;">
+      <div class="leaderboard-preview-title">TOP 3 กระดานคะแนน</div>
+      <div id="leaderboardRows"></div>
+      <div style="text-align:right; margin-top:5px;">
+        <a href="leaderboard.html" style="color:#11aaa7;text-decoration:underline;font-size:0.97em;">ดูทั้งหมด</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      &copy; 2025 MoneySkillz &mdash; สร้างสรรค์โดยทีมของคุณ
+    </div>
+  </div>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Initialize Firebase with the provided configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjLBl1sEGgQLyng51rW25b434bJ0opVc4",
+      authDomain: "myapplication-bd04c034.firebaseapp.com",
+      databaseURL: "https://myapplication-bd04c034-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "myapplication-bd04c034",
+      storageBucket: "myapplication-bd04c034.firebasestorage.app",
+      messagingSenderId: "49782830313",
+      appId: "1:49782830313:web:c81b5d86a937f22d296c78"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let userId = null;
+    
+    // ตรวจสอบสถานะการล็อกอินของผู้ใช้และกำหนด userId
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        userId = user.uid;
+        document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)}...)`;
+      } else {
+        try {
+          // หากผู้ใช้ไม่ได้ล็อกอิน ให้ล็อกอินแบบไม่ระบุตัวตน (anonymous)
+          const anonymousUserCredential = await signInAnonymously(auth);
+          userId = anonymousUserCredential.user.uid;
+          document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)}...)`;
+        } catch (error) {
+          console.error("Error signing in anonymously:", error);
+          // หากเกิดข้อผิดพลาดในการล็อกอินแบบไม่ระบุตัวตน ให้ใช้ UUID ชั่วคราว (แต่จะบันทึกลง Firebase ไม่ได้)
+          userId = crypto.randomUUID(); 
+          document.getElementById("userIdDisplay").textContent = `(ID: ${userId.substring(0, 8)} - fallback)`;
+        }
+      }
+      // เรียกโหลดและแสดงผล EXP หลังจากได้ userId แล้ว
+      await fetchAndDisplayExp();
+    });
+
+    // โหลดและแสดงผลค่า EXP จาก Firestore
+    async function fetchAndDisplayExp() {
+      if (!userId) return; // หากไม่มี userId ไม่ต้องดำเนินการต่อ
+      try {
+        const userRef = doc(db, `users`, userId);
+        // ใช้ onSnapshot เพื่อฟังการเปลี่ยนแปลงของข้อมูลแบบเรียลไทม์
+        onSnapshot(userRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            // ดึงค่า xp จากเอกสารผู้ใช้ หรือ 0 หากไม่มี
+            document.getElementById("totalExpValue").textContent = data.xp || 0; // เปลี่ยนจาก data.totalExp เป็น data.xp
+          } else {
+            // หากไม่มีเอกสารผู้ใช้ ให้ตั้งค่าเริ่มต้นเป็น 0 และสร้างเอกสารใหม่
+            document.getElementById("totalExpValue").textContent = 0;
+            setDoc(userRef, { xp: 0 }, { merge: true }); // เปลี่ยนจาก totalExp: 0 เป็น xp: 0
+          }
+        });
+      } catch (error) {
+        console.error("Error setting up user data listener:", error);
+      }
+    }
+
+    // เพิ่มค่า EXP ให้กับผู้ใช้ใน Firestore
+    async function addExp(expAmount) {
+      if (!userId) return; // หากไม่มี userId ไม่ต้องดำเนินการต่อ
+      try {
+        const userRef = doc(db, `users`, userId);
+        const docSnap = await getDoc(userRef);
+        let currentExp = 0;
+        if (docSnap.exists()) {
+          // ดึงค่า xp ปัจจุบันจากเอกสาร
+          currentExp = docSnap.data().xp || 0; // เปลี่ยนจาก docSnap.data().totalExp เป็น docSnap.data().xp
+        }
+        const newExp = currentExp + expAmount;
+        // อัปเดตฟิลด์ xp ในเอกสารผู้ใช้
+        await setDoc(userRef, { xp: newExp }, { merge: true }); // เปลี่ยนจาก totalExp: newExp เป็น xp: newExp
+        console.log(`EXP added to Firebase (xp field): ${expAmount}. New total xp: ${newExp}`); // เพิ่ม log
+      } catch (error) {
+        console.error("Error adding EXP:", error);
+      }
+    }
+    
+    // ค่า EXP ที่จะได้รับสำหรับแต่ละโหมดเกม (สำหรับหน้าเมนูนี้)
+    const EXP_VALUES = { easy: 100, medium: 200, hard: 300, timed_multiplier: 5 };
+
+    // ฟังก์ชันสำหรับเพิ่ม EXP เมื่อเล่นเกมจบ (การจำลองจากหน้าเมนู)
+    function addExpForGameCompletion(difficulty, score = 0) {
+      let expGained = 0;
+      if (difficulty in EXP_VALUES) {
+        expGained = EXP_VALUES[difficulty];
+      } else if (difficulty === 'timed') {
+        expGained = score * EXP_VALUES.timed_multiplier;
+      }
+      if (expGained > 0) addExp(expGained);
+      console.log(`Simulated game completion for difficulty: ${difficulty}, Score: ${score}, EXP Gained: ${expGained}`); // เพิ่ม log
+    }
+    
+    // เพิ่ม Event Listener ให้กับปุ่มเมนูเกม
+    document.querySelectorAll('.menu-btn').forEach(button => {
+      button.addEventListener('click', (event) => {
+        const difficulty = event.currentTarget.dataset.difficulty;
+        if (difficulty) {
+          // ใช้ setTimeout เพื่อจำลองการจบเกมและเพิ่ม EXP หลังจาก 1 วินาที
+          // ในสถานการณ์จริง ฟังก์ชันนี้จะถูกเรียกจากหน้าเกมเมื่อเกมจบลงจริงๆ
+          setTimeout(() => {
+            const score = difficulty === 'timed' ? 50 : 0; // คะแนนจำลองสำหรับโหมดจับเวลา
+            addExpForGameCompletion(difficulty, score);
+          }, 1000);
+        }
+      });
+    });
+
+    // แสดงคะแนนรวมโหมดจับเวลาจาก Local Storage
+    function showTotalScore() {
+      let val = localStorage.getItem("money_score_timed");
+      document.getElementById("totalScoreValue").textContent = val ? parseInt(val) : 0;
+    }
+
+    // แสดงคะแนนสูงสุดจาก Local Storage
+    function showHighScore() {
+      let highScore = localStorage.getItem("arcadeHighScore");
+      let highScoreValue = highScore ? parseInt(highScore) : 0;
+      document.getElementById("highScoreValue").textContent = highScoreValue;
+      document.getElementById("highScore").style.display = highScoreValue === 0 ? "none" : "block";
+    }
+
+    // เรียกฟังก์ชันแสดงคะแนนเมื่อโหลดหน้า
+    showTotalScore();
+    showHighScore();
+
+    // แสดงตัวอย่างกระดานคะแนนจาก Local Storage
+    function showLeaderboardPreview() {
+      let leaderboard = JSON.parse(localStorage.getItem("money_leaderboard")||"[]");
+      if(leaderboard && leaderboard.length > 0) {
+        leaderboard.sort((a,b)=>b.score-a.score);
+        let html = leaderboard.slice(0,3).map((r,i)=>
+          `<div class="leaderboard-row"><span>${i+1}. ${r.name}</span> <span>${r.score}</span></div>`
+        ).join('');
+        document.getElementById("leaderboardRows").innerHTML = html;
+        document.getElementById("leaderboardPreview").style.display = '';
+      }
+    }
+    showLeaderboardPreview();
+    
+  </script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

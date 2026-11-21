@@ -1,0 +1,225 @@
+/* ============================================================================
+ *  MoneySkillz — Home (dashboard) layout แบบ mockup: มือถือเป็นหลัก
+ *  ใช้เฉพาะ dashboard.html — โหลดต่อท้าย moneyskillz-ui.css
+ * ========================================================================== */
+
+#main-page{ width: 100%; max-width: 100%; margin: 0; padding-bottom: 86px; }
+.home-wrap{ padding: 0 16px; }
+.home-section{ margin-top: 22px; }
+
+/* ---------------- Top bar (เขียวเข้ม) ---------------- */
+.home-top{
+  background: linear-gradient(150deg, var(--primary-deep) 0%, var(--primary-color) 100%);
+  color:#fff; padding: 16px 18px 26px;
+  border-bottom-left-radius: 26px; border-bottom-right-radius: 26px;
+  box-shadow: 0 10px 28px rgba(14,77,44,.28);
+}
+.home-topbar{ display:flex; align-items:center; justify-content:space-between; }
+.home-brand{ display:flex; align-items:center; gap:10px; }
+.home-logo{
+  width:42px; height:42px; border-radius:13px; display:grid; place-items:center;
+  font-size:24px; background: rgba(255,255,255,.16); backdrop-filter: blur(4px);
+}
+.home-mascot{
+  width:54px; height:54px; flex:none; display:block;
+  filter: drop-shadow(0 5px 9px rgba(0,0,0,.28));
+  animation: mascotBob 3.2s ease-in-out infinite;
+}
+@keyframes mascotBob{ 0%,100%{ transform: translateY(0) rotate(-3deg); } 50%{ transform: translateY(-5px) rotate(3deg); } }
+.home-appname{ font-weight:700; font-size:1.25rem; line-height:1.05; }
+.home-brandtag{ font-size:.72rem; opacity:.85; margin-top:1px; }
+.home-avatar{
+  width:46px; height:46px; border-radius:50%; overflow:hidden;
+  border:2.5px solid rgba(255,255,255,.75); background:#fff; flex:none;
+}
+.home-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* Level + XP */
+.home-stat{ margin-top:16px; }
+.home-statline{ display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+.home-levelpill{
+  background: rgba(255,255,255,.18); color:#fff; font-weight:700; font-size:.82rem;
+  padding:4px 12px; border-radius: var(--r-pill); max-width:70%;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.home-xpnum{ font-size:.8rem; font-weight:600; opacity:.92; }
+.home-xpbar{ height:9px; border-radius:999px; background: rgba(255,255,255,.22); overflow:hidden; }
+.home-xpfill{
+  height:100%; width:0%; border-radius:999px; position:relative; overflow:hidden;
+  background: linear-gradient(90deg, #BFF5CE, #5BE487); transition: width .8s var(--ease);
+  box-shadow: 0 0 10px rgba(123,245,160,.6);
+}
+.home-xpfill::after{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.85), transparent);
+  transform: translateX(-120%); animation: xpShine 2.8s var(--ease) infinite;
+}
+@keyframes xpShine{ 55%,100%{ transform: translateX(220%); } }
+.home-prog-sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+
+/* ---------------- Welcome banner ---------------- */
+.home-welcome{
+  margin: -14px 16px 0; position:relative; z-index:2;
+  background: linear-gradient(135deg, #1C7D46, #25A85C);
+  color:#fff; border-radius: 20px; padding: 18px 18px;
+  display:flex; align-items:center; gap:12px;
+  box-shadow: 0 10px 24px rgba(20,107,57,.28);
+}
+.home-welcome-text{ flex:1; min-width:0; }
+.home-hello{ font-weight:700; font-size:1.12rem; }
+.wave-ico{ width:22px; height:22px; vertical-align:-4px; display:inline-block;
+  transform-origin:70% 80%; animation: waveHand 2.4s ease-in-out infinite; }
+@keyframes waveHand{ 0%,60%,100%{ transform:rotate(0); } 70%{ transform:rotate(16deg); } 80%{ transform:rotate(-8deg); } 90%{ transform:rotate(12deg); } }
+.coin-ico{ width:22px; height:22px; vertical-align:-5px; display:inline-block; }
+.home-welcome-sub{ font-size:.86rem; opacity:.92; margin-top:1px; }
+.home-quote{ font-size:.8rem; opacity:.9; font-style:italic; margin-top:7px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.home-welcome-art{ width:78px; height:66px; flex:none; object-fit:contain; filter: drop-shadow(0 5px 9px rgba(0,0,0,.22)); }
+.home-streak{ display:none; align-items:center; gap:4px; margin-top:9px;
+  background:rgba(255,255,255,.22); color:#fff; font-size:.78rem; font-weight:700;
+  padding:4px 12px; border-radius:999px; }
+
+/* ---------------- Section heads ---------------- */
+.home-head{ display:flex; align-items:center; justify-content:space-between; margin:0 0 12px; }
+.home-head h2{ margin:0; font-size:1.08rem; font-weight:700; color: var(--text-color); }
+.home-seeall{ font-size:.82rem; font-weight:600; color: var(--primary-color); text-decoration:none; }
+.home-seeall:active{ opacity:.6; }
+
+/* ---------------- Daily missions (เลื่อนแนวนอน) ---------------- */
+.home-hscroll{
+  display:flex; gap:12px; overflow-x:auto; padding:4px 16px 8px; margin:0 -16px;
+  scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+}
+.home-hscroll::-webkit-scrollbar{ display:none; }
+.mission-card{
+  flex:0 0 150px; scroll-snap-align:start; text-decoration:none;
+  background: var(--card-background); border:1px solid var(--line); border-radius:18px;
+  padding:14px; box-shadow: var(--shadow-card); color: var(--text-color);
+  display:flex; flex-direction:column; gap:8px; position:relative;
+  transition: transform .12s var(--ease), background .15s;
+}
+.mission-card:active{ transform: scale(.97); background:#eef8f1; }
+.mission-emoji{
+  width:52px; height:52px; display:block; object-fit:contain;
+  filter: drop-shadow(0 3px 6px rgba(16,42,40,.14));
+}
+.mission-title{ font-weight:600; font-size:.95rem; line-height:1.25; }
+.mission-xp{
+  position:absolute; top:12px; right:12px;
+  background: var(--surface-tint); color: var(--primary-darker);
+  font-size:.72rem; font-weight:700; padding:3px 9px; border-radius: var(--r-pill);
+}
+body.dark-mode .mission-xp{ background:#10311f; }
+
+/* ภารกิจที่ทำแล้ววันนี้ */
+.mission-check{ display:none; }
+.mission-card.done{ opacity:.72; }
+.mission-card.done .mission-emoji{ filter: grayscale(.35); }
+.mission-card.done .mission-xp{ display:none; }
+.mission-card.done .mission-check{
+  display:grid; place-items:center; position:absolute; top:12px; right:12px;
+  width:26px; height:26px; border-radius:50%;
+  background: var(--primary-color); color:#fff; font-size:.82rem; font-weight:800;
+  box-shadow:0 2px 6px rgba(31,143,78,.4);
+}
+body.dark-mode .mission-card:active{ background:#15301f; }
+
+/* ---------------- 2-up cards (บทเรียน + เป้าหมาย) ---------------- */
+.home-duo{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:360px){ .home-duo{ grid-template-columns:1fr; } }
+.home-card{
+  background: var(--card-background); border:1px solid var(--line); border-radius:18px;
+  padding:16px; box-shadow: var(--shadow-card);
+}
+.home-card-label{ font-size:.78rem; font-weight:700; color: var(--text-secondary); margin-bottom:8px; }
+.card-sub{ font-size:.82rem; font-weight:700; color: var(--text-secondary); margin-bottom:10px; }
+#userBadges.badge-row{ gap:14px; margin:6px 0 4px; min-height:40px; }
+#userBadges .badge{ width:58px; height:58px; font-size:1.8em; }
+#userBadges:empty::after{ content:'ยังไม่มีเหรียญตรา'; color: var(--text-secondary); font-size:.85rem; }
+.lesson-title{ font-weight:700; font-size:1rem; margin-bottom:10px; line-height:1.25; min-height:2.4em; }
+.mini-progress{ height:8px; border-radius:999px; background:#dcefe3; overflow:hidden; margin-bottom:6px; }
+.mini-fill{ height:100%; border-radius:999px; background: linear-gradient(90deg, var(--primary-color), var(--highlight-color)); }
+.mini-cap{ font-size:.76rem; color: var(--text-secondary); margin-bottom:12px; }
+body.dark-mode .mini-progress{ background:#0f2a1b; }
+
+.home-btn{
+  display:block; text-align:center; text-decoration:none; padding:11px 14px;
+  font-size:.92rem; width:100%; box-sizing:border-box;
+}
+.home-btn-outline{
+  background: #fff; color: var(--primary-color); box-shadow:none;
+  border:2px solid var(--primary-color);
+}
+body.dark-mode .home-btn-outline{ background: transparent; }
+
+/* goal card บนหน้าโฮม */
+.goal-card .goal-navigation{ display:flex; align-items:center; justify-content:space-between; gap:6px; padding:4px 0 10px; }
+.goal-card #goalDetails{ text-align:center; flex:1; min-width:0; }
+.goal-card #goalDetails h3{ margin:0 0 8px; font-size:1rem; color: var(--primary-darker); }
+.goal-card #goalDetails p{ margin:3px 0; font-size:.78rem; color: var(--text-secondary); }
+.goal-card .goal-nav-btn{ width:30px; height:30px; font-size:1.1em; flex:none; display:grid; place-items:center; border-radius:50%; }
+.goal-card .goal-progress-bar-container{ height:16px; margin:8px 0; }
+.goal-card .goal-progress-bar{ font-size:.72rem; }
+.goal-card .no-goal-message{ font-size:.82rem; color: var(--text-secondary); margin:14px 0; }
+
+/* ---------------- Quick menu (เมนูด่วน 4 คอลัมน์) ---------------- */
+.quick-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
+.quick-tile{
+  text-decoration:none; color: var(--text-color); text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  transition: transform .12s var(--ease);
+}
+.quick-tile:active{ transform: scale(.93); }
+.quick-ico{
+  width:56px; height:56px; border-radius:18px; display:grid; place-items:center;
+  background: var(--card-background); border:1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+.quick-ico .material-symbols-rounded{ font-size:27px; color: var(--primary-color); }
+.quick-tile p{ margin:0; font-size:.74rem; font-weight:600; line-height:1.15; }
+
+/* ไอคอนเมนูสีสันแบบไอคอนแอพ (ไทล์ขาว + ไอคอนสี + พื้นอ่อนจางให้ดูเป็นแอพ) */
+.quick-grid .quick-tile:nth-child(1) .quick-ico .material-symbols-rounded{ color:#F59E0B; }
+.quick-grid .quick-tile:nth-child(2) .quick-ico .material-symbols-rounded{ color:#3B82F6; }
+.quick-grid .quick-tile:nth-child(3) .quick-ico .material-symbols-rounded{ color:#F43F5E; }
+.quick-grid .quick-tile:nth-child(4) .quick-ico .material-symbols-rounded{ color:#14B8A6; }
+.quick-grid .quick-tile:nth-child(5) .quick-ico .material-symbols-rounded{ color:#22A85A; }
+.quick-grid .quick-tile:nth-child(6) .quick-ico .material-symbols-rounded{ color:#8B5CF6; }
+.quick-grid .quick-tile:nth-child(7) .quick-ico .material-symbols-rounded{ color:#FB923C; }
+.quick-grid .quick-tile:nth-child(8) .quick-ico .material-symbols-rounded{ color:#10B981; }
+body:not(.dark-mode) .quick-grid .quick-tile:nth-child(1) .quick-ico{ background:#FFF7E8; border-color:#FBE6BF; }
+body:not(.dark-mode) .quick-grid .quick-tile:nth-child(2) .quick-ico{ background:#EBF2FE; border-color:#CFE0FC; }
+body:not(.dark-mode) .quick-grid .quick-tile:nth-child(3) .quick-ico{ background:#FDEBEF; border-color:#FACcD5; }
+body:not(.dark-mode) .quick-grid .quick-tile:nth-child(4) .quick-ico{ background:#E6F7F4; border-color:#C4ECE5; }
+body:not(.dark-mode) .quick-grid .quick-tile:nth-child(5) .quick-ico{ background:#E9F6EE; border-color:#C9E9D6; }
+body:not(.dark-mode) .quick-grid .quick-tile:nth-child(6) .quick-ico{ background:#F2ECFE; border-color:#DECFFB; }
+body:not(.dark-mode) .quick-grid .quick-tile:nth-child(7) .quick-ico{ background:#FFF1E6; border-color:#FBDCC2; }
+body:not(.dark-mode) .quick-grid .quick-tile:nth-child(8) .quick-ico{ background:#E7F7F0; border-color:#C5ECDC; }
+
+/* ---------------- Finance card ---------------- */
+.finance-card .fin-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 0; border-bottom:1px solid var(--line); font-size:.98rem;
+}
+.finance-card .fin-row:last-child{ border-bottom:0; }
+.finance-card .fin-row span{ color: var(--text-secondary); font-weight:600; }
+.finance-card .fin-row strong{ font-size:1.08rem; font-weight:700; }
+.fin-income{ color: var(--success-color); }
+.fin-expense{ color: var(--danger-color); }
+.fin-balance strong{ color: var(--primary-darker); }
+.fin-balance span{ color: var(--text-color) !important; }
+
+/* ---------------- Coins / purchased ---------------- */
+.coins-row{
+  display:flex; align-items:center; justify-content:flex-end; gap:6px;
+  margin-top:12px; padding-top:12px; border-top:1px solid var(--line);
+  font-weight:600; color: var(--text-secondary);
+}
+.coins-row #userCoins{ font-size:1.25rem; font-weight:800; color: var(--accent-gold-dk); }
+.purchased-items-container{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; }
+.placeholder-message{ width:100%; text-align:center; color: var(--text-secondary); padding:14px 0; font-size:.9rem; }
+
+/* ---------------- Financial alert ---------------- */
+.financial-alert{ border-radius:14px; padding:12px 14px; font-size:.86rem; font-weight:600; margin-bottom:14px; }
+.financial-alert.warning{ background:#FFF4D6; color:#8A6400; }
+.financial-alert.danger{ background:#FDE4E1; color:#B5281C; }

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>รายละเอียดบทเรียน – บทที่ 2 การออมเงิน</title>
+  <meta name="theme-color" content="#1F8F4E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+  <link rel="stylesheet" href="theme-darkmode.css" />
+  <script async src="https://www.tiktok.com/embed.js"></script>
+  <style>
+    body { margin:0; font-family:'Segoe UI',sans-serif; background-color:#eaf4f4; }
+    .header { background-color:#1F8F4E; color:white; padding:20px; text-align:center; }
+    .container { padding:20px; max-width:800px; margin:0 auto; }
+    .lesson-title { color:#0E4D2C; font-size:1.7rem; margin-bottom:18px; }
+    .lesson-content { font-size:1.07rem; color:#444; line-height:1.9; margin-bottom:24px; }
+    .pagination { text-align:center; margin:28px 0 10px 0; }
+    .page-btn { display:inline-block; background:#1F8F4E; color:#fff; padding:8px 20px; border-radius:7px; text-decoration:none; margin:0 12px; transition:background 0.2s; }
+    .page-btn:disabled, .disabled { background:#ccc !important; color:#888; pointer-events:none; }
+    .back-btn { margin-top:30px; display:inline-block; background:#1F8F4E; color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; transition:background 0.2s; }
+    .save-btn { background:#1F8F4E; color:#fff; border:none; border-radius:7px; padding:10px 20px; margin-top:15px; cursor:pointer; }
+    .quiz-status { margin-left:16px; font-weight:bold; }
+    .video-container { margin: 24px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .video-wrapper { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; }
+    .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    .end-of-chapter-quiz .question { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #1F8F4E; }
+    .end-of-chapter-quiz .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; }
+    .end-of-chapter-quiz .choices { display: flex; flex-direction: column; gap: 10px; }
+    .end-of-chapter-quiz .choice { background-color: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 10px; cursor: pointer; display: block; }
+    #quizResult.correct { color: #388e3c; }
+    #quizResult.incorrect { color: #d32f2f; }
+
+    /* Custom Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+    .modal-content h3 {
+        color: #0E4D2C;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    .modal-content p {
+        color: #333;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        white-space: pre-wrap; /* Preserve newlines from message */
+    }
+    .modal-content button {
+        background-color: #1F8F4E;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .modal-content button:hover {
+        background-color: #15713D;
+        transform: translateY(-1px);
+    }
+    /* Specific styles for success/error messages */
+    .modal-content.success h3 { color: #388e3c; }
+    .modal-content.error h3 { color: #d32f2f; }
+  </style>
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+</head>
+<body>
+  <div class="header"><h1>รายละเอียดบทเรียน: การออมเงิน</h1></div>
+  <div class="container">
+    <div id="lessonDetails"></div>
+    <div class="pagination" id="pagination"></div>
+    <a href="lesson.html" class="back-btn">⬅ กลับสู่รายการบทเรียน</a>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="customAlertModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <button id="modalCloseBtn">ตกลง</button>
+    </div>
+  </div>
+
+  <script>
+    const lessonId = 2; // This should be dynamically set for each lesson page
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageNow = Number(urlParams.get("page")||1);
+
+    const pages = [
+       {
+        title: "บทที่ 2: ความหมายและทำไมต้องออม (หน้า 1/5)",
+        content: `
+          <div>
+            <b>การออมเงิน</b> คือ การแบ่งรายได้ส่วนหนึ่งเก็บไว้ ไม่นำไปใช้จ่ายทันที เพื่อเป้าหมายในอนาคต<br>
+            <b>ทำไมต้องออม?</b>
+            <ul>
+              <li>เพื่อเป้าหมายที่ต้องการ เช่น ซื้อของ, เรียนพิเศษ</li>
+              <li>เป็นเงินสำรองยามฉุกเฉิน เช่น เจ็บป่วย</li>
+              <li>สร้างความมั่นคงทางการเงินในระยะยาว</li>
+              <li>ฝึกวินัยและความรับผิดชอบต่อตนเอง</li>
+            </ul>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: เทคนิคการออมสำหรับวัยเรียน (หน้า 2/5)",
+        content: `
+          <div>
+            <b>เทคนิคยอดนิยม</b><br>
+            <ul>
+              <li><b>ออมก่อนใช้ (Pay Yourself First):</b> ได้รับเงินมา ให้หักส่วนที่จะออมออกไปก่อนทันที 10-20% ที่เหลือค่อยนำไปใช้จ่าย</li>
+              <li><b>ออมเศษเหรียญ:</b> ทุกสิ้นวัน นำเหรียญที่เหลือในกระเป๋าทั้งหมดมาหยอดกระปุก</li>
+              <li><b>ตั้งเป้าหมายให้เห็นภาพ:</b> ติดรูปของที่อยากได้ไว้ที่กระปุกออมสินเพื่อสร้างแรงบันดาลใจ</li>
+            </ul>
+             <div class="video-container">
+              <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/OUO2unyOv78" title="YouTube video player" allowfullscreen></iframe>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: ตั้งเป้าหมายการออมแบบ SMART (หน้า 3/5)",
+        content: `
+          <div>
+            การตั้งเป้าหมายที่ดีจะช่วยให้เราออมเงินได้สำเร็จ เป้าหมายควรเป็นแบบ <b>SMART</b>:
+            <ul>
+              <li><b>S (Specific):</b> เฉพาะเจาะจง - จะออมเงินเพื่ออะไร? (เช่น ซื้อหูฟังไร้สาย)</li>
+              <li><b>M (Measurable):</b> วัดผลได้ - ต้องใช้เงินเท่าไหร่? (เช่น 1,500 บาท)</li>
+              <li><b>A (Achievable):</b> ทำได้จริง - สามารถเก็บเงินจำนวนนี้ได้หรือไม่? (เช่น เก็บเดือนละ 500 บาท)</li>
+              <li><b>R (Relevant):</b> สมเหตุสมผล - สิ่งนี้สำคัญกับเราตอนนี้หรือไม่?</li>
+              <li><b>T (Time-bound):</b> มีกรอบเวลา - จะเก็บเงินให้ครบภายในเมื่อไหร่? (เช่น ภายใน 3 เดือน)</li>
+            </ul>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: อุปสรรคและวิธีเอาชนะใจตัวเอง (หน้า 4/5)",
+        content: `
+          <div>
+            <b>อุปสรรคที่พบบ่อย:</b>
+            <ol>
+              <li><b>ใจอ่อน:</b> เห็นของลดราคาหรือของที่อยากได้แล้วห้ามใจไม่อยู่</li>
+              <li><b>ไม่มีเป้าหมาย:</b> ไม่รู้จะเก็บเงินไปทำไม เลยไม่มีแรงจูงใจ</li>
+              <li><b>คิดว่าเงินน้อย:</b> รู้สึกว่าเงินค่าขนมไม่พอออม</li>
+            </ol>
+            <b>วิธีเอาชนะ:</b>
+            <ul>
+                <li>ใช้กฎ "รอ 24 ชั่วโมง" ก่อนซื้อของที่ไม่จำเป็น</li>
+                <li>เขียนเป้าหมายแปะไว้ในที่ที่เห็นบ่อยๆ</li>
+                <li>เริ่มต้นออมจากจำนวนน้อยๆ ก่อน เช่น วันละ 5-10 บาท เพื่อสร้างนิสัย</li>
+            </ul>
+          </div>
+        `
+      },
+      {
+        title: "บทที่ 2: แบบทดสอบท้ายบท (หน้า 5/5)",
+        content: `
+          <div class="end-of-chapter-quiz" id="end-of-chapter-quiz"></div>
+          <button type="button" class="save-btn" id="checkQuizBtn">ตรวจคำตอบ</button>
+          <span id="quizResult" class="quiz-status"></span>
+          <div style="margin-top:16px;">
+            <button id="doneBtn" class="save-btn disabled" style="background:#388e3c;">เรียนจบบทนี้</button>
+            <span id="doneStatus" class="quiz-status"></span>
+          </div>
+                    <div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; text-align: left;">
+  <h3>แหล่งที่มาที่น่าเชื่อถือ</h3>
+  <ul>
+    <li><a href="https://www.bot.or.th/th/home.html">ธนาคารแห่งประเทศไทย: การออมเงินและการวางแผนทางการเงิน</a></li>
+    <li><a href="https://opec.go.th/">สำนักงานคณะกรรมการส่งเสริมการศึกษาเอกชน: คู่มือส่งเสริมการออม</a></li>
+    <li><a href="https://www.gsb.or.th/blogs/6-%E0%B9%80%E0%B8%84%E0%B8%A5%E0%B9%87%E0%B8%94%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AD%E0%B8%AD%E0%B8%A1%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%99%E0%B9%89/" target="_blank">ธนาคารออมสิน: 6 เทคนิคการออมเงินสำหรับนักเรียน</a></li>
+  </ul>
+</div>
+        `
+      }
+    ];
+
+    let page = Math.min(Math.max(pageNow,1), pages.length);
+    document.getElementById("lessonDetails").innerHTML = `<div class="lesson-title">${pages[page-1].title}</div><div class="lesson-content">${pages[page-1].content}</div>`;
+    let pag = "";
+    if (page > 1) pag += `<a class="page-btn" href="lesson-detail2.html?page=${page-1}">หน้าก่อนหน้า</a>`;
+    if (page < pages.length) pag += `<a class="page-btn" href="lesson-detail2.html?page=${page+1}">หน้าถัดไป</a>`;
+    document.getElementById("pagination").innerHTML = pag;
+
+    // --- Custom Modal Functions ---
+    const customAlertModal = document.getElementById('customAlertModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalContent = customAlertModal.querySelector('.modal-content');
+
+    function showCustomAlert(title, message, isSuccess = true) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message; // Use textContent to handle newlines naturally
+        modalContent.className = 'modal-content ' + (isSuccess ? 'success' : 'error');
+        customAlertModal.classList.add('show');
+    }
+
+    function hideCustomAlert() {
+        customAlertModal.classList.remove('show');
+    }
+
+    modalCloseBtn.addEventListener('click', hideCustomAlert);
+    // --- End Custom Modal Functions ---
+
+    if (page === pages.length) {
+      const quizData = [
+          {
+              question: "หลักการ 'ออมก่อนใช้' (Pay Yourself First) หมายถึงอะไร?",
+              choices: ["ใช้เงินให้หมดก่อนสิ้นเดือน", "ได้รับเงินมาแล้วให้หักออมทันทีก่อนนำไปใช้จ่าย", "นำเงินที่เหลือจากใช้จ่ายมาออม", "ยืมเงินเพื่อนมาออมก่อน"],
+              answer: "ได้รับเงินมาแล้วให้หักออมทันทีก่อนนำไปใช้จ่าย"
+          },
+          {
+              question: "การตั้งเป้าหมายการออมแบบ SMART ตัว 'T' ย่อมาจากอะไร?",
+              choices: ["Time-bound (มีกรอบเวลาชัดเจน)", "Trust (น่าเชื่อถือ)", "Tactic (กลยุทธ์)", "Total (ยอดรวม)"],
+              answer: "Time-bound (มีกรอบเวลาชัดเจน)"
+          },
+          {
+              question: "วิธีใดช่วยสร้างแรงจูงใจในการออมได้ดีที่สุด?",
+              choices: ["เก็บเงินไว้ในที่ที่มองไม่เห็น", "บอกเป้าหมายให้เพื่อนฟัง", "ติดรูปภาพของที่อยากได้ไว้ที่กระปุกออมสิน", "เก็บเงินแบบไม่มีเป้าหมาย"],
+              answer: "ติดรูปภาพของที่อยากได้ไว้ที่กระปุกออมสิน"
+          }
+      ];
+
+      const quizContainer = document.getElementById('end-of-chapter-quiz');
+      const checkButton = document.getElementById('checkQuizBtn');
+      const resultContainer = document.getElementById('quizResult');
+      const doneBtn = document.getElementById("doneBtn");
+      const doneStatus = document.getElementById("doneStatus");
+
+      function buildEndOfChapterQuiz() {
+          quizData.forEach((currentQuestion, questionNumber) => {
+              const choicesHTML = currentQuestion.choices.map(choice => `
+                  <label class="choice">
+                      <input type="radio" name="chapter_question${questionNumber}" value="${choice}">
+                      ${choice}
+                  </label>
+              `).join('');
+              const questionHTML = `
+                  <div class="question">
+                      <div class="question-text">${questionNumber + 1}. ${currentQuestion.question}</div>
+                      <div class="choices">${choicesHTML}</div>
+                  </div>
+              `;
+              quizContainer.innerHTML += questionHTML;
+          });
+      }
+
+      function checkQuizAnswers() {
+          const answerContainers = quizContainer.querySelectorAll('.choices');
+          let numCorrect = 0;
+          let allAnswered = true;
+          quizData.forEach((currentQuestion, questionNumber) => {
+              const selector = `input[name=chapter_question${questionNumber}]:checked`;
+              const userAnswerNode = answerContainers[questionNumber].querySelector(selector);
+              if (!userAnswerNode) { allAnswered = false; return; }
+              if (userAnswerNode.value === currentQuestion.answer) numCorrect++;
+          });
+
+          if (!allAnswered) {
+              resultContainer.textContent = "กรุณาตอบคำถามให้ครบทุกข้อ";
+              resultContainer.className = "quiz-status incorrect";
+              doneBtn.disabled = true; // Keep done button disabled if not all questions are answered
+              doneBtn.classList.add('disabled');
+              return;
+          }
+          if (numCorrect === quizData.length) {
+              resultContainer.textContent = "เก่งมาก! คุณตอบถูกทุกข้อ";
+              resultContainer.className = "quiz-status correct";
+              doneBtn.disabled = false;
+              doneBtn.classList.remove('disabled');
+              doneStatus.textContent = "ตอนนี้คุณสามารถกดยืนยันเพื่อจบบทเรียนได้แล้ว!";
+          } else {
+              resultContainer.textContent = `พยายามอีกนิด! คุณตอบถูก ${numCorrect} จาก ${quizData.length} ข้อ`;
+              resultContainer.className = "quiz-status incorrect";
+              doneBtn.disabled = true;
+              doneBtn.classList.add('disabled');
+              doneStatus.textContent = "";
+          }
+      }
+      
+      function finishLesson() {
+        if (window.completeLessonInFirestore) {
+            window.completeLessonInFirestore(lessonId, 80); // Award 80 XP
+        } else {
+            console.error("Firebase script not loaded. Saving to localStorage only.");
+            localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+            window.checkInitialDoneStatus();
+            showCustomAlert("บันทึกความคืบหน้า", "บทเรียนนี้ถูกบันทึกเป็นเสร็จสิ้นแล้ว!");
+        }
+      }
+
+      window.checkInitialDoneStatus = function() {
+          if (localStorage.getItem(`MoneySkillz-lesson${lessonId}-done`) === "yes") {
+              doneStatus.innerHTML = "คุณเรียนจบบทนี้แล้ว!";
+              doneBtn.disabled = true;
+              doneBtn.classList.add('disabled');
+              if(checkButton) checkButton.style.display = 'none';
+              if(resultContainer) resultContainer.style.display = 'none';
+          }
+      }
+
+      buildEndOfChapterQuiz();
+      checkButton.addEventListener('click', checkQuizAnswers);
+      doneBtn.addEventListener('click', finishLesson);
+      window.checkInitialDoneStatus();
+    }
+  </script>
+
+  <script type="module">
+    // Firebase SDK Imports
+    import { onAuthStateChanged, doc, runTransaction, increment, arrayUnion, auth, db } from './js/firebase-init.js';
+
+    // Firebase Configuration
+  
+    // Initialize Firebase
+
+    // XP & Leveling System Configuration
+    const LEVEL_CONFIG = [
+        { level: 1, name: "ผู้เริ่มต้น", xpToNext: 100 },
+        { level: 2, name: "นักออมฝึกหัด", xpToNext: 250 },
+        { level: 3, name: "นักสะสมเหรียญ", xpToNext: 500 },
+        { level: 4, name: "ผู้เชี่ยวชาญการเงิน", xpToNext: 1000 },
+        { level: 5, name: "เศรษฐีหน้าใหม่", xpToNext: Infinity },
+    ];
+
+    /**
+     * Main function to grant XP, check for level-ups, and save data to Firestore.
+     * @param {string} uid - Firebase User ID.
+     * @param {number} amount - Amount of XP to add.
+     * @param {number} lessonId - ID of the recently completed lesson.
+     * @returns {Promise<{success: boolean, message: string, isSuccessStatus: boolean}>} - Result and message to display.
+     */
+    async function grantXpAndLevelUp(uid, amount, lessonId) {
+        if (!uid || !amount || amount <= 0) return { success: false, message: "Invalid input.", isSuccessStatus: false };
+        
+        const userRef = doc(db, 'users', uid);
+        let finalMessage = `สำเร็จ! ได้รับ ${amount} XP`;
+        let isSuccessStatus = true; // To determine modal style
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userSnap = await transaction.get(userRef);
+                if (!userSnap.exists()) throw new Error("User document not found.");
+
+                const userData = userSnap.data();
+                const completedLessons = userData.completedLessons || [];
+                if (completedLessons.includes(lessonId)) {
+                    console.log(`Lesson ${lessonId} already completed. No XP awarded.`);
+                    finalMessage = "คุณเรียนจบบทนี้ไปแล้ว ได้รับ XP ไปแล้ว";
+                    isSuccessStatus = false; // Not a new success
+                    return; 
+                }
+
+                let xp = userData.xp || 0;
+                let level = userData.level || 1;
+                let nextLevelXP = userData.nextLevelXP || LEVEL_CONFIG[0].xpToNext;
+                let totalCoinReward = 0;
+                
+                xp += amount;
+                
+                while (xp >= nextLevelXP && nextLevelXP !== Infinity) {
+                    const currentLevelIndex = LEVEL_CONFIG.findIndex(l => l.level === level);
+                    if (currentLevelIndex < LEVEL_CONFIG.length - 1) {
+                        const nextLevelInfo = LEVEL_CONFIG[currentLevelIndex + 1];
+                        const rewardForThisLevel = 100 + (nextLevelInfo.level * 25); // Calculate reward
+                        totalCoinReward += rewardForThisLevel;
+                        xp -= nextLevelXP; // Deduct XP used for level up
+                        level = nextLevelInfo.level; // Update new level
+                        nextLevelXP = nextLevelInfo.xpToNext; // Set XP for next level
+                        finalMessage += `\n🎉 ยินดีด้วย! คุณเลเวลอัพเป็น Level ${level} – ${nextLevelInfo.name}!`;
+                    } else {
+                        break; // Max level reached
+                    }
+                }
+                
+                const finalUpdateData = {
+                    xp: xp,
+                    level: level,
+                    nextLevelXP: nextLevelXP,
+                    completedLessons: arrayUnion(lessonId)
+                };
+
+                if (totalCoinReward > 0) {
+                    finalUpdateData.coins = increment(totalCoinReward);
+                    finalMessage += `\nได้รับ ${totalCoinReward} เหรียญ!`;
+                }
+                
+                transaction.update(userRef, finalUpdateData);
+            });
+            
+            return { success: true, message: finalMessage, isSuccessStatus: isSuccessStatus };
+        } catch (error) {
+            console.error("Error in transaction: ", error);
+            return { success: false, message: "เกิดข้อผิดพลาดในการบันทึกข้อมูล", isSuccessStatus: false };
+        }
+    }
+
+    /**
+     * Function called from the "Finish Lesson" button to start the XP granting process.
+     * @param {number} lessonId - Lesson ID.
+     * @param {number} xpToAdd - XP to grant.
+     */
+    window.completeLessonInFirestore = async (lessonId, xpToAdd) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+        
+        if (doneBtn.disabled) return;
+        doneBtn.disabled = true;
+        doneStatus.textContent = "กำลังบันทึก...";
+        
+        const user = auth.currentUser;
+        if (user) {
+            const result = await grantXpAndLevelUp(user.uid, xpToAdd, lessonId);
+            
+            // Use custom alert instead of browser alert
+            showCustomAlert(result.success ? "สำเร็จ!" : "เกิดข้อผิดพลาด", result.message, result.isSuccessStatus);
+            doneStatus.textContent = result.message.split('\n')[0]; // Show only the first line on status
+
+            if(result.success) {
+                localStorage.setItem(`MoneySkillz-lesson${lessonId}-done`, "yes");
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus();
+                }
+            } else {
+                doneBtn.disabled = false;
+            }
+        } else {
+            showCustomAlert("แจ้งเตือน", "กรุณาเข้าสู่ระบบเพื่อบันทึกความคืบหน้าและรับ XP", false);
+            doneBtn.disabled = false;
+            doneStatus.textContent = "โปรดเข้าสู่ระบบ";
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        const doneBtn = document.getElementById("doneBtn");
+        const doneStatus = document.getElementById("doneStatus");
+
+        if (doneBtn) {
+            if (!user) {
+                console.log("User is not logged in.");
+                doneBtn.disabled = true;
+                doneBtn.classList.add('disabled');
+                doneBtn.textContent = "กรุณาเข้าสู่ระบบ"; // Set button text directly
+                doneStatus.textContent = ""; // Clear status if logged out
+            } else {
+                console.log("User is logged in.", user.uid);
+                // Re-enable if conditions are met, otherwise check status via checkInitialDoneStatus
+                if (window.checkInitialDoneStatus) {
+                    window.checkInitialDoneStatus(); // This will enable/disable based on local storage
+                }
+                // If the button is not disabled by checkInitialDoneStatus, set its text back
+                if (!doneBtn.disabled) {
+                    doneBtn.textContent = "เรียนจบบทนี้";
+                }
+            }
+        }
+    });
+  </script>
+  <script src="darkmode-toggle.js"></script>
+</body>
+</html>

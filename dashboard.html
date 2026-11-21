@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>หน้าหลัก - MoneySkillz</title>
+  <meta name="theme-color" content="#1F8F4E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/owl.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="theme-darkmode.css">
+  <link rel="stylesheet" href="moneyskillz-ui.css">
+  <link rel="stylesheet" href="dashboard-home.css">
+  <style>
+    /* ===== Modal styles (เดิม) ===== */
+    .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
+    .modal-content{background-color:var(--card-background);margin:auto;padding:28px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:90%;width:360px;text-align:center;position:relative;animation:fadeIn .3s ease-out;}
+    .modal-content h2{color:var(--text-color);margin:0 0 14px;font-size:1.4em;}
+    .modal-content p{color:var(--text-color);margin-bottom:20px;line-height:1.5;}
+    .modal-buttons button{background-color:var(--primary-color);color:#fff;border:none;padding:11px 22px;border-radius:12px;cursor:pointer;font-size:1em;margin:0 6px;font-weight:700;font-family:'Kanit',sans-serif;}
+    .modal-buttons .cancel-btn{background-color:#eef2f0;color:#566;}
+    .close-button{color:var(--text-secondary);position:absolute;top:14px;right:18px;font-size:26px;font-weight:bold;cursor:pointer;}
+    .level-up-modal-content{background:linear-gradient(140deg,#1C7D46,#2BC46A);color:#fff;border:3px solid #43c06a;}
+    .level-up-modal-content h2,.level-up-modal-content p{color:#fff;}
+    .level-up-modal-content .modal-reward{font-weight:700;font-size:1.4em;margin-top:12px;color:#ffe169;}
+    .level-up-modal-content .level-up-icon{font-size:3.4em;margin-bottom:14px;animation:bounce .8s infinite alternate;}
+    @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+  </style>
+</head>
+<body>
+  <div id="main-page" class="nav-page active">
+
+    <!-- ===== Top bar: โลโก้ + Level + XP + avatar ===== -->
+    <header class="home-top">
+      <div class="home-topbar">
+        <div class="home-brand">
+          <div class="home-avatar">
+            <img id="profilePicture" src="assets/avatar.png" alt="โปรไฟล์">
+          </div>
+          <div>
+            <div class="home-appname">MoneySkillz</div>
+            <div class="home-brandtag">การเงินฉบับเด็กเก่ง</div>
+          </div>
+        </div>
+        <img class="home-mascot" src="assets/owl.png" alt="" aria-hidden="true">
+      </div>
+
+      <div class="home-stat">
+        <div class="home-statline">
+          <span class="home-levelpill" id="userLevel">Level 1</span>
+          <span class="home-xpnum"><span id="currentXP">0</span> / <span id="nextLevelXP">0</span> XP</span>
+        </div>
+        <div class="home-xpbar"><div id="userProgress" class="home-xpfill"></div></div>
+        <span id="progressValue" class="home-prog-sr">0%</span>
+      </div>
+    </header>
+
+    <!-- ===== Welcome banner ===== -->
+    <section class="home-welcome">
+      <div class="home-welcome-text">
+        <div class="home-hello">สวัสดี, <span id="usernameDisplay">ผู้ใช้</span>! <img class="wave-ico" src="assets/wave.png" alt=""></div>
+        <div class="home-welcome-sub">ยินดีต้อนรับกลับมาออมเงินกันต่อ</div>
+        <span class="home-streak" id="homeStreak" style="display:none;"></span>
+        <div class="home-quote" id="userQuote">"กำลังโหลดคำคม..."</div>
+      </div>
+      <img class="home-welcome-art" src="assets/welcome-chart.png" alt="กราฟการเงินเติบโต">
+    </section>
+
+    <div class="home-wrap">
+
+      <!-- ===== ภารกิจประจำวัน (เลื่อนแนวนอน) ===== -->
+      <div class="home-section">
+        <div class="home-head">
+          <h2>ภารกิจประจำวัน</h2>
+          <a class="home-seeall" href="game-mode.html">ดูทั้งหมด</a>
+        </div>
+        <div class="home-hscroll">
+          <a class="mission-card" data-mission="quiz" href="money-quiz.html">
+            <span class="mission-xp">+50 XP</span>
+            <span class="mission-check">✓</span>
+            <img class="mission-emoji" src="assets/m-quiz.png" alt="">
+            <span class="mission-title">แบบทดสอบการเงิน</span>
+          </a>
+          <a class="mission-card" data-mission="budget" href="budget-game.html">
+            <span class="mission-xp">+100 XP</span>
+            <span class="mission-check">✓</span>
+            <img class="mission-emoji" src="assets/m-budget.png" alt="">
+            <span class="mission-title">เกมจัดงบ 50/30/20</span>
+          </a>
+          <a class="mission-card" data-mission="debt" href="debt-game.html">
+            <span class="mission-xp">+80 XP</span>
+            <span class="mission-check">✓</span>
+            <img class="mission-emoji" src="assets/m-debt.png" alt="">
+            <span class="mission-title">เกมปลดหนี้</span>
+          </a>
+          <a class="mission-card" data-mission="invest" href="investment-game.html">
+            <span class="mission-xp">+90 XP</span>
+            <span class="mission-check">✓</span>
+            <img class="mission-emoji" src="assets/m-invest.svg" alt="">
+            <span class="mission-title">เกมจำลองลงทุน</span>
+          </a>
+          <a class="mission-card" data-mission="record" href="add-transaction.html">
+            <span class="mission-xp">+20 XP</span>
+            <span class="mission-check">✓</span>
+            <img class="mission-emoji" src="assets/m-record.png" alt="">
+            <span class="mission-title">บันทึกรายรับ-จ่าย</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- ===== บทเรียนแนะนำ + เป้าหมายการออม ===== -->
+      <div class="home-section home-duo">
+        <!-- บทเรียน (ตัวอย่าง) -->
+        <div class="home-card lesson-card">
+          <div class="home-card-label">บทเรียนของฉัน</div>
+          <div class="lesson-title" id="lessonTitle">บทเรียนการเงิน</div>
+          <div class="mini-progress"><div class="mini-fill" id="lessonFill" style="width:0%"></div></div>
+          <div class="mini-cap" id="lessonCap">ความคืบหน้า 0/6</div>
+          <a class="home-btn" id="lessonBtn" href="lesson.html">เริ่มบทเรียน</a>
+        </div>
+
+        <!-- เป้าหมายการออม (ผูกกับ dashboard.js) -->
+        <div class="home-card goal-card" id="goalDisplay">
+          <div class="home-card-label">เป้าหมายการออม</div>
+          <div class="goal-navigation">
+            <button id="prevGoal" class="goal-nav-btn" aria-label="ก่อนหน้า"><span class="material-symbols-rounded">chevron_left</span></button>
+            <div id="goalDetails">
+              <p class="no-goal-message" id="noGoalMsg">- ยังไม่มีเป้าหมาย -</p>
+              <h3 id="goalTitle" style="display:none;">-</h3>
+              <div class="goal-progress-bar-container" style="display:none;"><div id="goalProgressBar" class="goal-progress-bar">0%</div></div>
+              <p id="goalAmount" style="display:none;">เป้าหมาย: 0.00 ฿</p>
+              <p id="goalSavings" style="display:none;">ออมแล้ว: 0.00 ฿</p>
+              <p id="goalDueDate" style="display:none;">กำหนด: -</p>
+            </div>
+            <button id="nextGoal" class="goal-nav-btn" aria-label="ถัดไป"><span class="material-symbols-rounded">chevron_right</span></button>
+          </div>
+          <a class="home-btn home-btn-outline" href="add-goal.html">+ เพิ่มเป้าหมาย</a>
+        </div>
+      </div>
+
+      <!-- ===== เมนูด่วน ===== -->
+      <div class="home-section">
+        <div class="home-head"><h2>เมนูทั้งหมด</h2></div>
+        <div class="quick-grid">
+          <a class="quick-tile" href="add-transaction.html"><span class="quick-ico"><span class="material-symbols-rounded">edit_note</span></span><p>บันทึก</p></a>
+          <a class="quick-tile" href="history.html"><span class="quick-ico"><span class="material-symbols-rounded">receipt_long</span></span><p>ประวัติ</p></a>
+          <a class="quick-tile" href="add-goal.html"><span class="quick-ico"><span class="material-symbols-rounded">flag</span></span><p>เป้าหมาย</p></a>
+          <a class="quick-tile" href="graph.html"><span class="quick-ico"><span class="material-symbols-rounded">show_chart</span></span><p>กราฟ</p></a>
+          <a class="quick-tile" href="lesson.html"><span class="quick-ico"><span class="material-symbols-rounded">menu_book</span></span><p>บทเรียน</p></a>
+          <a class="quick-tile" href="game-mode.html"><span class="quick-ico"><span class="material-symbols-rounded">sports_esports</span></span><p>เล่นเกม</p></a>
+          <a class="quick-tile" href="leaderboard.html"><span class="quick-ico"><span class="material-symbols-rounded">leaderboard</span></span><p>อันดับ</p></a>
+          <a class="quick-tile" href="shop.html"><span class="quick-ico"><span class="material-symbols-rounded">shopping_cart</span></span><p>ร้านค้า</p></a>
+        </div>
+      </div>
+
+      <!-- ===== ภาพรวมการเงิน ===== -->
+      <div class="home-section">
+        <div class="home-head"><h2>ภาพรวมการเงิน</h2></div>
+        <div id="financial-alert" class="financial-alert" style="display:none;"></div>
+        <div class="home-card finance-card">
+          <div class="fin-row"><span>รายรับ</span><strong class="fin-income" id="income">0.00 ฿</strong></div>
+          <div class="fin-row"><span>รายจ่าย</span><strong class="fin-expense" id="expense">0.00 ฿</strong></div>
+          <div class="fin-row fin-balance"><span>คงเหลือ</span><strong id="balance">0.00 ฿</strong></div>
+        </div>
+      </div>
+
+      <!-- ===== เหรียญตรา & ของรางวัล ===== -->
+      <div class="home-section">
+        <div class="home-head"><h2>เหรียญตรา & ของรางวัล</h2></div>
+        <div class="home-card">
+          <div class="card-sub">🏅 เหรียญตราความสำเร็จ</div>
+          <div id="userBadges" class="badge-row"></div>
+          <div class="card-sub" style="margin-top:16px;">🛍️ ของรางวัลจากร้านค้า</div>
+          <div id="purchasedItemsContainer" class="purchased-items-container">
+            <p class="placeholder-message">ยังไม่มีของรางวัล</p>
+          </div>
+          <div class="coins-row">เหรียญคงเหลือ <span id="userCoins">0</span> <img class="coin-ico" src="assets/coin.png" alt="เหรียญ"></div>
+        </div>
+      </div>
+
+      <!-- ===== รายการล่าสุด ===== -->
+      <div class="home-section">
+        <div class="home-head"><h2>รายการล่าสุด</h2></div>
+        <div class="home-card">
+          <div id="transactionsContainer"><p class="no-transactions-message">ไม่มีรายการธุรกรรมในขณะนี้</p></div>
+        </div>
+      </div>
+
+    </div><!-- /home-wrap -->
+  </div><!-- /main-page -->
+
+  <!-- ===== Modals ===== -->
+  <div id="notificationModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeNotificationModal()">&times;</span>
+      <h2 id="notificationModalTitle"></h2>
+      <p id="notificationModalMessage"></p>
+      <div class="modal-buttons"><button onclick="closeNotificationModal()">ตกลง</button></div>
+    </div>
+  </div>
+
+  <div id="confirmationModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeConfirmationModal()">&times;</span>
+      <h2 id="confirmationModalTitle"></h2>
+      <p id="confirmationModalMessage"></p>
+      <div class="modal-buttons">
+        <button id="confirmModalConfirmBtn">ยืนยัน</button>
+        <button onclick="closeConfirmationModal()" class="cancel-btn">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="levelUpModal" class="modal">
+    <div class="modal-content level-up-modal-content">
+      <span class="close-button" onclick="closeLevelUpModal()">&times;</span>
+      <div class="level-up-icon"><span class="material-symbols-rounded" style="font-size:1em;">workspace_premium</span></div>
+      <h2>ยินดีด้วย!</h2>
+      <p>คุณเลเวลอัพเป็น <span id="levelUpModalLevel"></span></p>
+      <p><span id="levelUpModalName"></span></p>
+      <p class="modal-reward" id="levelUpModalReward"></p>
+      <div class="modal-buttons"><button onclick="closeLevelUpModal()">ยอดเยี่ยม!</button></div>
+    </div>
+  </div>
+
+  <!-- น้องซี widget + bottom nav 5 แท็บ ฉีดเองผ่านสคริปต์ -->
+  <script type="module" src="dashboard.js" defer></script>
+  <script src="darkmode-toggle.js"></script>
+  <script src="js/bottom-nav.js" defer></script>
+  <script type="module" src="js/nong-see-widget.js"></script>
+</body>
+</html>
